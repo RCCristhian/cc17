@@ -175,7 +175,7 @@
         renderBoard();
       } catch (e) {
         console.error(e);
-        alert("Falta darle permisos a la base de datos. Asegúrate de correr el código SQL de seguridad.");
+        alert("Error cargando tareas: " + e.message);
       }
     }
 
