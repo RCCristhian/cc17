@@ -281,11 +281,8 @@
   
   <!-- Header con estética moderna CC17 -->
   <header class="py-3 px-8 border-b border-white/[0.08] bg-[#090b10]/90 backdrop-blur-md flex justify-between items-center z-10 shrink-0">
-    <div class="flex items-center gap-4">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-rose-500 to-red-500 p-0.5 shadow-lg shadow-red-600/30 flex items-center justify-center">
-        <div class="w-full h-full bg-[#07090e] rounded-[10px] flex items-center justify-center border border-red-500/30">
-          <span class="text-xs font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.6)]">CC17</span>
-        </div>
+      <div class="flex items-center shrink-0">
+        <img src="logo.png" alt="CC17" class="h-9 w-auto object-contain select-none filter drop-shadow-[0_0_12px_rgba(185,28,28,0.5)]">
       </div>
       <div>
         <div class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-red-500/90 flex items-center gap-1.5">
@@ -841,18 +838,18 @@
           }
           
           let tagsHtml = `<span class="tag" style="background-color: ${cardColor}25; color: ${cardColor}; border: 1px solid ${cardColor}55;">${task.project}</span>`;
-          
-          if (isWorking) {
-            tagsHtml = `
-              <span class="tag" style="background-color: ${cardColor}30; color: #ffffff; border: 1.5px solid ${cardColor}; box-shadow: 0 0 14px ${cardColor}88;">
-                <span class="pulse-dot" style="background-color: ${cardColor}; box-shadow: 0 0 8px ${cardColor};"></span>
-                Trabajando...
-              </span>
-            ` + tagsHtml;
-          }
-
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
+          }
+
+          let workingStatusHtml = '';
+          if (isWorking) {
+            workingStatusHtml = `
+              <div class="flex items-center gap-1.5 mb-2 select-none" style="color: ${cardColor};">
+                <span class="pulse-dot !w-2 !h-2 !mr-0.5" style="background-color: ${cardColor}; box-shadow: 0 0 10px ${cardColor};"></span>
+                <span class="text-[11px] font-black tracking-wider uppercase" style="text-shadow: 0 0 12px ${cardColor}99;">Trabajando...</span>
+              </div>
+            `;
           }
 
           let workingButtonHtml = '';
@@ -877,6 +874,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
             </div>
+            ${workingStatusHtml}
             <div class="mb-2 flex flex-wrap items-center gap-1">${tagsHtml}</div>
             <div class="font-bold text-base mb-1.5 text-white pr-14 leading-snug">${task.title}</div>
             <div class="text-slate-400 text-xs leading-relaxed font-normal">${task.description}</div>
