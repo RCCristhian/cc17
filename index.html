@@ -135,41 +135,73 @@
   </div>
 
   <script>
-    const initialData = {
-      'todo': [
-        { id: 't3', project: 'Independencia & Teruel', tagClass: 'tag-indep', title: 'Renders del lobby', desc: 'Desarrollar los renders interiores del lobby una vez cerrados los criterios de diseño.', priority: false },
-        { id: 't4', project: 'Independencia & Teruel', tagClass: 'tag-indep', title: 'Renders del área común', desc: 'Definir configuración con CC17. Una vez aprobada, desarrollar renders.', priority: false },
-        { id: 't6', project: 'Lord Cochrane 4', tagClass: 'tag-lord', title: 'Renders de departamentos', desc: 'Iniciar renders interiores de tipologías 1, 2 y 3. Especial prioridad a la tipología 3.', priority: true },
-        { id: 't7', project: 'Lord Cochrane 4', tagClass: 'tag-lord', title: 'Tour virtual del PH 802', desc: 'Recorrido virtual para entender distribución y relación entre interiores, terrazas y exteriores.', priority: false },
-        { id: 't8', project: 'Lord Cochrane 4', tagClass: 'tag-lord', title: 'Renders del lobby', desc: 'Desarrollar sobre la base del diseño final aprobado.', priority: false },
-        { id: 't9', project: 'Lord Cochrane 4', tagClass: 'tag-lord', title: 'Renders del área común', desc: 'Comunicar concepto y uso del espacio común (una vez definido diseño).', priority: false },
-        { id: 't11', project: 'Paget 01 y 02', tagClass: 'tag-paget', title: 'Afinación de renders exteriores', desc: 'Revisión y ajuste. Coordinación constante con paisajismo y arquitectura.', priority: false },
-        { id: 't12', project: 'Paget 01 y 02', tagClass: 'tag-paget', title: 'Paget 01: Actualización renders interiores', desc: 'Definir alcance. Evaluar qué imágenes necesitan actualizarse para la etapa final de ventas.', priority: false },
-        { id: 't13', project: 'Apoyo Transversal', tagClass: 'tag-transv', title: 'Mockups y piezas de apoyo', desc: 'Apoyar en desarrollo de mockups. Adaptar renders y planos para piezas impresas y sala de ventas.', priority: false }
-      ],
-      'in-progress': [
-        { id: 't1', project: 'Independencia & Teruel', tagClass: 'tag-indep', title: 'Tour virtual de departamentos', desc: 'Continuar desarrollo. Evaluar priorizar tipologías 3, 4 y 5.', priority: true },
-        { id: 't2', project: 'Independencia & Teruel', tagClass: 'tag-indep', title: 'Interiorismo para tour virtual', desc: 'Alinear propuesta con identidad. Pendiente coordinar reunión con interioristas.', priority: false },
-        { id: 't5', project: 'Independencia & Teruel', tagClass: 'tag-indep', title: 'Planos comerciales', desc: 'Continuar con desarrollo y actualización según necesidades comerciales.', priority: false },
-        { id: 't10', project: 'Lord Cochrane 4', tagClass: 'tag-lord', title: 'Planos comerciales', desc: 'Continuar desarrollo y actualización, incorporando ajustes para ventas.', priority: false }
-      ],
-      'done-col': []
+    const SUPABASE_URL = 'https://cegnqgqftdiramaoebsy.supabase.co/rest/v1/tasks';
+    const SUPABASE_KEY = 'sb_publishable_oOBGRvcqeH1QxFnG7zIY0g_A_eNAk6u';
+    
+    const HEADERS = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
     };
 
+    const initialData = [
+      { id: 't3', col_id: 'todo', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Renders del lobby', description: 'Desarrollar los renders interiores del lobby una vez cerrados los criterios de diseño.', priority: false },
+      { id: 't4', col_id: 'todo', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Renders del área común', description: 'Definir configuración con CC17. Una vez aprobada, desarrollar renders.', priority: false },
+      { id: 't6', col_id: 'todo', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Renders de departamentos', description: 'Iniciar renders interiores de tipologías 1, 2 y 3. Especial prioridad a la tipología 3.', priority: true },
+      { id: 't7', col_id: 'todo', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Tour virtual del PH 802', description: 'Recorrido virtual para entender distribución y relación entre interiores, terrazas y exteriores.', priority: false },
+      { id: 't8', col_id: 'todo', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Renders del lobby', description: 'Desarrollar sobre la base del diseño final aprobado.', priority: false },
+      { id: 't9', col_id: 'todo', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Renders del área común', description: 'Comunicar concepto y uso del espacio común (una vez definido diseño).', priority: false },
+      { id: 't11', col_id: 'todo', project: 'Paget 01 y 02', tag_class: 'tag-paget', title: 'Afinación de renders exteriores', description: 'Revisión y ajuste. Coordinación constante con paisajismo y arquitectura.', priority: false },
+      { id: 't12', col_id: 'todo', project: 'Paget 01 y 02', tag_class: 'tag-paget', title: 'Paget 01: Actualización renders interiores', description: 'Definir alcance. Evaluar qué imágenes necesitan actualizarse para la etapa final de ventas.', priority: false },
+      { id: 't13', col_id: 'todo', project: 'Apoyo Transversal', tag_class: 'tag-transv', title: 'Mockups y piezas de apoyo', description: 'Apoyar en desarrollo de mockups. Adaptar renders y planos para piezas impresas y sala de ventas.', priority: false },
+      { id: 't1', col_id: 'in-progress', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Tour virtual de departamentos', description: 'Continuar desarrollo. Evaluar priorizar tipologías 3, 4 y 5.', priority: true },
+      { id: 't2', col_id: 'in-progress', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Interiorismo para tour virtual', description: 'Alinear propuesta con identidad. Pendiente coordinar reunión con interioristas.', priority: false },
+      { id: 't5', col_id: 'in-progress', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Planos comerciales', description: 'Continuar con desarrollo y actualización según necesidades comerciales.', priority: false },
+      { id: 't10', col_id: 'in-progress', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Planos comerciales', description: 'Continuar desarrollo y actualización, incorporando ajustes para ventas.', priority: false }
+    ];
+
+    let tasksData = [];
+
+    async function loadTasks() {
+      try {
+        const res = await fetch(SUPABASE_URL, { headers: HEADERS });
+        if (!res.ok) throw new Error('Error de permisos o red');
+        tasksData = await res.json();
+        
+        // Si la BD está vacía, la llenamos con initialData
+        if (tasksData.length === 0) {
+          for (let task of initialData) {
+            await fetch(SUPABASE_URL, {
+              method: 'POST',
+              headers: HEADERS,
+              body: JSON.stringify(task)
+            });
+          }
+          tasksData = initialData;
+        }
+        
+        renderBoard();
+      } catch (e) {
+        console.error(e);
+        alert("Falta darle permisos a la base de datos. Asegúrate de correr el código SQL de seguridad.");
+      }
+    }
+
     function renderBoard() {
-      const data = JSON.parse(localStorage.getItem('kanbanData2')) || initialData;
-      
       ['todo', 'in-progress', 'done-col'].forEach(colId => {
         const col = document.getElementById(colId);
         col.innerHTML = '';
         
-        data[colId].forEach(task => {
+        const colTasks = tasksData.filter(t => t.col_id === colId);
+        
+        colTasks.forEach(task => {
           const card = document.createElement('div');
           card.className = `kanban-card text-sm ${task.priority ? 'is-priority' : ''}`;
           card.draggable = true;
           card.id = task.id;
           
-          let tagsHtml = `<span class="tag ${task.tagClass}">${task.project}</span>`;
+          let tagsHtml = `<span class="tag ${task.tag_class}">${task.project}</span>`;
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
           }
@@ -180,7 +212,7 @@
             </button>
             <div class="mb-3">${tagsHtml}</div>
             <div class="font-bold text-base mb-1.5 text-[var(--foreground)] pr-6">${task.title}</div>
-            <div class="text-[var(--muted-foreground)] leading-relaxed">${task.desc}</div>
+            <div class="text-[var(--muted-foreground)] leading-relaxed">${task.description}</div>
           `;
           
           card.addEventListener('dragstart', handleDragStart);
@@ -188,69 +220,62 @@
           col.appendChild(card);
         });
         
-        // Update counts
-        const countId = `count-${colId}`;
-        document.getElementById(countId).innerText = data[colId].length;
+        document.getElementById(`count-${colId}`).innerText = colTasks.length;
       });
     }
 
-    // Modal Logic
-    function openAddModal() {
-      document.getElementById('addModal').classList.add('active');
-      document.getElementById('newTaskTitle').focus();
-    }
-
-    function closeModal() {
-      document.getElementById('addModal').classList.remove('active');
-      // Clear fields
-      document.getElementById('newTaskTitle').value = '';
-      document.getElementById('newTaskDesc').value = '';
-      document.getElementById('newTaskPriority').checked = false;
-      document.getElementById('newTaskProject').selectedIndex = 0;
-    }
-
-    function addTask() {
+    async function addTask() {
       const title = document.getElementById('newTaskTitle').value.trim();
       const desc = document.getElementById('newTaskDesc').value.trim();
       const priority = document.getElementById('newTaskPriority').checked;
-      
       const select = document.getElementById('newTaskProject');
       const project = select.options[select.selectedIndex].value;
       const tagClass = select.options[select.selectedIndex].getAttribute('data-class');
 
-      if (!title) {
-        alert("El título de la tarea es obligatorio.");
-        return;
-      }
+      if (!title) return alert("El título es obligatorio.");
 
       const newTask = {
         id: 't' + Date.now(),
+        col_id: 'todo',
         project: project,
-        tagClass: tagClass,
+        tag_class: tagClass,
         title: title,
-        desc: desc,
+        description: desc,
         priority: priority
       };
 
-      const data = JSON.parse(localStorage.getItem('kanbanData2')) || initialData;
-      data['todo'].push(newTask);
-      localStorage.setItem('kanbanData2', JSON.stringify(data));
-      
-      closeModal();
-      renderBoard();
+      try {
+        await fetch(SUPABASE_URL, {
+          method: 'POST',
+          headers: HEADERS,
+          body: JSON.stringify(newTask)
+        });
+        tasksData.push(newTask);
+        renderBoard();
+        closeModal();
+      } catch (e) {
+        alert("Error al guardar.");
+      }
     }
 
-    function deleteTask(id) {
-      if(confirm("¿Estás seguro de eliminar esta tarea?")) {
-        const data = JSON.parse(localStorage.getItem('kanbanData2')) || initialData;
-        
-        for (const colId in data) {
-          data[colId] = data[colId].filter(t => t.id !== id);
-        }
-        
-        localStorage.setItem('kanbanData2', JSON.stringify(data));
+    async function deleteTask(id) {
+      if(!confirm("¿Estás seguro de eliminar esta tarea?")) return;
+      try {
+        await fetch(`${SUPABASE_URL}?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
+        tasksData = tasksData.filter(t => t.id !== id);
         renderBoard();
+      } catch (e) {
+        alert("Error al borrar.");
       }
+    }
+
+    // Modal Logic
+    function openAddModal() { document.getElementById('addModal').classList.add('active'); document.getElementById('newTaskTitle').focus(); }
+    function closeModal() {
+      document.getElementById('addModal').classList.remove('active');
+      document.getElementById('newTaskTitle').value = '';
+      document.getElementById('newTaskDesc').value = '';
+      document.getElementById('newTaskPriority').checked = false;
     }
 
     // Drag and Drop Logic
@@ -263,10 +288,26 @@
       e.dataTransfer.setData('text/plain', this.id);
     }
 
-    function handleDragEnd(e) {
+    async function handleDragEnd(e) {
       this.classList.remove('dragging');
+      const newColId = this.parentElement.id;
+      const id = this.id;
+      
+      const task = tasksData.find(t => t.id === id);
+      if (task && task.col_id !== newColId) {
+        task.col_id = newColId;
+        renderBoard(); // update UI instantly
+        try {
+          await fetch(`${SUPABASE_URL}?id=eq.${id}`, {
+            method: 'PATCH',
+            headers: HEADERS,
+            body: JSON.stringify({ col_id: newColId })
+          });
+        } catch (e) {
+          console.error("No se pudo guardar la posición en el servidor");
+        }
+      }
       draggedCard = null;
-      saveBoardState();
     }
 
     document.querySelectorAll('.dropzone').forEach(zone => {
@@ -285,7 +326,6 @@
 
     function getDragAfterElement(container, y) {
       const draggableElements = [...container.querySelectorAll('.kanban-card:not(.dragging)')];
-      
       return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
@@ -297,71 +337,20 @@
       }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    function saveBoardState() {
-      const newData = { 'todo': [], 'in-progress': [], 'done-col': [] };
-      const currentData = JSON.parse(localStorage.getItem('kanbanData2')) || initialData;
-      
-      // We need to find the full task object by ID when reconstructing
-      const findTask = (id) => {
-        for (const col in currentData) {
-          const found = currentData[col].find(t => t.id === id);
-          if (found) return found;
-        }
-        return null;
-      };
-      
-      ['todo', 'in-progress', 'done-col'].forEach(colId => {
-        const cards = document.getElementById(colId).querySelectorAll('.kanban-card');
-        cards.forEach(card => {
-          const orig = findTask(card.id);
-          if (orig) newData[colId].push(orig);
-        });
-      });
-      
-      localStorage.setItem('kanbanData2', JSON.stringify(newData));
-      renderBoard();
-    }
-
-    function resetBoard() {
-      if(confirm("¿Estás seguro de que deseas restablecer el tablero a su estado original? Perderás el progreso guardado.")) {
-        localStorage.removeItem('kanbanData2');
-        renderBoard();
-      }
-    }
-
     function exportData() {
-      const data = localStorage.getItem('kanbanData2') || JSON.stringify(initialData);
-      const blob = new Blob([data], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(tasksData)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = 'tablero_cc17_backup.json';
-      a.click();
+      a.href = url; a.download = 'tablero_cc17.json'; a.click();
       URL.revokeObjectURL(url);
     }
-
-    function importData(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const contents = e.target.result;
-          JSON.parse(contents); // validate JSON
-          localStorage.setItem('kanbanData2', contents);
-          renderBoard();
-          alert("¡Datos importados correctamente!");
-        } catch (err) {
-          alert("Error: El archivo no es válido.");
-        }
-      };
-      reader.readAsText(file);
-      event.target.value = ''; // reset input
+    
+    function resetBoard() {
+      alert("Para resetear toda la base de datos, debes borrar los registros manualmente o recrear la tabla.");
     }
 
-    // Initialize board
-    renderBoard();
+    // Inicializar
+    loadTasks();
   </script>
 </body>
 </html>
