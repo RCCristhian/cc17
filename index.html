@@ -1,133 +1,354 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metodología de Visualización | CC17</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    .kanban-board { display: flex; gap: 1.25rem; height: calc(100vh - 6rem); padding: 1.5rem; overflow-x: auto; align-items: flex-start; }
-    .kanban-column { flex: 1; min-width: 320px; max-width: 400px; background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); max-height: 100%; }
-    .kanban-column-header { padding: 1rem; font-weight: 600; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: #07090e;
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99, 102, 241, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 85% 10%, rgba(59, 130, 246, 0.08), transparent);
+      color: #f1f5f9;
+    }
     
-    .kanban-cards { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; min-height: 200px; }
-    
-    .kanban-card { 
-      background: var(--background); 
-      border: 1px solid var(--border); 
-      border-radius: 0.5rem; 
-      padding: 1rem; 
-      cursor: grab; 
-      transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+    .kanban-board {
+      display: flex;
+      gap: 1.5rem;
+      height: calc(100vh - 6.5rem);
+      padding: 1.5rem 2rem 2rem 2rem;
+      overflow-x: auto;
+      align-items: flex-start;
+    }
+
+    .kanban-column {
+      flex: 1;
+      min-width: 340px;
+      max-width: 420px;
+      background: #0d1118;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      max-height: 100%;
+    }
+
+    .kanban-column-header {
+      padding: 1.15rem 1.25rem;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .kanban-cards {
+      flex: 1;
+      padding: 1.25rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-height: 220px;
+    }
+
+    .kanban-cards::-webkit-scrollbar {
+      width: 6px;
+    }
+    .kanban-cards::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+    }
+
+    .kanban-card {
+      background: #131722;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 1rem;
+      padding: 1.15rem;
+      cursor: grab;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
+      box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.4);
     }
-    .kanban-card:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border-color: #9ca3af; }
-    .kanban-card:active { cursor: grabbing; }
-    .kanban-card.dragging { opacity: 0.4; }
-    
-    .kanban-card.is-priority {
-      border-left: 4px solid rgb(239, 68, 68);
+
+    .kanban-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6);
+      border-color: rgba(255, 255, 255, 0.25);
     }
-    
-    .tag { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; margin-bottom: 0.5rem; margin-right: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    
-    /* Project Tags */
-    .tag-indep { background-color: rgba(59, 130, 246, 0.15); color: rgb(37, 99, 235); }
-    .tag-lord { background-color: rgba(16, 185, 129, 0.15); color: rgb(5, 150, 105); }
-    .tag-paget { background-color: rgba(139, 92, 246, 0.15); color: rgb(109, 40, 217); }
-    .tag-transv { background-color: rgba(245, 158, 11, 0.15); color: rgb(217, 119, 6); }
-    .tag-custom { background-color: rgba(107, 114, 128, 0.15); color: rgb(75, 85, 99); }
-    
-    /* Priority Tag */
-    .tag-priority { background-color: rgba(239, 68, 68, 0.15); color: rgb(220, 38, 38); display: inline-flex; align-items: center; gap: 0.25rem; }
-    
-    .delete-btn { display: none; position: absolute; top: 0.5rem; right: 0.5rem; color: var(--muted-foreground); cursor: pointer; padding: 0.25rem; }
-    .kanban-card:hover .delete-btn { display: block; }
-    .delete-btn:hover { color: rgb(239, 68, 68); }
+
+    .kanban-card:active {
+      cursor: grabbing;
+    }
+
+    .kanban-card.dragging {
+      opacity: 0.35;
+      transform: scale(0.97);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 0.65rem;
+      margin-right: 0.35rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .tag-priority {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      box-shadow: 0 0 10px -2px rgba(239, 68, 68, 0.3);
+    }
+
+    .card-actions {
+      display: none;
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      gap: 0.4rem;
+    }
+
+    .kanban-card:hover .card-actions {
+      display: flex;
+    }
+
+    .action-icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 0.5rem;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      transition: all 0.2s;
+    }
+
+    .action-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      transform: scale(1.05);
+    }
+
+    .action-icon-btn.delete:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+    }
 
     /* Modal styles */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; justify-content: center; align-items: center; }
-    .modal-overlay.active { display: flex; }
-    .modal-content { background: var(--card); padding: 1.5rem; border-radius: 0.75rem; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #0f131c;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 1.75rem;
+      border-radius: 1.25rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 30px rgba(59, 130, 246, 0.1);
+    }
+
+    .color-preset-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 9999px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .color-preset-btn:hover {
+      transform: scale(1.15);
+    }
+    .color-preset-btn.active {
+      border-color: #ffffff;
+      transform: scale(1.15);
+    }
   </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased h-screen overflow-hidden flex flex-col m-0 font-sans">
+<body class="antialiased h-screen overflow-hidden flex flex-col m-0 select-none">
   
-  <header class="p-4 border-b border-[var(--border)] bg-[var(--card)] flex justify-between items-center shadow-sm z-10 shrink-0">
-    <div>
-      <h1 class="text-xl font-bold tracking-tight">Programa de Trabajo - Comercial</h1>
-      <p class="text-sm text-[var(--muted-foreground)]">Arrastra las tarjetas, crea nuevas o marca las prioritarias.</p>
+  <!-- Header con estética moderna Ray Binaries -->
+  <header class="py-3 px-8 border-b border-white/[0.08] bg-[#090b10]/90 backdrop-blur-md flex justify-between items-center z-10 shrink-0">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center">
+        <div class="w-full h-full bg-[#07090e] rounded-[10px] flex items-center justify-center">
+          <span class="text-xs font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">CC17</span>
+        </div>
+      </div>
+      <div>
+        <div class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-amber-400/90 flex items-center gap-1.5">
+          <span>RAY BINARIES</span>
+          <span class="text-white/20">•</span>
+          <span class="text-blue-400">VISUALIZACIÓN 3D</span>
+        </div>
+        <h1 class="text-lg font-extrabold tracking-tight text-white flex items-center gap-2">
+          Metodología de Trabajo & Cronograma
+        </h1>
+      </div>
     </div>
-    <div class="flex gap-2">
-      <button onclick="openAddModal()" class="text-sm bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md font-medium transition-colors shadow-sm">
-        + Nueva Tarea
+
+    <div class="flex items-center gap-3">
+      <button onclick="openAddModal()" class="flex items-center gap-2 text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98]">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Nueva Tarjeta</span>
       </button>
     </div>
   </header>
   
+  <!-- Kanban Board -->
   <main class="kanban-board">
+    <!-- Columna 1: Por Hacer -->
     <div class="kanban-column">
       <div class="kanban-column-header">
-         <span>📝 Por Hacer</span>
-         <span class="bg-[var(--border)] px-2 py-0.5 rounded-full text-xs" id="count-todo">0</span>
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(59,130,246,0.3)]">
+            1
+          </div>
+          <span class="text-sm font-bold tracking-wide text-white">Por Hacer</span>
+        </div>
+        <span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
       </div>
       <div class="kanban-cards dropzone" id="todo"></div>
     </div>
     
+    <!-- Columna 2: En Progreso -->
     <div class="kanban-column">
       <div class="kanban-column-header">
-         <span>⏳ En Progreso</span>
-         <span class="bg-[var(--border)] px-2 py-0.5 rounded-full text-xs" id="count-in-progress">0</span>
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/40 text-purple-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.3)]">
+            2
+          </div>
+          <span class="text-sm font-bold tracking-wide text-white">En Progreso</span>
+        </div>
+        <span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-in-progress">0</span>
       </div>
       <div class="kanban-cards dropzone" id="in-progress"></div>
     </div>
     
+    <!-- Columna 3: Terminado -->
     <div class="kanban-column">
       <div class="kanban-column-header">
-         <span>✅ Terminado</span>
-         <span class="bg-[var(--border)] px-2 py-0.5 rounded-full text-xs" id="count-done-col">0</span>
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+            3
+          </div>
+          <span class="text-sm font-bold tracking-wide text-white">Terminado</span>
+        </div>
+        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-done-col">0</span>
       </div>
       <div class="kanban-cards dropzone" id="done-col"></div>
     </div>
   </main>
 
-  <!-- Add/Edit Task Modal -->
+  <!-- Modal para Agregar / Editar Tarjeta con Selector de Color Libre -->
   <div id="addModal" class="modal-overlay">
     <div class="modal-content">
-      <h2 id="modalTitle" class="text-lg font-bold mb-4">Añadir Nueva Tarea</h2>
+      <div class="flex justify-between items-center mb-5">
+        <h2 id="modalTitle" class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+          <span>Nueva Tarjeta</span>
+        </h2>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
       <input type="hidden" id="editingTaskId">
-      <div class="flex flex-col gap-3">
+
+      <div class="flex flex-col gap-4">
+        <!-- Selector de Proyecto -->
         <div>
-          <label class="block text-sm font-medium mb-1">Proyecto</label>
-          <div class="flex gap-2 items-center">
-            <select id="taskProjectSelect" onchange="handleProjectChange()" class="flex-1 border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500">
-            </select>
-            <div class="flex items-center gap-1.5 bg-[var(--background)] border border-[var(--border)] rounded-md p-1 px-2.5 h-[38px]" title="Color de la etiqueta del proyecto">
-              <span class="text-xs text-[var(--muted-foreground)] font-medium">Color:</span>
-              <input type="color" id="taskColorInput" value="#3b82f6" class="w-6 h-6 border-0 rounded cursor-pointer bg-transparent">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Proyecto</label>
+          <select id="taskProjectSelect" onchange="handleProjectChange()" class="w-full bg-[#080a0f] border border-white/10 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+          </select>
+        </div>
+
+        <!-- Campo adicional si elige "+ Crear nuevo proyecto" -->
+        <div id="newProjectContainer" style="display: none;" class="p-3 bg-blue-950/30 border border-blue-500/30 rounded-xl">
+          <label class="block text-xs font-bold text-blue-300 uppercase tracking-wide mb-1">Nombre del Nuevo Proyecto</label>
+          <input type="text" id="newProjectInput" placeholder="Ej: Miraflores II" class="w-full bg-[#07090e] border border-blue-500/50 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+        </div>
+
+        <!-- Color de la Tarjeta (Presets + Color Picker libre) -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <label class="text-xs font-bold uppercase tracking-wider text-slate-300">Color de la Tarjeta</label>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[11px] text-slate-400">Personalizado:</span>
+              <input type="color" id="taskColorInput" value="#3b82f6" onchange="onCustomColorPick(this.value)" class="w-6 h-6 rounded-md border-0 cursor-pointer bg-transparent">
             </div>
+          </div>
+
+          <div class="flex items-center gap-2 p-2 bg-[#080a0f] border border-white/10 rounded-xl">
+            <button type="button" onclick="selectPresetColor('#3b82f6')" style="background-color: #3b82f6;" class="color-preset-btn" title="Azul Eléctrico"></button>
+            <button type="button" onclick="selectPresetColor('#8b5cf6')" style="background-color: #8b5cf6;" class="color-preset-btn" title="Violeta Neón"></button>
+            <button type="button" onclick="selectPresetColor('#10b981')" style="background-color: #10b981;" class="color-preset-btn" title="Esmeralda"></button>
+            <button type="button" onclick="selectPresetColor('#f59e0b')" style="background-color: #f59e0b;" class="color-preset-btn" title="Ámbar / Oro"></button>
+            <button type="button" onclick="selectPresetColor('#ec4899')" style="background-color: #ec4899;" class="color-preset-btn" title="Rosa Neón"></button>
+            <button type="button" onclick="selectPresetColor('#06b6d4')" style="background-color: #06b6d4;" class="color-preset-btn" title="Cian"></button>
+            <button type="button" onclick="selectPresetColor('#ef4444')" style="background-color: #ef4444;" class="color-preset-btn" title="Rojo"></button>
+            <button type="button" onclick="selectPresetColor('#64748b')" style="background-color: #64748b;" class="color-preset-btn" title="Gris Carbón"></button>
           </div>
         </div>
 
-        <div id="newProjectContainer" style="display: none;" class="p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <label class="block text-xs font-bold text-blue-800 uppercase tracking-wide mb-1">Nombre del Nuevo Proyecto</label>
-          <input type="text" id="newProjectInput" placeholder="Ej: Miraflores II" class="w-full border border-blue-300 bg-white rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <!-- Título -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Título de la Tarea</label>
+          <input type="text" id="newTaskTitle" placeholder="Ej: Renders de fachada principal" class="w-full bg-[#080a0f] border border-white/10 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
         </div>
 
+        <!-- Descripción -->
         <div>
-          <label class="block text-sm font-medium mb-1">Título de la Tarea</label>
-          <input type="text" id="newTaskTitle" placeholder="Ej: Renders de fachada" class="w-full border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Descripción</label>
+          <textarea id="newTaskDesc" rows="3" placeholder="Detalles o requerimientos de la tarea..." class="w-full bg-[#080a0f] border border-white/10 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"></textarea>
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Descripción</label>
-          <textarea id="newTaskDesc" rows="3" placeholder="Detalles de la tarea..." class="w-full border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
-        </div>
-        <div class="flex items-center gap-2 mt-1">
-          <input type="checkbox" id="newTaskPriority" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
-          <label for="newTaskPriority" class="text-sm font-medium text-red-600 flex items-center gap-1 cursor-pointer select-none">🔥 Marcar como Prioritario</label>
+
+        <!-- Prioritario -->
+        <div class="flex items-center gap-2.5 pt-1">
+          <input type="checkbox" id="newTaskPriority" class="w-4 h-4 rounded text-red-600 bg-[#080a0f] border-white/20 focus:ring-red-500 cursor-pointer">
+          <label for="newTaskPriority" class="text-xs font-bold text-red-400 flex items-center gap-1.5 cursor-pointer select-none">
+            🔥 Marcar como Prioritario
+          </label>
         </div>
       </div>
-      <div class="flex justify-end gap-2 mt-5">
-        <button onclick="closeModal()" class="px-4 py-2 text-sm border border-[var(--border)] rounded-md hover:bg-[var(--accent)] font-medium">Cancelar</button>
-        <button onclick="saveTask()" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm">Guardar Tarea</button>
+
+      <div class="flex justify-end gap-2.5 mt-6">
+        <button onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-colors">
+          Cancelar
+        </button>
+        <button onclick="saveTask()" class="px-5 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+          Guardar Tarjeta
+        </button>
       </div>
     </div>
   </div>
@@ -151,6 +372,25 @@
     ];
 
     let tasksData = [];
+
+    function selectPresetColor(hex) {
+      document.getElementById('taskColorInput').value = hex;
+      updateActivePresetButton(hex);
+    }
+
+    function onCustomColorPick(hex) {
+      updateActivePresetButton(hex);
+    }
+
+    function updateActivePresetButton(hex) {
+      document.querySelectorAll('.color-preset-btn').forEach(btn => {
+        if (btn.getAttribute('onclick').includes(hex)) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
 
     function getKnownProjects() {
       const map = new Map();
@@ -196,7 +436,6 @@
     function handleProjectChange() {
       const select = document.getElementById('taskProjectSelect');
       const newContainer = document.getElementById('newProjectContainer');
-      const colorInput = document.getElementById('taskColorInput');
 
       if (select.value === '__new__') {
         newContainer.style.display = 'block';
@@ -206,7 +445,7 @@
         newContainer.style.display = 'none';
         const opt = select.options[select.selectedIndex];
         if (opt && opt.getAttribute('data-color')) {
-          colorInput.value = opt.getAttribute('data-color');
+          selectPresetColor(opt.getAttribute('data-color'));
         }
       }
     }
@@ -233,37 +472,48 @@
         
         colTasks.forEach(task => {
           const card = document.createElement('div');
-          card.className = `kanban-card text-sm ${task.priority ? 'is-priority' : ''}`;
+          card.className = `kanban-card text-sm`;
           card.draggable = true;
           card.id = task.id;
           
-          let tagColor = task.tag_class;
-          if (!tagColor || !tagColor.startsWith('#')) {
+          let cardColor = task.tag_class;
+          if (!cardColor || !cardColor.startsWith('#')) {
             const classColors = {
               'tag-indep': '#3b82f6',
               'tag-lord': '#10b981',
               'tag-paget': '#8b5cf6',
               'tag-transv': '#f59e0b',
-              'tag-custom': '#6b7280'
+              'tag-custom': '#64748b'
             };
-            tagColor = classColors[task.tag_class] || '#3b82f6';
+            cardColor = classColors[task.tag_class] || '#3b82f6';
           }
           
-          let tagsHtml = `<span class="tag" style="background-color: ${tagColor}22; color: ${tagColor}; border: 1px solid ${tagColor}44;">${task.project}</span>`;
+          // Estilo de tarjeta moderna con acento y brillo del color escogido
+          card.style.background = `linear-gradient(145deg, ${cardColor}18 0%, #12151e 65%)`;
+          card.style.borderColor = `${cardColor}40`;
+          card.style.boxShadow = `0 4px 18px -3px ${cardColor}1a`;
+
+          if (task.priority) {
+            card.style.borderLeft = `4px solid #ef4444`;
+          }
+          
+          let tagsHtml = `<span class="tag" style="background-color: ${cardColor}25; color: ${cardColor}; border: 1px solid ${cardColor}55;">${task.project}</span>`;
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
           }
           
           card.innerHTML = `
-            <div class="delete-btn" style="right: 2.2rem; color: #3b82f6;" onclick="editTask('${task.id}')" title="Editar tarea">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            <div class="card-actions">
+              <button class="action-icon-btn" onclick="editTask('${task.id}')" title="Editar tarjeta">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+              <button class="action-icon-btn delete" onclick="deleteTask('${task.id}')" title="Eliminar tarjeta">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
             </div>
-            <div class="delete-btn" onclick="deleteTask('${task.id}')" title="Eliminar tarea">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </div>
-            <div class="mb-3">${tagsHtml}</div>
-            <div class="font-bold text-base mb-1.5 text-[var(--foreground)] pr-12">${task.title}</div>
-            <div class="text-[var(--muted-foreground)] leading-relaxed">${task.description}</div>
+            <div class="mb-2">${tagsHtml}</div>
+            <div class="font-bold text-base mb-1.5 text-white pr-14 leading-snug">${task.title}</div>
+            <div class="text-slate-400 text-xs leading-relaxed font-normal">${task.description}</div>
           `;
           
           card.addEventListener('dragstart', handleDragStart);
@@ -292,7 +542,6 @@
           projectName = document.getElementById('newProjectInput').value.trim();
           if (!projectName) return alert("Por favor escribe el nombre del nuevo proyecto.");
           
-          // Guardar proyecto en caché local
           try {
             const stored = JSON.parse(localStorage.getItem('cc17_custom_projects') || '[]');
             stored.push({ name: projectName, color: color });
@@ -345,7 +594,7 @@
       const task = tasksData.find(t => t.id === id);
       if (!task) return;
       
-      document.getElementById('modalTitle').innerText = 'Editar Tarea';
+      document.getElementById('modalTitle').innerText = 'Editar Tarjeta';
       document.getElementById('editingTaskId').value = task.id;
       document.getElementById('newTaskTitle').value = task.title;
       document.getElementById('newTaskDesc').value = task.description;
@@ -353,15 +602,15 @@
       
       populateProjectDropdown(task.project);
       
-      if (task.tag_class && task.tag_class.startsWith('#')) {
-        document.getElementById('taskColorInput').value = task.tag_class;
-      }
+      let color = task.tag_class;
+      if (!color || !color.startsWith('#')) color = '#3b82f6';
+      selectPresetColor(color);
       
       document.getElementById('addModal').classList.add('active');
     }
 
     async function deleteTask(id) {
-      if(!confirm("¿Estás seguro de eliminar esta tarea?")) return;
+      if(!confirm("¿Estás seguro de eliminar esta tarjeta?")) return;
       try {
         const res = await fetch(`${SUPABASE_URL}?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
         if (!res.ok) throw new Error("HTTP " + res.status + " " + await res.text());
@@ -373,7 +622,7 @@
     }
 
     function openAddModal() { 
-      document.getElementById('modalTitle').innerText = 'Añadir Nueva Tarea';
+      document.getElementById('modalTitle').innerText = 'Nueva Tarjeta';
       document.getElementById('editingTaskId').value = '';
       document.getElementById('newTaskTitle').value = '';
       document.getElementById('newTaskDesc').value = '';
