@@ -217,6 +217,10 @@
     </div>
 
     <div class="flex items-center gap-3">
+      <button onclick="openProjectManagerModal()" class="flex items-center gap-2 text-sm font-semibold bg-[#131722] hover:bg-[#1a2030] text-slate-200 border border-white/10 hover:border-white/20 px-4 py-2 rounded-xl transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        <span>Gestionar Proyectos</span>
+      </button>
       <button onclick="openAddModal()" class="flex items-center gap-2 text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98]">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         <span>Nueva Tarjeta</span>
@@ -351,6 +355,49 @@
     </div>
   </div>
 
+  <!-- Modal Gestión de Proyectos -->
+  <div id="projectManagerModal" class="modal-overlay">
+    <div class="modal-content !max-w-xl">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+            <span>📁 Gestión de Proyectos</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Al cambiar el nombre de un proyecto, todas sus tarjetas se actualizarán automáticamente.</p>
+        </div>
+        <button onclick="closeProjectManagerModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <!-- Formulario para Añadir Nuevo Proyecto -->
+      <div class="p-3.5 bg-[#080a0f] border border-white/10 rounded-xl mb-4">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Crear Nuevo Proyecto</label>
+        <div class="flex gap-2 items-center">
+          <input type="text" id="pmNewProjectName" placeholder="Nombre del proyecto..." class="flex-1 bg-[#121622] border border-white/10 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+          <div class="flex items-center gap-1.5 bg-[#121622] border border-white/10 rounded-xl px-2.5 h-[42px]" title="Color del proyecto">
+            <input type="color" id="pmNewProjectColor" value="#3b82f6" class="w-6 h-6 rounded-md border-0 cursor-pointer bg-transparent">
+          </div>
+          <button onclick="createNewProjectFromManager()" class="px-4 h-[42px] bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl transition-all shadow-md shrink-0">
+            + Añadir
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de Proyectos Existentes -->
+      <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Proyectos Registrados</label>
+      <div id="projectManagerList" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="flex justify-end mt-5 pt-3 border-t border-white/[0.08]">
+        <button onclick="closeProjectManagerModal()" class="px-5 py-2 text-sm font-semibold text-slate-300 hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-colors">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = 'https://cegnqgqftdiramaoebsy.supabase.co/rest/v1/tasks';
     const SUPABASE_KEY = 'sb_publishable_oOBGRvcqeH1QxFnG7zIY0g_A_eNAk6u';
@@ -388,6 +435,212 @@
           btn.classList.remove('active');
         }
       });
+    }
+
+    // --- GESTIÓN DE PROYECTOS ---
+    function openProjectManagerModal() {
+      document.getElementById('projectManagerModal').classList.add('active');
+      renderProjectManagerList();
+    }
+
+    function closeProjectManagerModal() {
+      document.getElementById('projectManagerModal').classList.remove('active');
+    }
+
+    function sanitizeId(str) {
+      return encodeURIComponent(str).replace(/[^a-zA-Z0-9]/g, '_');
+    }
+
+    function renderProjectManagerList() {
+      const container = document.getElementById('projectManagerList');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      const projects = getKnownProjects();
+      if (projects.length === 0) {
+        container.innerHTML = `<div class="text-sm text-slate-500 py-3 text-center">No hay proyectos registrados aún.</div>`;
+        return;
+      }
+
+      projects.forEach(p => {
+        const sid = sanitizeId(p.name);
+        const taskCount = tasksData.filter(t => t.project === p.name).length;
+        
+        const row = document.createElement('div');
+        row.className = "p-3 bg-[#0c1017] border border-white/[0.08] rounded-xl flex items-center justify-between gap-3";
+        row.id = `pm-row-${sid}`;
+        
+        row.innerHTML = `
+          <!-- Vista normal -->
+          <div class="flex items-center gap-3 flex-1 min-w-0" id="pm-view-${sid}">
+            <div class="w-4 h-4 rounded-full shrink-0 shadow-sm" style="background-color: ${p.color}; box-shadow: 0 0 10px ${p.color}88;"></div>
+            <div class="flex items-center gap-2 truncate">
+              <span class="text-sm font-bold text-white truncate" id="pm-name-display-${sid}">${p.name}</span>
+              <span class="text-[11px] font-semibold text-slate-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full shrink-0">
+                ${taskCount} ${taskCount === 1 ? 'tarjeta' : 'tarjetas'}
+              </span>
+            </div>
+          </div>
+
+          <!-- Vista edición -->
+          <div class="hidden flex-1 items-center gap-2" id="pm-edit-${sid}">
+            <input type="text" class="flex-1 bg-[#121622] border border-blue-500/70 rounded-lg p-1.5 px-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500" value="${p.name.replace(/"/g, '&quot;')}" id="pm-input-${sid}">
+            <input type="color" class="w-7 h-7 border-0 bg-transparent cursor-pointer shrink-0" value="${p.color}" id="pm-color-${sid}" title="Cambiar color del proyecto">
+            <button onclick="saveProjectRename('${p.name.replace(/'/g, "\\'")}')" class="px-3 py-1 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded-lg shadow-sm">Guardar</button>
+            <button onclick="cancelProjectRename('${p.name.replace(/'/g, "\\'")}')" class="px-2 py-1 text-slate-400 hover:text-white text-xs">Cancelar</button>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="flex items-center gap-1.5 shrink-0" id="pm-actions-${sid}">
+            <button onclick="startProjectRename('${p.name.replace(/'/g, "\\'")}')" class="action-icon-btn !flex !static" title="Editar nombre y color en todas las tarjetas">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </button>
+            <button onclick="deleteProjectFromManager('${p.name.replace(/'/g, "\\'")}')" class="action-icon-btn delete !flex !static" title="Eliminar proyecto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        `;
+        
+        container.appendChild(row);
+      });
+    }
+
+    function startProjectRename(name) {
+      const sid = sanitizeId(name);
+      document.getElementById(`pm-view-${sid}`).classList.add('hidden');
+      document.getElementById(`pm-actions-${sid}`).classList.add('hidden');
+      const editDiv = document.getElementById(`pm-edit-${sid}`);
+      editDiv.classList.remove('hidden');
+      editDiv.classList.add('flex');
+      document.getElementById(`pm-input-${sid}`).focus();
+    }
+
+    function cancelProjectRename(name) {
+      const sid = sanitizeId(name);
+      document.getElementById(`pm-view-${sid}`).classList.remove('hidden');
+      document.getElementById(`pm-actions-${sid}`).classList.remove('hidden');
+      const editDiv = document.getElementById(`pm-edit-${sid}`);
+      editDiv.classList.remove('flex');
+      editDiv.classList.add('hidden');
+    }
+
+    async function saveProjectRename(oldName) {
+      const sid = sanitizeId(oldName);
+      const newName = document.getElementById(`pm-input-${sid}`).value.trim();
+      const newColor = document.getElementById(`pm-color-${sid}`).value;
+
+      if (!newName) return alert("El nombre del proyecto no puede estar vacío.");
+
+      try {
+        // 1. Actualizar todas las tarjetas en memoria
+        let affectedCount = 0;
+        tasksData.forEach(t => {
+          if (t.project === oldName) {
+            t.project = newName;
+            t.tag_class = newColor;
+            affectedCount++;
+          }
+        });
+
+        // 2. Actualizar en Supabase para todas las tareas con ese proyecto
+        if (affectedCount > 0) {
+          const res = await fetch(`${SUPABASE_URL}?project=eq.${encodeURIComponent(oldName)}`, {
+            method: 'PATCH',
+            headers: HEADERS,
+            body: JSON.stringify({ project: newName, tag_class: newColor })
+          });
+          if (!res.ok) console.warn("Aviso al sincronizar con Supabase:", await res.text());
+        }
+
+        // 3. Actualizar almacenamiento local de proyectos
+        let stored = [];
+        try {
+          stored = JSON.parse(localStorage.getItem('cc17_custom_projects') || '[]');
+        } catch (e) {}
+
+        stored = stored.filter(p => p.name !== oldName);
+        stored.push({ name: newName, color: newColor });
+        localStorage.setItem('cc17_custom_projects', JSON.stringify(stored));
+
+        // 4. Actualizar defaultProjects si estaba allí
+        const def = defaultProjects.find(p => p.name === oldName);
+        if (def) {
+          def.name = newName;
+          def.color = newColor;
+        }
+
+        // 5. Re-renderizar tablero y modal
+        renderBoard();
+        renderProjectManagerList();
+        populateProjectDropdown();
+
+      } catch (e) {
+        alert("Error al actualizar proyecto: " + e.message);
+      }
+    }
+
+    async function createNewProjectFromManager() {
+      const nameInput = document.getElementById('pmNewProjectName');
+      const colorInput = document.getElementById('pmNewProjectColor');
+      const name = nameInput.value.trim();
+      const color = colorInput.value;
+
+      if (!name) return alert("Por favor escribe el nombre del proyecto.");
+
+      let stored = [];
+      try {
+        stored = JSON.parse(localStorage.getItem('cc17_custom_projects') || '[]');
+      } catch (e) {}
+
+      if (getKnownProjects().some(p => p.name.toLowerCase() === name.toLowerCase())) {
+        return alert("Ya existe un proyecto con ese nombre.");
+      }
+
+      stored.push({ name, color });
+      localStorage.setItem('cc17_custom_projects', JSON.stringify(stored));
+
+      nameInput.value = '';
+      renderProjectManagerList();
+      populateProjectDropdown();
+    }
+
+    async function deleteProjectFromManager(name) {
+      const taskCount = tasksData.filter(t => t.project === name).length;
+      let msg = `¿Deseas eliminar el proyecto "${name}"?`;
+      if (taskCount > 0) {
+        msg = `El proyecto "${name}" tiene ${taskCount} ${taskCount === 1 ? 'tarjeta asociada' : 'tarjetas asociadas'}. Si lo eliminas, las tarjetas pasarán a llamarse "Sin Proyecto". ¿Continuar?`;
+      }
+
+      if (!confirm(msg)) return;
+
+      try {
+        if (taskCount > 0) {
+          tasksData.forEach(t => {
+            if (t.project === name) {
+              t.project = "Sin Proyecto";
+            }
+          });
+
+          await fetch(`${SUPABASE_URL}?project=eq.${encodeURIComponent(name)}`, {
+            method: 'PATCH',
+            headers: HEADERS,
+            body: JSON.stringify({ project: "Sin Proyecto" })
+          });
+        }
+
+        let stored = [];
+        try {
+          stored = JSON.parse(localStorage.getItem('cc17_custom_projects') || '[]');
+        } catch (e) {}
+        stored = stored.filter(p => p.name !== name);
+        localStorage.setItem('cc17_custom_projects', JSON.stringify(stored));
+
+        renderBoard();
+        renderProjectManagerList();
+        populateProjectDropdown();
+      } catch (e) {
+        alert("Error al eliminar proyecto: " + e.message);
+      }
     }
 
     function getKnownProjects() {
