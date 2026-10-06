@@ -83,7 +83,7 @@
     <div class="kanban-column">
       <div class="kanban-column-header">
          <span>✅ Terminado</span>
-         <span class="bg-[var(--border)] px-2 py-0.5 rounded-full text-xs" id="count-done">0</span>
+         <span class="bg-[var(--border)] px-2 py-0.5 rounded-full text-xs" id="count-done-col">0</span>
       </div>
       <div class="kanban-cards dropzone" id="done-col"></div>
     </div>
@@ -95,32 +95,39 @@
       <h2 id="modalTitle" class="text-lg font-bold mb-4">Añadir Nueva Tarea</h2>
       <input type="hidden" id="editingTaskId">
       <div class="flex flex-col gap-3">
-        <div class="flex gap-2">
-          <div class="flex-1">
-            <label class="block text-sm font-medium mb-1">Nombre del Proyecto</label>
-            <input type="text" id="newTaskProject" placeholder="Ej: Independencia & Teruel" class="w-full border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500">
-          </div>
-          <div class="w-20">
-            <label class="block text-sm font-medium mb-1">Color</label>
-            <input type="color" id="newTaskColor" value="#3b82f6" class="w-full h-9 border border-[var(--border)] rounded-md cursor-pointer">
+        <div>
+          <label class="block text-sm font-medium mb-1">Proyecto</label>
+          <div class="flex gap-2 items-center">
+            <select id="taskProjectSelect" onchange="handleProjectChange()" class="flex-1 border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500">
+            </select>
+            <div class="flex items-center gap-1.5 bg-[var(--background)] border border-[var(--border)] rounded-md p-1 px-2.5 h-[38px]" title="Color de la etiqueta del proyecto">
+              <span class="text-xs text-[var(--muted-foreground)] font-medium">Color:</span>
+              <input type="color" id="taskColorInput" value="#3b82f6" class="w-6 h-6 border-0 rounded cursor-pointer bg-transparent">
+            </div>
           </div>
         </div>
+
+        <div id="newProjectContainer" style="display: none;" class="p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <label class="block text-xs font-bold text-blue-800 uppercase tracking-wide mb-1">Nombre del Nuevo Proyecto</label>
+          <input type="text" id="newProjectInput" placeholder="Ej: Miraflores II" class="w-full border border-blue-300 bg-white rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+        </div>
+
         <div>
           <label class="block text-sm font-medium mb-1">Título de la Tarea</label>
-          <input type="text" id="newTaskTitle" placeholder="Ej: Renders de cocina" class="w-full border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500">
+          <input type="text" id="newTaskTitle" placeholder="Ej: Renders de fachada" class="w-full border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Descripción</label>
           <textarea id="newTaskDesc" rows="3" placeholder="Detalles de la tarea..." class="w-full border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
         </div>
         <div class="flex items-center gap-2 mt-1">
-          <input type="checkbox" id="newTaskPriority" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
-          <label for="newTaskPriority" class="text-sm font-medium text-red-600 flex items-center gap-1">🔥 Marcar como Prioritario</label>
+          <input type="checkbox" id="newTaskPriority" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
+          <label for="newTaskPriority" class="text-sm font-medium text-red-600 flex items-center gap-1 cursor-pointer select-none">🔥 Marcar como Prioritario</label>
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-5">
-        <button onclick="closeModal()" class="px-4 py-2 text-sm border border-[var(--border)] rounded-md hover:bg-[var(--accent)]">Cancelar</button>
-        <button onclick="saveTask()" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Guardar Tarea</button>
+        <button onclick="closeModal()" class="px-4 py-2 text-sm border border-[var(--border)] rounded-md hover:bg-[var(--accent)] font-medium">Cancelar</button>
+        <button onclick="saveTask()" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm">Guardar Tarea</button>
       </div>
     </div>
   </div>
@@ -136,42 +143,79 @@
       'Prefer': 'return=representation'
     };
 
-    const initialData = [
-      { id: 't3', col_id: 'todo', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Renders del lobby', description: 'Desarrollar los renders interiores del lobby una vez cerrados los criterios de diseño.', priority: false },
-      { id: 't4', col_id: 'todo', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Renders del área común', description: 'Definir configuración con CC17. Una vez aprobada, desarrollar renders.', priority: false },
-      { id: 't6', col_id: 'todo', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Renders de departamentos', description: 'Iniciar renders interiores de tipologías 1, 2 y 3. Especial prioridad a la tipología 3.', priority: true },
-      { id: 't7', col_id: 'todo', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Tour virtual del PH 802', description: 'Recorrido virtual para entender distribución y relación entre interiores, terrazas y exteriores.', priority: false },
-      { id: 't8', col_id: 'todo', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Renders del lobby', description: 'Desarrollar sobre la base del diseño final aprobado.', priority: false },
-      { id: 't9', col_id: 'todo', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Renders del área común', description: 'Comunicar concepto y uso del espacio común (una vez definido diseño).', priority: false },
-      { id: 't11', col_id: 'todo', project: 'Paget 01 y 02', tag_class: 'tag-paget', title: 'Afinación de renders exteriores', description: 'Revisión y ajuste. Coordinación constante con paisajismo y arquitectura.', priority: false },
-      { id: 't12', col_id: 'todo', project: 'Paget 01 y 02', tag_class: 'tag-paget', title: 'Paget 01: Actualización renders interiores', description: 'Definir alcance. Evaluar qué imágenes necesitan actualizarse para la etapa final de ventas.', priority: false },
-      { id: 't13', col_id: 'todo', project: 'Apoyo Transversal', tag_class: 'tag-transv', title: 'Mockups y piezas de apoyo', description: 'Apoyar en desarrollo de mockups. Adaptar renders y planos para piezas impresas y sala de ventas.', priority: false },
-      { id: 't1', col_id: 'in-progress', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Tour virtual de departamentos', description: 'Continuar desarrollo. Evaluar priorizar tipologías 3, 4 y 5.', priority: true },
-      { id: 't2', col_id: 'in-progress', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Interiorismo para tour virtual', description: 'Alinear propuesta con identidad. Pendiente coordinar reunión con interioristas.', priority: false },
-      { id: 't5', col_id: 'in-progress', project: 'Independencia & Teruel', tag_class: 'tag-indep', title: 'Planos comerciales', description: 'Continuar con desarrollo y actualización según necesidades comerciales.', priority: false },
-      { id: 't10', col_id: 'in-progress', project: 'Lord Cochrane 4', tag_class: 'tag-lord', title: 'Planos comerciales', description: 'Continuar desarrollo y actualización, incorporando ajustes para ventas.', priority: false }
+    const defaultProjects = [
+      { name: "Independencia & Teruel", color: "#3b82f6" },
+      { name: "Lord Cochrane 4", color: "#10b981" },
+      { name: "Paget 01 y 02", color: "#8b5cf6" },
+      { name: "Apoyo Transversal", color: "#f59e0b" }
     ];
 
     let tasksData = [];
 
+    function getKnownProjects() {
+      const map = new Map();
+      defaultProjects.forEach(p => map.set(p.name, p.color));
+      
+      try {
+        const stored = JSON.parse(localStorage.getItem('cc17_custom_projects') || '[]');
+        stored.forEach(p => map.set(p.name, p.color));
+      } catch (e) {}
+
+      tasksData.forEach(t => {
+        if (t.project && !map.has(t.project)) {
+          let c = t.tag_class && t.tag_class.startsWith('#') ? t.tag_class : '#3b82f6';
+          map.set(t.project, c);
+        }
+      });
+
+      return Array.from(map.entries()).map(([name, color]) => ({ name, color }));
+    }
+
+    function populateProjectDropdown(selectedName) {
+      const select = document.getElementById('taskProjectSelect');
+      select.innerHTML = '';
+      
+      const projects = getKnownProjects();
+      projects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.name;
+        opt.setAttribute('data-color', p.color);
+        if (p.name === selectedName) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      const newOpt = document.createElement('option');
+      newOpt.value = '__new__';
+      newOpt.textContent = '➕ Crear nuevo proyecto...';
+      select.appendChild(newOpt);
+
+      handleProjectChange();
+    }
+
+    function handleProjectChange() {
+      const select = document.getElementById('taskProjectSelect');
+      const newContainer = document.getElementById('newProjectContainer');
+      const colorInput = document.getElementById('taskColorInput');
+
+      if (select.value === '__new__') {
+        newContainer.style.display = 'block';
+        document.getElementById('newProjectInput').value = '';
+        document.getElementById('newProjectInput').focus();
+      } else {
+        newContainer.style.display = 'none';
+        const opt = select.options[select.selectedIndex];
+        if (opt && opt.getAttribute('data-color')) {
+          colorInput.value = opt.getAttribute('data-color');
+        }
+      }
+    }
+
     async function loadTasks() {
       try {
         const res = await fetch(SUPABASE_URL, { headers: HEADERS });
-        if (!res.ok) throw new Error('Error de permisos o red');
+        if (!res.ok) throw new Error('Error al conectar con la base de datos: ' + res.status);
         tasksData = await res.json();
-        
-        // Si la BD está vacía, la llenamos con initialData
-        if (tasksData.length === 0) {
-          for (let task of initialData) {
-            await fetch(SUPABASE_URL, {
-              method: 'POST',
-              headers: HEADERS,
-              body: JSON.stringify(task)
-            });
-          }
-          tasksData = initialData;
-        }
-        
         renderBoard();
       } catch (e) {
         console.error(e);
@@ -182,6 +226,7 @@
     function renderBoard() {
       ['todo', 'in-progress', 'done-col'].forEach(colId => {
         const col = document.getElementById(colId);
+        if (!col) return;
         col.innerHTML = '';
         
         const colTasks = tasksData.filter(t => t.col_id === colId);
@@ -192,26 +237,32 @@
           card.draggable = true;
           card.id = task.id;
           
-          let tagsHtml = '';
-          if (task.tag_class.startsWith('#')) {
-            tagsHtml = `<span class="tag" style="background-color: ${task.tag_class}20; color: ${task.tag_class}">${task.project}</span>`;
-          } else {
-            tagsHtml = `<span class="tag ${task.tag_class}">${task.project}</span>`;
+          let tagColor = task.tag_class;
+          if (!tagColor || !tagColor.startsWith('#')) {
+            const classColors = {
+              'tag-indep': '#3b82f6',
+              'tag-lord': '#10b981',
+              'tag-paget': '#8b5cf6',
+              'tag-transv': '#f59e0b',
+              'tag-custom': '#6b7280'
+            };
+            tagColor = classColors[task.tag_class] || '#3b82f6';
           }
           
+          let tagsHtml = `<span class="tag" style="background-color: ${tagColor}22; color: ${tagColor}; border: 1px solid ${tagColor}44;">${task.project}</span>`;
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
           }
           
           card.innerHTML = `
-            <div class="delete-btn" style="right: 2rem; color: #3b82f6" onclick="editTask('${task.id}')" title="Editar tarea">
+            <div class="delete-btn" style="right: 2.2rem; color: #3b82f6;" onclick="editTask('${task.id}')" title="Editar tarea">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
             </div>
             <div class="delete-btn" onclick="deleteTask('${task.id}')" title="Eliminar tarea">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </div>
             <div class="mb-3">${tagsHtml}</div>
-            <div class="font-bold text-base mb-1.5 text-[var(--foreground)] pr-10">${task.title}</div>
+            <div class="font-bold text-base mb-1.5 text-[var(--foreground)] pr-12">${task.title}</div>
             <div class="text-[var(--muted-foreground)] leading-relaxed">${task.description}</div>
           `;
           
@@ -220,7 +271,8 @@
           col.appendChild(card);
         });
         
-        document.getElementById(`count-${colId}`).innerText = colTasks.length;
+        const countEl = document.getElementById(`count-${colId}`);
+        if (countEl) countEl.innerText = colTasks.length;
       });
     }
 
@@ -229,15 +281,28 @@
         const title = document.getElementById('newTaskTitle').value.trim();
         const desc = document.getElementById('newTaskDesc').value.trim();
         const priority = document.getElementById('newTaskPriority').checked;
-        const project = document.getElementById('newTaskProject').value.trim() || 'General';
-        const color = document.getElementById('newTaskColor').value;
+        const select = document.getElementById('taskProjectSelect');
+        const color = document.getElementById('taskColorInput').value;
         const editingId = document.getElementById('editingTaskId').value;
 
-        if (!title) return alert("El título es obligatorio.");
+        if (!title) return alert("El título de la tarea es obligatorio.");
+
+        let projectName = select.value;
+        if (projectName === '__new__') {
+          projectName = document.getElementById('newProjectInput').value.trim();
+          if (!projectName) return alert("Por favor escribe el nombre del nuevo proyecto.");
+          
+          // Guardar proyecto en caché local
+          try {
+            const stored = JSON.parse(localStorage.getItem('cc17_custom_projects') || '[]');
+            stored.push({ name: projectName, color: color });
+            localStorage.setItem('cc17_custom_projects', JSON.stringify(stored));
+          } catch(e) {}
+        }
 
         const taskObj = {
           col_id: 'todo',
-          project: project,
+          project: projectName,
           tag_class: color,
           title: title,
           description: desc,
@@ -245,7 +310,6 @@
         };
 
         if (editingId) {
-          // Update existing
           taskObj.id = editingId;
           const oldTask = tasksData.find(t => t.id === editingId);
           taskObj.col_id = oldTask ? oldTask.col_id : 'todo';
@@ -259,7 +323,6 @@
           const idx = tasksData.findIndex(t => t.id === editingId);
           if (idx !== -1) tasksData[idx] = taskObj;
         } else {
-          // Create new
           taskObj.id = 't' + Date.now();
           const res = await fetch(SUPABASE_URL, {
             method: 'POST',
@@ -269,6 +332,7 @@
           if (!res.ok) throw new Error("HTTP " + res.status + " " + await res.text());
           tasksData.push(taskObj);
         }
+
         renderBoard();
         closeModal();
       } catch (e) {
@@ -286,13 +350,11 @@
       document.getElementById('newTaskTitle').value = task.title;
       document.getElementById('newTaskDesc').value = task.description;
       document.getElementById('newTaskPriority').checked = task.priority;
-      document.getElementById('newTaskProject').value = task.project;
       
-      // If it's a hex code, set the color picker
-      if (task.tag_class.startsWith('#')) {
-        document.getElementById('newTaskColor').value = task.tag_class;
-      } else {
-        document.getElementById('newTaskColor').value = '#3b82f6';
+      populateProjectDropdown(task.project);
+      
+      if (task.tag_class && task.tag_class.startsWith('#')) {
+        document.getElementById('taskColorInput').value = task.tag_class;
       }
       
       document.getElementById('addModal').classList.add('active');
@@ -310,22 +372,19 @@
       }
     }
 
-    // Modal Logic
     function openAddModal() { 
       document.getElementById('modalTitle').innerText = 'Añadir Nueva Tarea';
       document.getElementById('editingTaskId').value = '';
+      document.getElementById('newTaskTitle').value = '';
+      document.getElementById('newTaskDesc').value = '';
+      document.getElementById('newTaskPriority').checked = false;
+      populateProjectDropdown();
       document.getElementById('addModal').classList.add('active'); 
       document.getElementById('newTaskTitle').focus(); 
-      document.getElementById('newTaskColor').value = '#3b82f6';
-      document.getElementById('newTaskProject').value = '';
     }
     
     function closeModal() {
       document.getElementById('addModal').classList.remove('active');
-      document.getElementById('newTaskTitle').value = '';
-      document.getElementById('newTaskDesc').value = '';
-      document.getElementById('newTaskPriority').checked = false;
-      document.getElementById('newTaskProject').value = '';
       document.getElementById('editingTaskId').value = '';
     }
 
@@ -347,7 +406,7 @@
       const task = tasksData.find(t => t.id === id);
       if (task && task.col_id !== newColId) {
         task.col_id = newColId;
-        renderBoard(); // update UI instantly
+        renderBoard();
         try {
           const res = await fetch(`${SUPABASE_URL}?id=eq.${id}`, {
             method: 'PATCH',
@@ -388,18 +447,6 @@
           return closest;
         }
       }, { offset: Number.NEGATIVE_INFINITY }).element;
-    }
-
-    function exportData() {
-      const blob = new Blob([JSON.stringify(tasksData)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'tablero_cc17.json'; a.click();
-      URL.revokeObjectURL(url);
-    }
-    
-    function resetBoard() {
-      alert("Para resetear toda la base de datos, debes borrar los registros manualmente o recrear la tabla.");
     }
 
     // Inicializar
