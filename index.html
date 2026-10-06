@@ -225,52 +225,55 @@
     }
 
     async function saveTask() {
-      const title = document.getElementById('newTaskTitle').value.trim();
-      const desc = document.getElementById('newTaskDesc').value.trim();
-      const priority = document.getElementById('newTaskPriority').checked;
-      const project = document.getElementById('newTaskProject').value.trim() || 'General';
-      const color = document.getElementById('newTaskColor').value;
-      const editingId = document.getElementById('editingTaskId').value;
-
-      if (!title) return alert("El título es obligatorio.");
-
-      const taskObj = {
-        col_id: 'todo',
-        project: project,
-        tag_class: color,
-        title: title,
-        description: desc,
-        priority: priority
-      };
-
       try {
+        const title = document.getElementById('newTaskTitle').value.trim();
+        const desc = document.getElementById('newTaskDesc').value.trim();
+        const priority = document.getElementById('newTaskPriority').checked;
+        const project = document.getElementById('newTaskProject').value.trim() || 'General';
+        const color = document.getElementById('newTaskColor').value;
+        const editingId = document.getElementById('editingTaskId').value;
+
+        if (!title) return alert("El título es obligatorio.");
+
+        const taskObj = {
+          col_id: 'todo',
+          project: project,
+          tag_class: color,
+          title: title,
+          description: desc,
+          priority: priority
+        };
+
         if (editingId) {
           // Update existing
           taskObj.id = editingId;
           const oldTask = tasksData.find(t => t.id === editingId);
           taskObj.col_id = oldTask ? oldTask.col_id : 'todo';
           
-          await fetch(`${SUPABASE_URL}?id=eq.${editingId}`, {
+          const res = await fetch(`${SUPABASE_URL}?id=eq.${editingId}`, {
             method: 'PATCH',
             headers: HEADERS,
             body: JSON.stringify(taskObj)
           });
+          if (!res.ok) throw new Error("HTTP " + res.status + " " + await res.text());
           const idx = tasksData.findIndex(t => t.id === editingId);
           if (idx !== -1) tasksData[idx] = taskObj;
         } else {
           // Create new
           taskObj.id = 't' + Date.now();
-          await fetch(SUPABASE_URL, {
+          const res = await fetch(SUPABASE_URL, {
             method: 'POST',
             headers: HEADERS,
             body: JSON.stringify(taskObj)
           });
+          if (!res.ok) throw new Error("HTTP " + res.status + " " + await res.text());
           tasksData.push(taskObj);
         }
         renderBoard();
         closeModal();
       } catch (e) {
-        alert("Error al guardar.");
+        alert("Error al guardar: " + e.message);
+        console.error(e);
       }
     }
 
@@ -298,11 +301,12 @@
     async function deleteTask(id) {
       if(!confirm("¿Estás seguro de eliminar esta tarea?")) return;
       try {
-        await fetch(`${SUPABASE_URL}?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
+        const res = await fetch(`${SUPABASE_URL}?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
+        if (!res.ok) throw new Error("HTTP " + res.status + " " + await res.text());
         tasksData = tasksData.filter(t => t.id !== id);
         renderBoard();
       } catch (e) {
-        alert("Error al borrar.");
+        alert("Error al borrar: " + e.message);
       }
     }
 
@@ -345,12 +349,14 @@
         task.col_id = newColId;
         renderBoard(); // update UI instantly
         try {
-          await fetch(`${SUPABASE_URL}?id=eq.${id}`, {
+          const res = await fetch(`${SUPABASE_URL}?id=eq.${id}`, {
             method: 'PATCH',
             headers: HEADERS,
             body: JSON.stringify({ col_id: newColId })
           });
+          if (!res.ok) throw new Error("HTTP " + res.status + " " + await res.text());
         } catch (e) {
+          alert("Error al guardar posición: " + e.message);
           console.error("No se pudo guardar la posición en el servidor");
         }
       }
