@@ -196,7 +196,7 @@
     }
 
     .kanban-card.has-working-btn .card-actions {
-      right: 2.85rem;
+      right: 3.1rem;
     }
 
     .kanban-card:hover .card-actions {
@@ -281,6 +281,12 @@
       background: rgba(255, 255, 255, 0.12);
       color: #ffffff;
       transform: scale(1.05);
+    }
+
+    .action-icon-btn.duplicate:hover {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #60a5fa;
     }
 
     .action-icon-btn.delete:hover {
@@ -975,6 +981,12 @@
             ${workingStatusHtml}
             ${workingButtonHtml}
             <div class="card-actions">
+              <button class="action-icon-btn duplicate" onclick="duplicateTask('${task.id}', event)" title="Duplicar tarjeta">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
               <button class="action-icon-btn" onclick="editTask('${task.id}')" title="Editar tarjeta">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               </button>
@@ -983,7 +995,7 @@
               </button>
             </div>
             <div class="mb-2 flex flex-wrap items-center gap-1">${tagsHtml}</div>
-            <div class="font-bold text-base mb-1.5 text-white pr-14 leading-snug">${task.title}</div>
+            <div class="font-bold text-base mb-1.5 text-white ${colId === 'in-progress' ? 'pr-36' : 'pr-28'} leading-snug">${task.title}</div>
             <div class="text-slate-400 text-xs leading-relaxed font-normal">${task.description}</div>
           `;
           
@@ -1112,6 +1124,46 @@
       selectPresetColor(color);
       
       document.getElementById('addModal').classList.add('active');
+    }
+
+    async function duplicateTask(id, event) {
+      if (event) event.stopPropagation();
+      const original = tasksData.find(t => t.id === id);
+      if (!original) return;
+
+      try {
+        const cleanTag = (original.tag_class || '#3b82f6').replace(':working', '');
+        const newId = 't' + Date.now();
+        const newTask = {
+          id: newId,
+          col_id: original.col_id || 'todo',
+          project: original.project || 'Sin Proyecto',
+          tag_class: cleanTag,
+          title: original.title ? `${original.title} (Copia)` : 'Copia',
+          description: original.description || '',
+          priority: Boolean(original.priority)
+        };
+
+        const res = await fetch(SUPABASE_URL, {
+          method: 'POST',
+          headers: HEADERS,
+          body: JSON.stringify(newTask)
+        });
+
+        if (!res.ok) throw new Error("HTTP " + res.status + " " + await res.text());
+
+        const originalIndex = tasksData.findIndex(t => t.id === id);
+        if (originalIndex !== -1) {
+          tasksData.splice(originalIndex + 1, 0, newTask);
+        } else {
+          tasksData.push(newTask);
+        }
+
+        renderBoard();
+      } catch (e) {
+        alert("Error al duplicar tarjeta: " + e.message);
+        console.error(e);
+      }
     }
 
     async function deleteTask(id) {
