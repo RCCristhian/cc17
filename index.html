@@ -65,22 +65,68 @@
 
     .working-outer-badge {
       position: absolute;
-      top: -11px;
+      top: -12px;
       left: 14px;
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 2px 10px;
+      padding: 2.5px 11px;
       border-radius: 9999px;
       background: #080a0f;
-      color: var(--card-color);
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
+      color: #FFC20E;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      box-shadow: 0 0 14px var(--card-glow);
+      box-shadow: 0 0 16px rgba(255, 194, 14, 0.45);
+      border: 1px solid rgba(255, 194, 14, 0.55);
       z-index: 10;
       pointer-events: none;
+    }
+
+    /* Animación Typewriter: deletreo constante de "Trabajando..." */
+    @keyframes typeWorkingAnim {
+      0%, 5% { width: 0ch; }
+      58%, 80% { width: 13.6ch; }
+      94%, 100% { width: 0ch; }
+    }
+
+    @keyframes cursorBlinkAnim {
+      0%, 100% { border-color: #FFC20E; }
+      50% { border-color: transparent; }
+    }
+
+    .typewriter-working {
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      vertical-align: middle;
+      border-right: 2px solid #FFC20E;
+      width: 0ch;
+      animation: typeWorkingAnim 3.2s steps(13, end) infinite, cursorBlinkAnim 0.6s infinite;
+      color: #FFC20E;
+      text-shadow: 0 0 12px rgba(255, 194, 14, 0.8);
+      font-family: inherit;
+    }
+
+    /* Resplandor y animación llamativa para la etiqueta cuando está activo */
+    @keyframes tagWorkingShimmer {
+      0%, 100% {
+        box-shadow: 0 0 14px rgba(255, 194, 14, 0.6), inset 0 0 8px rgba(255, 194, 14, 0.25);
+        border-color: #FFC20E;
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 24px rgba(255, 194, 14, 0.95), inset 0 0 14px rgba(255, 194, 14, 0.5);
+        border-color: #ffffff;
+        transform: scale(1.05);
+      }
+    }
+
+    .tag-working-active {
+      animation: tagWorkingShimmer 1.8s infinite ease-in-out !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.05em !important;
     }
 
     .kanban-cards::-webkit-scrollbar {
@@ -128,6 +174,7 @@
       margin-right: 0.35rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
+      transition: all 0.2s;
     }
 
     .tag-priority {
@@ -157,11 +204,11 @@
     /* Animación de Borde Resplandeciente para 'Trabajando...' */
     @keyframes workingBorderPulse {
       0%, 100% {
-        box-shadow: 0 0 15px -2px var(--card-glow), 0 0 35px -5px var(--card-glow), inset 0 0 15px -5px var(--card-glow);
-        border-color: var(--card-color);
+        box-shadow: 0 0 18px -2px rgba(255, 194, 14, 0.45), 0 0 40px -5px rgba(255, 194, 14, 0.25);
+        border-color: #FFC20E;
       }
       50% {
-        box-shadow: 0 0 28px 2px var(--card-glow), 0 0 60px 2px var(--card-glow), inset 0 0 25px 0px var(--card-glow);
+        box-shadow: 0 0 32px 3px rgba(255, 194, 14, 0.75), 0 0 65px 2px rgba(255, 194, 14, 0.4);
         border-color: #ffffff;
       }
     }
@@ -909,7 +956,7 @@
             card.style.borderLeft = `4px solid #ef4444`;
           }
           
-          let tagsHtml = `<span class="tag" style="background-color: ${cardColor}25; color: ${cardColor}; border: 1px solid ${cardColor}55;">${task.project}</span>`;
+          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background-color: ${cardColor}25; color: ${cardColor}; border: 1px solid ${cardColor}55;">${task.project}</span>`;
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
           }
@@ -918,8 +965,8 @@
           if (isWorking) {
             workingStatusHtml = `
               <div class="working-outer-badge">
-                <span class="pulse-dot !w-2 !h-2 !mr-0" style="background-color: ${cardColor}; box-shadow: 0 0 8px ${cardColor};"></span>
-                <span>Trabajando...</span>
+                <span class="pulse-dot !w-2 !h-2 !mr-1" style="background-color: #FFC20E; box-shadow: 0 0 10px #FFC20E;"></span>
+                <span class="typewriter-working">Trabajando...</span>
               </div>
             `;
           }
@@ -929,7 +976,7 @@
             workingButtonHtml = `
               <button onclick="toggleWorking('${task.id}', event)" 
                 class="working-circle-btn ${isWorking ? 'is-active' : ''}" 
-                style="--card-color: ${cardColor}; --card-glow: ${cardColor}66;" 
+                style="--card-color: #FFC20E; --card-glow: rgba(255, 194, 14, 0.6);" 
                 title="${isWorking ? 'Activo: Trabajando actualmente. Clic para desactivar' : 'Clic para marcar: Trabajando ahora'}">
                 <span class="circle-inner"></span>
               </button>
