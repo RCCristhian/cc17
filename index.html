@@ -200,54 +200,67 @@
       display: flex;
     }
 
-    /* Animación fluida de doble haz que recorre el borde desde esquinas opuestas en el color del proyecto */
+    /* Animación fluida de doble haz simétrico que recorre el borde a velocidad 100% constante */
     .kanban-card.is-active-working {
       margin-top: 8px;
       border-color: rgba(255, 255, 255, 0.16) !important;
     }
 
-    .card-border-dual-runner {
+    .card-border-dual-svg {
       position: absolute;
-      inset: -1.5px;
-      border-radius: 1rem;
-      padding: 1.5px;
-      overflow: hidden;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
+      overflow: visible;
+      border-radius: 1rem;
       z-index: 5;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude;
     }
 
-    .card-border-dual-runner::before {
-      content: '';
-      position: absolute;
-      top: -100%;
-      left: -100%;
-      width: 300%;
-      height: 300%;
-      background: conic-gradient(
-        transparent 0%,
-        transparent 22%,
-        var(--card-color, #3b82f6) 43%,
-        #ffffff 48%,
-        transparent 48.2%,
-        transparent 72%,
-        var(--card-color, #3b82f6) 93%,
-        #ffffff 98%,
-        transparent 98.2%
-      );
-      animation: rotateDualBeam 3.6s linear infinite;
-      will-change: transform;
+    /* Capa 1: Cola suave en color del proyecto (24 de longitud, 26 de espacio) */
+    .dual-beam-tail {
+      fill: none;
+      stroke: var(--card-color, #3b82f6);
+      stroke-width: 2px;
+      stroke-linecap: round;
+      stroke-dasharray: 24 26;
+      stroke-dashoffset: 0;
+      opacity: 0.45;
+      animation: dualBeamConstant 3.8s linear infinite;
     }
 
-    @keyframes rotateDualBeam {
+    /* Capa 2: Cuerpo brillante en color del proyecto (14 de longitud, 36 de espacio) */
+    .dual-beam-body {
+      fill: none;
+      stroke: var(--card-color, #3b82f6);
+      stroke-width: 2.5px;
+      stroke-linecap: round;
+      stroke-dasharray: 14 36;
+      stroke-dashoffset: 0;
+      opacity: 0.95;
+      animation: dualBeamConstant 3.8s linear infinite;
+      filter: drop-shadow(0 0 5px var(--card-color, #3b82f6));
+    }
+
+    /* Capa 3: Cabeza blanca intensa (5 de longitud, 45 de espacio) */
+    .dual-beam-head {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2px;
+      stroke-linecap: round;
+      stroke-dasharray: 5 45;
+      stroke-dashoffset: 0;
+      animation: dualBeamConstant 3.8s linear infinite;
+      filter: drop-shadow(0 0 3px #ffffff);
+    }
+
+    @keyframes dualBeamConstant {
       0% {
-        transform: rotate(0deg);
+        stroke-dashoffset: 0;
       }
       100% {
-        transform: rotate(360deg);
+        stroke-dashoffset: -100;
       }
     }
 
@@ -995,7 +1008,13 @@
 
           let borderRunnerHtml = '';
           if (isWorking) {
-            borderRunnerHtml = `<div class="card-border-dual-runner" aria-hidden="true"></div>`;
+            borderRunnerHtml = `
+              <svg class="card-border-dual-svg" aria-hidden="true">
+                <rect class="dual-beam-tail" x="0" y="0" width="100%" height="100%" rx="16" ry="16" pathLength="100" />
+                <rect class="dual-beam-body" x="0" y="0" width="100%" height="100%" rx="16" ry="16" pathLength="100" />
+                <rect class="dual-beam-head" x="0" y="0" width="100%" height="100%" rx="16" ry="16" pathLength="100" />
+              </svg>
+            `;
           }
 
           let workingStatusHtml = '';
