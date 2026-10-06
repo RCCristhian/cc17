@@ -203,8 +203,25 @@
       display: flex;
     }
 
+    /* Pulso suave de baja a alta intensidad en el color del proyecto (sin pasar a blanco) */
+    @keyframes workingCardPulse {
+      0%, 100% {
+        border-color: var(--card-color-soft, rgba(59, 130, 246, 0.35));
+        box-shadow: 0 0 8px -2px var(--card-glow-soft, rgba(59, 130, 246, 0.2)),
+                    0 4px 18px -3px rgba(0, 0, 0, 0.5);
+      }
+      50% {
+        border-color: var(--card-color, #3b82f6);
+        box-shadow: 0 0 20px 1px var(--card-glow, rgba(59, 130, 246, 0.6)),
+                    inset 0 0 10px -2px var(--card-glow-soft, rgba(59, 130, 246, 0.2)),
+                    0 6px 24px -2px rgba(0, 0, 0, 0.65);
+      }
+    }
+
     .kanban-card.is-active-working {
       margin-top: 8px;
+      animation: workingCardPulse 2.4s infinite ease-in-out !important;
+      border-width: 1.5px !important;
     }
 
     @keyframes pulseDotAnim {
@@ -937,14 +954,19 @@
           
           // Estilo de tarjeta moderna con acento y brillo del color escogido
           card.style.setProperty('--card-color', cardColor);
+          card.style.setProperty('--card-color-soft', `${cardColor}45`);
           card.style.setProperty('--card-glow', `${cardColor}66`);
+          card.style.setProperty('--card-glow-soft', `${cardColor}20`);
           card.style.background = isWorking 
             ? `linear-gradient(145deg, ${cardColor}22 0%, #141824 65%)`
             : `linear-gradient(145deg, ${cardColor}18 0%, #12151e 65%)`;
-          card.style.borderColor = isWorking ? `${cardColor}55` : `${cardColor}40`;
-          card.style.boxShadow = isWorking 
-            ? `0 4px 20px -2px rgba(0, 0, 0, 0.5)` 
-            : `0 4px 18px -3px ${cardColor}1a`;
+          if (isWorking) {
+            card.style.borderColor = '';
+            card.style.boxShadow = '';
+          } else {
+            card.style.borderColor = `${cardColor}40`;
+            card.style.boxShadow = `0 4px 18px -3px ${cardColor}1a`;
+          }
 
           if (task.priority) {
             card.style.borderLeft = `4px solid #ef4444`;
