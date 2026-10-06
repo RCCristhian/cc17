@@ -65,21 +65,20 @@
 
     .working-outer-badge {
       position: absolute;
-      top: -12px;
+      top: -14px;
       left: 14px;
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 2.5px 11px;
-      border-radius: 9999px;
-      background: #080a0f;
+      padding: 0;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
       color: #FFC20E;
       font-size: 11px;
       font-weight: 900;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      box-shadow: 0 0 16px rgba(255, 194, 14, 0.45);
-      border: 1px solid rgba(255, 194, 14, 0.55);
       z-index: 10;
       pointer-events: none;
     }
@@ -201,21 +200,51 @@
       display: flex;
     }
 
-    /* Animación de Borde Resplandeciente para 'Trabajando...' */
-    @keyframes workingBorderPulse {
-      0%, 100% {
-        box-shadow: 0 0 18px -2px rgba(255, 194, 14, 0.45), 0 0 40px -5px rgba(255, 194, 14, 0.25);
-        border-color: #FFC20E;
-      }
-      50% {
-        box-shadow: 0 0 32px 3px rgba(255, 194, 14, 0.75), 0 0 65px 2px rgba(255, 194, 14, 0.4);
-        border-color: #ffffff;
-      }
+    /* Animación de haz que recorre todo el perímetro del borde de la tarjeta */
+    .kanban-card.is-active-working {
+      border-color: rgba(255, 255, 255, 0.16) !important;
     }
 
-    .kanban-card.is-active-working {
-      animation: workingBorderPulse 2.2s infinite ease-in-out !important;
-      border-width: 1.5px !important;
+    .card-border-runner {
+      position: absolute;
+      inset: -1.5px;
+      border-radius: 1rem;
+      padding: 1.5px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 5;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      filter: drop-shadow(0 0 6px rgba(255, 194, 14, 0.95)) drop-shadow(0 0 2px #ffffff);
+    }
+
+    .card-border-runner::before {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: -100%;
+      width: 300%;
+      height: 300%;
+      background: conic-gradient(
+        transparent 0%,
+        transparent 70%,
+        rgba(255, 194, 14, 0.2) 80%,
+        #FFC20E 90%,
+        #ffffff 97%,
+        transparent 100%
+      );
+      animation: runnerTravelRotate 3s linear infinite;
+    }
+
+    @keyframes runnerTravelRotate {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     @keyframes pulseDotAnim {
@@ -944,11 +973,11 @@
           card.style.setProperty('--card-color', cardColor);
           card.style.setProperty('--card-glow', `${cardColor}66`);
           card.style.background = isWorking 
-            ? `linear-gradient(145deg, ${cardColor}28 0%, #151a26 65%)`
+            ? `linear-gradient(145deg, ${cardColor}22 0%, #141824 65%)`
             : `linear-gradient(145deg, ${cardColor}18 0%, #12151e 65%)`;
-          card.style.borderColor = isWorking ? cardColor : `${cardColor}40`;
+          card.style.borderColor = isWorking ? `${cardColor}55` : `${cardColor}40`;
           card.style.boxShadow = isWorking 
-            ? `0 0 22px -1px ${cardColor}66` 
+            ? `0 4px 20px -2px rgba(0, 0, 0, 0.5)` 
             : `0 4px 18px -3px ${cardColor}1a`;
 
           if (task.priority) {
@@ -983,6 +1012,7 @@
           }
           
           card.innerHTML = `
+            ${isWorking ? '<div class="card-border-runner" aria-hidden="true"></div>' : ''}
             ${workingStatusHtml}
             ${workingButtonHtml}
             <div class="card-actions">
