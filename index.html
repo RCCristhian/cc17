@@ -57,18 +57,8 @@
       <p class="text-sm text-[var(--muted-foreground)]">Arrastra las tarjetas, crea nuevas o marca las prioritarias.</p>
     </div>
     <div class="flex gap-2">
-      <button onclick="exportData()" class="text-sm border border-[var(--border)] hover:bg-[var(--accent)] px-3 py-2 rounded-md font-medium transition-colors" title="Descargar datos">
-        💾 Exportar
-      </button>
-      <button onclick="document.getElementById('importFile').click()" class="text-sm border border-[var(--border)] hover:bg-[var(--accent)] px-3 py-2 rounded-md font-medium transition-colors" title="Subir datos">
-        📂 Importar
-      </button>
-      <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
       <button onclick="openAddModal()" class="text-sm bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md font-medium transition-colors shadow-sm">
         + Nueva Tarea
-      </button>
-      <button onclick="resetBoard()" class="text-sm border border-[var(--border)] hover:bg-red-50 hover:text-red-600 px-4 py-2 rounded-md font-medium transition-colors">
-        Restablecer
       </button>
     </div>
   </header>
@@ -99,23 +89,24 @@
     </div>
   </main>
 
-  <!-- Add Task Modal -->
+  <!-- Add/Edit Task Modal -->
   <div id="addModal" class="modal-overlay">
     <div class="modal-content">
-      <h2 class="text-lg font-bold mb-4">Añadir Nueva Tarea</h2>
+      <h2 id="modalTitle" class="text-lg font-bold mb-4">Añadir Nueva Tarea</h2>
+      <input type="hidden" id="editingTaskId">
       <div class="flex flex-col gap-3">
-        <div>
-          <label class="block text-sm font-medium mb-1">Proyecto</label>
-          <select id="newTaskProject" class="w-full border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500">
-            <option value="Independencia & Teruel" data-class="tag-indep">Independencia & Teruel</option>
-            <option value="Lord Cochrane 4" data-class="tag-lord">Lord Cochrane 4</option>
-            <option value="Paget 01 y 02" data-class="tag-paget">Paget 01 y 02</option>
-            <option value="Apoyo Transversal" data-class="tag-transv">Apoyo Comercial Transversal</option>
-            <option value="Otro" data-class="tag-custom">Otro Proyecto</option>
-          </select>
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <label class="block text-sm font-medium mb-1">Nombre del Proyecto</label>
+            <input type="text" id="newTaskProject" placeholder="Ej: Independencia & Teruel" class="w-full border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="w-20">
+            <label class="block text-sm font-medium mb-1">Color</label>
+            <input type="color" id="newTaskColor" value="#3b82f6" class="w-full h-9 border border-[var(--border)] rounded-md cursor-pointer">
+          </div>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">Título</label>
+          <label class="block text-sm font-medium mb-1">Título de la Tarea</label>
           <input type="text" id="newTaskTitle" placeholder="Ej: Renders de cocina" class="w-full border border-[var(--border)] bg-[var(--background)] rounded-md p-2 text-sm focus:outline-none focus:border-blue-500">
         </div>
         <div>
@@ -129,7 +120,7 @@
       </div>
       <div class="flex justify-end gap-2 mt-5">
         <button onclick="closeModal()" class="px-4 py-2 text-sm border border-[var(--border)] rounded-md hover:bg-[var(--accent)]">Cancelar</button>
-        <button onclick="addTask()" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Guardar Tarea</button>
+        <button onclick="saveTask()" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">Guardar Tarea</button>
       </div>
     </div>
   </div>
@@ -201,17 +192,26 @@
           card.draggable = true;
           card.id = task.id;
           
-          let tagsHtml = `<span class="tag ${task.tag_class}">${task.project}</span>`;
+          let tagsHtml = '';
+          if (task.tag_class.startsWith('#')) {
+            tagsHtml = `<span class="tag" style="background-color: ${task.tag_class}20; color: ${task.tag_class}">${task.project}</span>`;
+          } else {
+            tagsHtml = `<span class="tag ${task.tag_class}">${task.project}</span>`;
+          }
+          
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
           }
           
           card.innerHTML = `
-            <button class="delete-btn" onclick="deleteTask('${task.id}')" title="Eliminar tarea">
+            <div class="delete-btn" style="right: 2rem; color: #3b82f6" onclick="editTask('${task.id}')" title="Editar tarea">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </div>
+            <div class="delete-btn" onclick="deleteTask('${task.id}')" title="Eliminar tarea">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
+            </div>
             <div class="mb-3">${tagsHtml}</div>
-            <div class="font-bold text-base mb-1.5 text-[var(--foreground)] pr-6">${task.title}</div>
+            <div class="font-bold text-base mb-1.5 text-[var(--foreground)] pr-10">${task.title}</div>
             <div class="text-[var(--muted-foreground)] leading-relaxed">${task.description}</div>
           `;
           
@@ -224,38 +224,75 @@
       });
     }
 
-    async function addTask() {
+    async function saveTask() {
       const title = document.getElementById('newTaskTitle').value.trim();
       const desc = document.getElementById('newTaskDesc').value.trim();
       const priority = document.getElementById('newTaskPriority').checked;
-      const select = document.getElementById('newTaskProject');
-      const project = select.options[select.selectedIndex].value;
-      const tagClass = select.options[select.selectedIndex].getAttribute('data-class');
+      const project = document.getElementById('newTaskProject').value.trim() || 'General';
+      const color = document.getElementById('newTaskColor').value;
+      const editingId = document.getElementById('editingTaskId').value;
 
       if (!title) return alert("El título es obligatorio.");
 
-      const newTask = {
-        id: 't' + Date.now(),
+      const taskObj = {
         col_id: 'todo',
         project: project,
-        tag_class: tagClass,
+        tag_class: color,
         title: title,
         description: desc,
         priority: priority
       };
 
       try {
-        await fetch(SUPABASE_URL, {
-          method: 'POST',
-          headers: HEADERS,
-          body: JSON.stringify(newTask)
-        });
-        tasksData.push(newTask);
+        if (editingId) {
+          // Update existing
+          taskObj.id = editingId;
+          const oldTask = tasksData.find(t => t.id === editingId);
+          taskObj.col_id = oldTask ? oldTask.col_id : 'todo';
+          
+          await fetch(`${SUPABASE_URL}?id=eq.${editingId}`, {
+            method: 'PATCH',
+            headers: HEADERS,
+            body: JSON.stringify(taskObj)
+          });
+          const idx = tasksData.findIndex(t => t.id === editingId);
+          if (idx !== -1) tasksData[idx] = taskObj;
+        } else {
+          // Create new
+          taskObj.id = 't' + Date.now();
+          await fetch(SUPABASE_URL, {
+            method: 'POST',
+            headers: HEADERS,
+            body: JSON.stringify(taskObj)
+          });
+          tasksData.push(taskObj);
+        }
         renderBoard();
         closeModal();
       } catch (e) {
         alert("Error al guardar.");
       }
+    }
+
+    function editTask(id) {
+      const task = tasksData.find(t => t.id === id);
+      if (!task) return;
+      
+      document.getElementById('modalTitle').innerText = 'Editar Tarea';
+      document.getElementById('editingTaskId').value = task.id;
+      document.getElementById('newTaskTitle').value = task.title;
+      document.getElementById('newTaskDesc').value = task.description;
+      document.getElementById('newTaskPriority').checked = task.priority;
+      document.getElementById('newTaskProject').value = task.project;
+      
+      // If it's a hex code, set the color picker
+      if (task.tag_class.startsWith('#')) {
+        document.getElementById('newTaskColor').value = task.tag_class;
+      } else {
+        document.getElementById('newTaskColor').value = '#3b82f6';
+      }
+      
+      document.getElementById('addModal').classList.add('active');
     }
 
     async function deleteTask(id) {
@@ -270,12 +307,22 @@
     }
 
     // Modal Logic
-    function openAddModal() { document.getElementById('addModal').classList.add('active'); document.getElementById('newTaskTitle').focus(); }
+    function openAddModal() { 
+      document.getElementById('modalTitle').innerText = 'Añadir Nueva Tarea';
+      document.getElementById('editingTaskId').value = '';
+      document.getElementById('addModal').classList.add('active'); 
+      document.getElementById('newTaskTitle').focus(); 
+      document.getElementById('newTaskColor').value = '#3b82f6';
+      document.getElementById('newTaskProject').value = '';
+    }
+    
     function closeModal() {
       document.getElementById('addModal').classList.remove('active');
       document.getElementById('newTaskTitle').value = '';
       document.getElementById('newTaskDesc').value = '';
       document.getElementById('newTaskPriority').checked = false;
+      document.getElementById('newTaskProject').value = '';
+      document.getElementById('editingTaskId').value = '';
     }
 
     // Drag and Drop Logic
