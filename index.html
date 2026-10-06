@@ -203,90 +203,81 @@
       display: flex;
     }
 
-    /* Animación: Destello de Cristal / Shimmer Diagonal Continuo a velocidad 100% constante */
+    /* Animación: Resplandor Neón Respirante con Esquinas Cyber en el color del proyecto */
+    @keyframes ambientBreathe {
+      0%, 100% {
+        box-shadow: 0 0 16px -2px var(--card-glow, rgba(59, 130, 246, 0.4)),
+                    inset 0 0 12px -3px var(--card-glow, rgba(59, 130, 246, 0.2)),
+                    0 4px 20px -2px rgba(0, 0, 0, 0.6);
+        border-color: var(--card-color, #3b82f6);
+      }
+      50% {
+        box-shadow: 0 0 28px 2px var(--card-glow, rgba(59, 130, 246, 0.7)),
+                    inset 0 0 18px -1px var(--card-glow, rgba(59, 130, 246, 0.35)),
+                    0 6px 25px -2px rgba(0, 0, 0, 0.7);
+        border-color: #ffffff;
+      }
+    }
+
+    @keyframes cyberCornerPulse {
+      0%, 100% {
+        opacity: 0.85;
+        filter: drop-shadow(0 0 4px var(--card-color, #3b82f6));
+        border-color: var(--card-color, #3b82f6);
+      }
+      50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 8px var(--card-color, #3b82f6)) drop-shadow(0 0 3px #ffffff);
+        border-color: #ffffff;
+      }
+    }
+
     .kanban-card.is-active-working {
       margin-top: 8px;
-      border-color: var(--card-color, #3b82f6) !important;
-      box-shadow: 0 0 20px -3px var(--card-glow, rgba(59, 130, 246, 0.45)), 0 4px 20px -2px rgba(0, 0, 0, 0.6) !important;
+      animation: ambientBreathe 3.2s infinite ease-in-out !important;
+      border-width: 1.5px !important;
     }
 
-    .card-glass-shimmer {
+    /* Corchetes Cyber en las 4 esquinas */
+    .cyber-corner {
       position: absolute;
-      inset: 0;
-      border-radius: 1rem;
-      overflow: hidden;
+      width: 18px;
+      height: 18px;
       pointer-events: none;
-      z-index: 2;
+      z-index: 6;
+      animation: cyberCornerPulse 3.2s infinite ease-in-out;
     }
 
-    .card-glass-shimmer::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        115deg,
-        transparent 0%,
-        transparent 35%,
-        rgba(255, 255, 255, 0.04) 42%,
-        var(--card-glow, rgba(59, 130, 246, 0.35)) 47%,
-        rgba(255, 255, 255, 0.45) 50%,
-        var(--card-glow, rgba(59, 130, 246, 0.35)) 53%,
-        rgba(255, 255, 255, 0.04) 58%,
-        transparent 65%,
-        transparent 100%
-      );
-      transform: translateX(-150%);
-      animation: glassShimmerSweep 3s linear infinite;
-      will-change: transform;
+    .cyber-corner-tl {
+      top: -2px;
+      left: -2px;
+      border-top: 2.5px solid var(--card-color, #3b82f6);
+      border-left: 2.5px solid var(--card-color, #3b82f6);
+      border-top-left-radius: 1rem;
     }
 
-    .card-border-shimmer {
-      position: absolute;
-      inset: -1.5px;
-      border-radius: 1rem;
-      padding: 1.5px;
-      overflow: hidden;
-      pointer-events: none;
-      z-index: 5;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude;
+    .cyber-corner-tr {
+      top: -2px;
+      right: -2px;
+      border-top: 2.5px solid var(--card-color, #3b82f6);
+      border-right: 2.5px solid var(--card-color, #3b82f6);
+      border-top-right-radius: 1rem;
     }
 
-    .card-border-shimmer::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        115deg,
-        transparent 0%,
-        transparent 35%,
-        var(--card-color, #3b82f6) 45%,
-        #ffffff 50%,
-        var(--card-color, #3b82f6) 55%,
-        transparent 65%,
-        transparent 100%
-      );
-      transform: translateX(-150%);
-      animation: glassShimmerSweep 3s linear infinite;
-      will-change: transform;
-      filter: drop-shadow(0 0 6px var(--card-color, #3b82f6));
+    .cyber-corner-bl {
+      bottom: -2px;
+      left: -2px;
+      border-bottom: 2.5px solid var(--card-color, #3b82f6);
+      border-left: 2.5px solid var(--card-color, #3b82f6);
+      border-bottom-left-radius: 1rem;
     }
 
-    @keyframes glassShimmerSweep {
-      0% {
-        transform: translateX(-150%);
-      }
-      100% {
-        transform: translateX(150%);
-      }
+    .cyber-corner-br {
+      bottom: -2px;
+      right: -2px;
+      border-bottom: 2.5px solid var(--card-color, #3b82f6);
+      border-right: 2.5px solid var(--card-color, #3b82f6);
+      border-bottom-right-radius: 1rem;
     }
 
     @keyframes pulseDotAnim {
@@ -1034,8 +1025,10 @@
           let borderRunnerHtml = '';
           if (isWorking) {
             borderRunnerHtml = `
-              <div class="card-glass-shimmer" aria-hidden="true"></div>
-              <div class="card-border-shimmer" aria-hidden="true"></div>
+              <div class="cyber-corner cyber-corner-tl" aria-hidden="true"></div>
+              <div class="cyber-corner cyber-corner-tr" aria-hidden="true"></div>
+              <div class="cyber-corner cyber-corner-bl" aria-hidden="true"></div>
+              <div class="cyber-corner cyber-corner-br" aria-hidden="true"></div>
             `;
           }
 
