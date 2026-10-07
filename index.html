@@ -45,40 +45,43 @@
 
     /* Tintes por columna para diferenciación visual */
     .kanban-column-todo {
-      background: #080a10;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.85);
+      background: #080a10 !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9) !important;
     }
     .kanban-column-todo .kanban-column-header {
-      background: #05070c;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      background: #05070c !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
     }
 
     .kanban-column-paused {
-      background: linear-gradient(180deg, rgba(217, 119, 6, 0.22) 0%, rgba(217, 119, 6, 0.16) 55%, #0d1118 92%);
-      border: 1px solid rgba(245, 158, 11, 0.28);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.32) 0%, rgba(245, 158, 11, 0.22) 55%, rgba(245, 158, 11, 0.08) 80%, #090c12 100%) !important;
+      border: 1px solid rgba(245, 158, 11, 0.35) !important;
+      box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.15) !important;
     }
     .kanban-column-paused .kanban-column-header {
-      background: rgba(245, 158, 11, 0.10);
-      border-bottom: 1px solid rgba(245, 158, 11, 0.22);
+      background: rgba(245, 158, 11, 0.20) !important;
+      border-bottom: 1px solid rgba(245, 158, 11, 0.32) !important;
     }
 
     .kanban-column-progress {
-      background: linear-gradient(180deg, rgba(147, 51, 234, 0.20) 0%, rgba(147, 51, 234, 0.14) 55%, #0d1118 92%);
-      border: 1px solid rgba(168, 85, 247, 0.28);
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.30) 0%, rgba(168, 85, 247, 0.20) 55%, rgba(168, 85, 247, 0.08) 80%, #090c12 100%) !important;
+      border: 1px solid rgba(168, 85, 247, 0.35) !important;
+      box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.15) !important;
     }
     .kanban-column-progress .kanban-column-header {
-      background: rgba(168, 85, 247, 0.10);
-      border-bottom: 1px solid rgba(168, 85, 247, 0.22);
+      background: rgba(168, 85, 247, 0.20) !important;
+      border-bottom: 1px solid rgba(168, 85, 247, 0.32) !important;
     }
 
     .kanban-column-done {
-      background: linear-gradient(180deg, rgba(16, 185, 129, 0.20) 0%, rgba(16, 185, 129, 0.14) 55%, #0d1118 92%);
-      border: 1px solid rgba(16, 185, 129, 0.28);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.30) 0%, rgba(16, 185, 129, 0.20) 55%, rgba(16, 185, 129, 0.08) 80%, #090c12 100%) !important;
+      border: 1px solid rgba(16, 185, 129, 0.35) !important;
+      box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.15) !important;
     }
     .kanban-column-done .kanban-column-header {
-      background: rgba(16, 185, 129, 0.10);
-      border-bottom: 1px solid rgba(16, 185, 129, 0.22);
+      background: rgba(16, 185, 129, 0.20) !important;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.32) !important;
     }
 
     .kanban-column-header {
@@ -1026,8 +1029,10 @@
           const isWorking = (colId === 'in-progress') && rawTag.includes(':working');
           const cleanTag = rawTag.replace(':working', '');
 
-          let cardColor = cleanTag;
-          if (!cardColor || !cardColor.startsWith('#')) {
+          // Resolver el color del proyecto asociado a la tarjeta
+          const knownProject = getKnownProjects().find(p => p.name.toLowerCase() === (task.project || '').toLowerCase());
+          let cardColor = (knownProject && knownProject.color) ? knownProject.color : cleanTag;
+          if (!cardColor || !cardColor.startsWith('#') || cardColor.toLowerCase() === '#ffffff') {
             const classColors = {
               'tag-indep': '#3b82f6',
               'tag-lord': '#10b981',
@@ -1035,34 +1040,45 @@
               'tag-transv': '#f59e0b',
               'tag-custom': '#64748b'
             };
-            cardColor = classColors[cleanTag] || '#3b82f6';
+            cardColor = classColors[cleanTag] || (knownProject ? knownProject.color : '#3b82f6');
           }
+          if (!cardColor || !cardColor.startsWith('#')) cardColor = '#3b82f6';
+
+          // Extraer componentes RGB para colorear con precisión e intensidad
+          let hexClean = cardColor.replace('#', '');
+          if (hexClean.length === 3) hexClean = hexClean.split('').map(c => c + c).join('');
+          const cr = parseInt(hexClean.substring(0, 2), 16) || 59;
+          const cg = parseInt(hexClean.substring(2, 4), 16) || 130;
+          const cb = parseInt(hexClean.substring(4, 6), 16) || 246;
+          const rgb = `${cr}, ${cg}, ${cb}`;
 
           card.className = `kanban-card text-sm ${isWorking ? 'is-active-working' : ''} ${colId === 'in-progress' ? 'has-working-btn' : ''}`;
           
-          // Estilo de tarjeta moderna con acento y brillo del color escogido
           card.style.setProperty('--card-color', cardColor);
-          card.style.setProperty('--card-color-soft', `${cardColor}45`);
-          card.style.setProperty('--card-glow', `${cardColor}66`);
-          card.style.setProperty('--card-glow-soft', `${cardColor}20`);
+          card.style.setProperty('--card-color-soft', `rgba(${rgb}, 0.5)`);
+          card.style.setProperty('--card-glow', `rgba(${rgb}, 0.6)`);
+          card.style.setProperty('--card-glow-soft', `rgba(${rgb}, 0.25)`);
+
+          // Fondo visiblemente tintado con el color del proyecto
           card.style.background = isWorking 
-            ? `linear-gradient(140deg, ${cardColor}35 0%, ${cardColor}18 50%, #111420 95%)`
-            : `linear-gradient(140deg, ${cardColor}26 0%, ${cardColor}12 50%, #0e111a 95%)`;
+            ? `linear-gradient(140deg, rgba(${rgb}, 0.38) 0%, rgba(${rgb}, 0.20) 50%, #0e121d 95%)`
+            : `linear-gradient(140deg, rgba(${rgb}, 0.28) 0%, rgba(${rgb}, 0.14) 50%, #0c0f18 95%)`;
+
           if (isWorking) {
             card.style.borderColor = '';
             card.style.boxShadow = '';
           } else {
-            card.style.borderColor = `${cardColor}50`;
-            card.style.boxShadow = `0 4px 18px -3px ${cardColor}25, 0 1px 3px rgba(0,0,0,0.5)`;
+            card.style.borderColor = `rgba(${rgb}, 0.55)`;
+            card.style.boxShadow = `0 6px 20px -3px rgba(${rgb}, 0.32), inset 0 1px 0 rgba(${rgb}, 0.35)`;
           }
 
           if (task.priority) {
-            card.style.borderLeft = `4.5px solid #ef4444`;
+            card.style.borderLeft = `5px solid #ef4444`;
           } else {
-            card.style.borderLeft = `3.5px solid ${cardColor}`;
+            card.style.borderLeft = `4px solid ${cardColor}`;
           }
           
-          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background-color: ${cardColor}25; color: ${cardColor}; border: 1px solid ${cardColor}55;">${task.project}</span>`;
+          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background-color: rgba(${rgb}, 0.3); color: #ffffff; border: 1px solid rgba(${rgb}, 0.7); text-shadow: 0 0 8px rgba(${rgb}, 0.5);">${task.project}</span>`;
           if (colId === 'paused') {
             tagsHtml += `<span class="tag" style="background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);">⏸️ Pausado</span>`;
           }
