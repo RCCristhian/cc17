@@ -1059,26 +1059,37 @@
           card.style.setProperty('--card-glow', `rgba(${rgb}, 0.6)`);
           card.style.setProperty('--card-glow-soft', `rgba(${rgb}, 0.25)`);
 
-          // Fondo visiblemente tintado con el color del proyecto
-          card.style.background = isWorking 
-            ? `linear-gradient(140deg, rgba(${rgb}, 0.38) 0%, rgba(${rgb}, 0.20) 50%, #0e121d 95%)`
-            : `linear-gradient(140deg, rgba(${rgb}, 0.28) 0%, rgba(${rgb}, 0.14) 50%, #0c0f18 95%)`;
+          // Fondo 100% OPACO (sin transparencia) para que el color de la columna NUNCA se transparente
+          const topR = Math.min(255, Math.round(cr * 0.35 + 8));
+          const topG = Math.min(255, Math.round(cg * 0.35 + 10));
+          const topB = Math.min(255, Math.round(cb * 0.35 + 16));
+
+          const midR = Math.min(255, Math.round(cr * 0.22 + 8));
+          const midG = Math.min(255, Math.round(cg * 0.22 + 9));
+          const midB = Math.min(255, Math.round(cb * 0.22 + 13));
+
+          const botR = Math.min(255, Math.round(cr * 0.12 + 6));
+          const botG = Math.min(255, Math.round(cg * 0.12 + 7));
+          const botB = Math.min(255, Math.round(cb * 0.12 + 10));
+
+          card.style.background = `linear-gradient(145deg, rgb(${topR}, ${topG}, ${topB}) 0%, rgb(${midR}, ${midG}, ${midB}) 55%, rgb(${botR}, ${botG}, ${botB}) 100%)`;
+          card.style.backgroundColor = `rgb(${midR}, ${midG}, ${midB})`;
 
           if (isWorking) {
             card.style.borderColor = '';
             card.style.boxShadow = '';
           } else {
-            card.style.borderColor = `rgba(${rgb}, 0.55)`;
-            card.style.boxShadow = `0 6px 20px -3px rgba(${rgb}, 0.32), inset 0 1px 0 rgba(${rgb}, 0.35)`;
+            card.style.borderColor = `${cardColor}88`;
+            card.style.boxShadow = `0 8px 24px -4px rgba(${rgb}, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12)`;
           }
 
           if (task.priority) {
-            card.style.borderLeft = `5px solid #ef4444`;
+            card.style.borderLeft = `5.5px solid #ef4444`;
           } else {
-            card.style.borderLeft = `4px solid ${cardColor}`;
+            card.style.borderLeft = `4.5px solid ${cardColor}`;
           }
           
-          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background-color: rgba(${rgb}, 0.3); color: #ffffff; border: 1px solid rgba(${rgb}, 0.7); text-shadow: 0 0 8px rgba(${rgb}, 0.5);">${task.project}</span>`;
+          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background-color: rgba(0, 0, 0, 0.45); color: #ffffff; border: 1.5px solid ${cardColor}; font-weight: 800; box-shadow: 0 0 10px ${cardColor}55;">${task.project}</span>`;
           if (colId === 'paused') {
             tagsHtml += `<span class="tag" style="background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);">⏸️ Pausado</span>`;
           }
