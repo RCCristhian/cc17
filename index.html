@@ -45,38 +45,39 @@
     }
 
     .kanban-column-todo {
-      border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+      border: 2.5px solid rgba(255, 255, 255, 0.22) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 15px -3px rgba(255, 255, 255, 0.05) !important;
     }
     .kanban-column-todo .kanban-column-header {
-      background: #05070c !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.16) !important;
     }
 
     .kanban-column-paused {
-      border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 18px -4px rgba(245, 158, 11, 0.18) !important;
+      border: 2.5px solid rgba(245, 158, 11, 0.75) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 24px -2px rgba(245, 158, 11, 0.28) !important;
     }
     .kanban-column-paused .kanban-column-header {
-      background: rgba(245, 158, 11, 0.04) !important;
-      border-bottom: 1px solid rgba(245, 158, 11, 0.25) !important;
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.32) 0%, rgba(245, 158, 11, 0.14) 100%) !important;
+      border-bottom: 2px solid rgba(245, 158, 11, 0.55) !important;
     }
 
     .kanban-column-progress {
-      border: 1.5px solid rgba(168, 85, 247, 0.45) !important;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 18px -4px rgba(168, 85, 247, 0.18) !important;
+      border: 2.5px solid rgba(168, 85, 247, 0.75) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 24px -2px rgba(168, 85, 247, 0.28) !important;
     }
     .kanban-column-progress .kanban-column-header {
-      background: rgba(168, 85, 247, 0.04) !important;
-      border-bottom: 1px solid rgba(168, 85, 247, 0.25) !important;
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.32) 0%, rgba(168, 85, 247, 0.14) 100%) !important;
+      border-bottom: 2px solid rgba(168, 85, 247, 0.55) !important;
     }
 
     .kanban-column-done {
-      border: 1.5px solid rgba(16, 185, 129, 0.45) !important;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 18px -4px rgba(16, 185, 129, 0.18) !important;
+      border: 2.5px solid rgba(16, 185, 129, 0.75) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 24px -2px rgba(16, 185, 129, 0.28) !important;
     }
     .kanban-column-done .kanban-column-header {
-      background: rgba(16, 185, 129, 0.04) !important;
-      border-bottom: 1px solid rgba(16, 185, 129, 0.25) !important;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.32) 0%, rgba(16, 185, 129, 0.14) 100%) !important;
+      border-bottom: 2px solid rgba(16, 185, 129, 0.55) !important;
     }
 
     /* Responsividad para celulares y pantallas pequeñas */
@@ -489,12 +490,12 @@
     <div class="kanban-column kanban-column-todo">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-white/5 border border-white/15 text-slate-400 text-xs font-bold flex items-center justify-center shadow-inner">
+          <div class="w-6 h-6 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold flex items-center justify-center shadow-inner">
             1
           </div>
-          <span class="text-sm font-bold tracking-wide text-slate-300">Por Iniciar</span>
+          <span class="text-sm font-extrabold tracking-wide text-white">Por Iniciar</span>
         </div>
-        <span class="bg-white/5 text-slate-400 border border-white/10 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
+        <span class="bg-white/10 text-white border border-white/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
       </div>
       <div class="kanban-cards dropzone" id="todo"></div>
     </div>
@@ -503,12 +504,12 @@
     <div class="kanban-column kanban-column-paused">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.3)]">
+          <div class="w-6 h-6 rounded-full bg-amber-500/25 border border-amber-400/50 text-amber-300 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.4)]">
             2
           </div>
-          <span class="text-sm font-bold tracking-wide text-white">En Pausa</span>
+          <span class="text-sm font-extrabold tracking-wide text-amber-100">En Pausa</span>
         </div>
-        <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-paused">0</span>
+        <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-paused">0</span>
       </div>
       <div class="kanban-cards dropzone" id="paused"></div>
     </div>
@@ -517,12 +518,12 @@
     <div class="kanban-column kanban-column-progress">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/40 text-purple-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.3)]">
+          <div class="w-6 h-6 rounded-full bg-purple-500/25 border border-purple-400/50 text-purple-300 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.4)]">
             3
           </div>
-          <span class="text-sm font-bold tracking-wide text-white">En Progreso</span>
+          <span class="text-sm font-extrabold tracking-wide text-purple-100">En Progreso</span>
         </div>
-        <span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-in-progress">0</span>
+        <span class="bg-purple-500/20 text-purple-300 border border-purple-400/40 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-in-progress">0</span>
       </div>
       <div class="kanban-cards dropzone" id="in-progress"></div>
     </div>
@@ -531,12 +532,12 @@
     <div class="kanban-column kanban-column-done">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/25 border border-emerald-400/50 text-emerald-300 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.4)]">
             4
           </div>
-          <span class="text-sm font-bold tracking-wide text-white">Terminado</span>
+          <span class="text-sm font-extrabold tracking-wide text-emerald-100">Terminado</span>
         </div>
-        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-done-col">0</span>
+        <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-done-col">0</span>
       </div>
       <div class="kanban-cards dropzone" id="done-col"></div>
     </div>
