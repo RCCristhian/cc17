@@ -45,13 +45,14 @@
 
     /* Tintes por columna para diferenciación visual */
     .kanban-column-todo {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.05) 28%, #090c12 65%, #020305 100%);
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      background: linear-gradient(180deg, #020306 0%, #06080e 30%, rgba(255, 255, 255, 0.05) 70%, rgba(255, 255, 255, 0.22) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8), inset 0 -4px 18px rgba(255, 255, 255, 0.1);
     }
     .kanban-column-todo .kanban-column-header {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.55);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .kanban-column-paused {
@@ -431,12 +432,12 @@
     <div class="kanban-column kanban-column-todo">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-white/20 border border-white/60 text-white text-xs font-bold flex items-center justify-center shadow-[0_0_14px_rgba(255,255,255,0.4)]">
+          <div class="w-6 h-6 rounded-full bg-black/60 border border-slate-700/60 text-slate-300 text-xs font-bold flex items-center justify-center shadow-inner">
             1
           </div>
-          <span class="text-sm font-bold tracking-wide text-white">Por Iniciar</span>
+          <span class="text-sm font-bold tracking-wide text-slate-200">Por Iniciar</span>
         </div>
-        <span class="bg-white/10 text-white border border-white/25 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
+        <span class="bg-black/50 text-slate-300 border border-slate-700/60 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
       </div>
       <div class="kanban-cards dropzone" id="todo"></div>
     </div>
@@ -620,10 +621,9 @@
       'Prefer': 'return=representation'
     };
 
-    const defaultProjects = [
+    let defaultProjects = [
       { name: "Independencia & Teruel", color: "#3b82f6" },
       { name: "Lord Cochrane 4", color: "#10b981" },
-      { name: "Paget 01 y 02", color: "#8b5cf6" },
       { name: "Apoyo Transversal", color: "#f59e0b" }
     ];
 
@@ -780,6 +780,15 @@
           def.color = newColor;
         }
 
+        let deletedDefaults = [];
+        try {
+          deletedDefaults = JSON.parse(localStorage.getItem('cc17_deleted_defaults') || '[]');
+        } catch (e) {}
+        if (!deletedDefaults.includes(oldName)) {
+          deletedDefaults.push(oldName);
+          localStorage.setItem('cc17_deleted_defaults', JSON.stringify(deletedDefaults));
+        }
+
         // 5. Re-renderizar tablero y modal
         renderBoard();
         renderProjectManagerList();
@@ -839,6 +848,23 @@
           });
         }
 
+        // 1. Eliminar de defaultProjects si existe
+        const defIdx = defaultProjects.findIndex(p => p.name === name);
+        if (defIdx !== -1) {
+          defaultProjects.splice(defIdx, 1);
+        }
+
+        // 2. Registrar en deletedDefaults para evitar que reaparezca
+        let deletedDefaults = [];
+        try {
+          deletedDefaults = JSON.parse(localStorage.getItem('cc17_deleted_defaults') || '[]');
+        } catch (e) {}
+        if (!deletedDefaults.includes(name)) {
+          deletedDefaults.push(name);
+          localStorage.setItem('cc17_deleted_defaults', JSON.stringify(deletedDefaults));
+        }
+
+        // 3. Eliminar de cc17_custom_projects
         let stored = [];
         try {
           stored = JSON.parse(localStorage.getItem('cc17_custom_projects') || '[]');
@@ -856,15 +882,34 @@
 
     function getKnownProjects() {
       const map = new Map();
-      defaultProjects.forEach(p => map.set(p.name, p.color));
+
+      let deletedDefaults = [];
+      try {
+        deletedDefaults = JSON.parse(localStorage.getItem('cc17_deleted_defaults') || '[]');
+      } catch (e) {}
+
+      // Bloquear Paget 01 y 02 explícitamente por si existía en localStorage antiguo
+      if (!deletedDefaults.includes("Paget 01 y 02")) {
+        deletedDefaults.push("Paget 01 y 02");
+      }
+      
+      defaultProjects.forEach(p => {
+        if (!deletedDefaults.includes(p.name)) {
+          map.set(p.name, p.color);
+        }
+      });
       
       try {
         const stored = JSON.parse(localStorage.getItem('cc17_custom_projects') || '[]');
-        stored.forEach(p => map.set(p.name, p.color));
+        stored.forEach(p => {
+          if (!deletedDefaults.includes(p.name)) {
+            map.set(p.name, p.color);
+          }
+        });
       } catch (e) {}
 
       tasksData.forEach(t => {
-        if (t.project && !map.has(t.project)) {
+        if (t.project && !map.has(t.project) && !deletedDefaults.includes(t.project)) {
           let c = t.tag_class && t.tag_class.startsWith('#') ? t.tag_class : '#3b82f6';
           map.set(t.project, c);
         }
