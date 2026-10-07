@@ -461,9 +461,139 @@
       border-color: #ffffff;
       transform: scale(1.15);
     }
+
+    /* Preloader moderno iOS style */
+    .preloader-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background-color: #07090e;
+      background-image: 
+        radial-gradient(ellipse 70% 50% at 50% 35%, rgba(99, 102, 241, 0.14), transparent 70%),
+        radial-gradient(ellipse 50% 40% at 50% 65%, rgba(220, 38, 38, 0.12), transparent 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .preloader-overlay.fade-out {
+      opacity: 0;
+      transform: scale(1.04);
+      pointer-events: none;
+    }
+
+    .preloader-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      user-select: none;
+    }
+
+    .preloader-logo-wrapper {
+      position: relative;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preloader-glow {
+      position: absolute;
+      inset: -20px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(220, 38, 38, 0.5) 0%, rgba(99, 102, 241, 0.25) 50%, transparent 75%);
+      filter: blur(24px);
+      animation: preloaderPulse 2.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes preloaderPulse {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      100% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .preloader-logo {
+      position: relative;
+      z-index: 2;
+      height: 64px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.65));
+      animation: preloaderFloat 3s ease-in-out infinite alternate;
+    }
+
+    @media (min-width: 640px) {
+      .preloader-logo {
+        height: 82px;
+      }
+    }
+
+    @keyframes preloaderFloat {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-4px); }
+    }
+
+    .preloader-bar-track {
+      width: 220px;
+      height: 4px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (min-width: 640px) {
+      .preloader-bar-track {
+        width: 260px;
+        height: 5px;
+      }
+    }
+
+    .preloader-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #dc2626 0%, #a855f7 50%, #3b82f6 100%);
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.8);
+      transition: width 0.15s ease-out;
+    }
+
+    .preloader-status {
+      margin-top: 1.15rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+      transition: opacity 0.3s;
+    }
   </style>
 </head>
 <body class="antialiased h-screen overflow-hidden flex flex-col m-0 select-none">
+
+  <!-- Preloader Moderno CC17 -->
+  <div id="appPreloader" class="preloader-overlay">
+    <div class="preloader-content">
+      <!-- Logo CC17 con aura pulsante -->
+      <div class="preloader-logo-wrapper">
+        <div class="preloader-glow"></div>
+        <img src="logo.png" alt="CC17" class="preloader-logo">
+      </div>
+      
+      <!-- Barra de progreso moderna -->
+      <div class="preloader-bar-track">
+        <div id="preloaderBarFill" class="preloader-bar-fill"></div>
+      </div>
+
+      <!-- Texto de estado -->
+      <div id="preloaderStatusText" class="preloader-status">Iniciando espacio de trabajo...</div>
+    </div>
+  </div>
   
   <!-- Header con estética moderna CC17 -->
   <header class="py-2.5 sm:py-3 px-3 sm:px-8 border-b border-white/[0.08] bg-[#090b10]/95 backdrop-blur-md flex justify-between items-center z-10 shrink-0 gap-2">
@@ -1480,7 +1610,52 @@
       }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    // Inicializar
+    function runPreloader() {
+      const fill = document.getElementById('preloaderBarFill');
+      const text = document.getElementById('preloaderStatusText');
+      const overlay = document.getElementById('appPreloader');
+      if (!overlay) return;
+
+      const startTime = performance.now();
+      const totalDuration = 2700; // 2.7 segundos de animación de barra progresiva
+
+      function updateProgress(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / totalDuration);
+        // Easing suave estilo Apple (easeOutCubic)
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const percent = Math.round(eased * 100);
+
+        if (fill) fill.style.width = percent + '%';
+
+        if (text) {
+          if (progress < 0.35) {
+            text.textContent = 'Iniciando CC17...';
+          } else if (progress < 0.75) {
+            text.textContent = 'Cargando tablero y tarjetas...';
+          } else {
+            text.textContent = 'Listo';
+          }
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(updateProgress);
+        } else {
+          // A los 3 segundos exactos (2.7s carga + 300ms espera), desvanecimiento cinematográfico
+          setTimeout(() => {
+            overlay.classList.add('fade-out');
+            setTimeout(() => {
+              overlay.style.display = 'none';
+            }, 700);
+          }, 300);
+        }
+      }
+
+      requestAnimationFrame(updateProgress);
+    }
+
+    // Inicializar preloader y cargar datos en paralelo
+    runPreloader();
     loadTasks();
   </script>
 </body>
