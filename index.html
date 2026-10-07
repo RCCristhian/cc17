@@ -45,41 +45,40 @@
 
     /* Tintes por columna para diferenciación visual */
     .kanban-column-todo {
-      background: linear-gradient(180deg, #020306 0%, #06080e 30%, rgba(255, 255, 255, 0.05) 70%, rgba(255, 255, 255, 0.22) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-bottom: 2px solid rgba(255, 255, 255, 0.45);
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8), inset 0 -4px 18px rgba(255, 255, 255, 0.1);
+      background: #080a10;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.85);
     }
     .kanban-column-todo .kanban-column-header {
-      background: rgba(0, 0, 0, 0.55);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: #05070c;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     }
 
     .kanban-column-paused {
-      background: linear-gradient(180deg, rgba(217, 119, 6, 0.14) 0%, rgba(13, 17, 24, 0.98) 50%);
-      border: 1px solid rgba(245, 158, 11, 0.25);
+      background: linear-gradient(180deg, rgba(217, 119, 6, 0.22) 0%, rgba(217, 119, 6, 0.16) 55%, #0d1118 92%);
+      border: 1px solid rgba(245, 158, 11, 0.28);
     }
     .kanban-column-paused .kanban-column-header {
-      background: rgba(245, 158, 11, 0.07);
-      border-bottom: 1px solid rgba(245, 158, 11, 0.18);
+      background: rgba(245, 158, 11, 0.10);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.22);
     }
 
     .kanban-column-progress {
-      background: linear-gradient(180deg, rgba(147, 51, 234, 0.12) 0%, rgba(13, 17, 24, 0.98) 50%);
-      border: 1px solid rgba(168, 85, 247, 0.24);
+      background: linear-gradient(180deg, rgba(147, 51, 234, 0.20) 0%, rgba(147, 51, 234, 0.14) 55%, #0d1118 92%);
+      border: 1px solid rgba(168, 85, 247, 0.28);
     }
     .kanban-column-progress .kanban-column-header {
-      background: rgba(168, 85, 247, 0.06);
-      border-bottom: 1px solid rgba(168, 85, 247, 0.18);
+      background: rgba(168, 85, 247, 0.10);
+      border-bottom: 1px solid rgba(168, 85, 247, 0.22);
     }
 
     .kanban-column-done {
-      background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(13, 17, 24, 0.98) 50%);
-      border: 1px solid rgba(16, 185, 129, 0.22);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.20) 0%, rgba(16, 185, 129, 0.14) 55%, #0d1118 92%);
+      border: 1px solid rgba(16, 185, 129, 0.28);
     }
     .kanban-column-done .kanban-column-header {
-      background: rgba(16, 185, 129, 0.06);
-      border-bottom: 1px solid rgba(16, 185, 129, 0.18);
+      background: rgba(16, 185, 129, 0.10);
+      border-bottom: 1px solid rgba(16, 185, 129, 0.22);
     }
 
     .kanban-column-header {
@@ -432,12 +431,12 @@
     <div class="kanban-column kanban-column-todo">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-black/60 border border-slate-700/60 text-slate-300 text-xs font-bold flex items-center justify-center shadow-inner">
+          <div class="w-6 h-6 rounded-full bg-white/5 border border-white/15 text-slate-400 text-xs font-bold flex items-center justify-center shadow-inner">
             1
           </div>
-          <span class="text-sm font-bold tracking-wide text-slate-200">Por Iniciar</span>
+          <span class="text-sm font-bold tracking-wide text-slate-300">Por Iniciar</span>
         </div>
-        <span class="bg-black/50 text-slate-300 border border-slate-700/60 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
+        <span class="bg-white/5 text-slate-400 border border-white/10 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
       </div>
       <div class="kanban-cards dropzone" id="todo"></div>
     </div>
@@ -1047,18 +1046,20 @@
           card.style.setProperty('--card-glow', `${cardColor}66`);
           card.style.setProperty('--card-glow-soft', `${cardColor}20`);
           card.style.background = isWorking 
-            ? `linear-gradient(145deg, ${cardColor}22 0%, #141824 65%)`
-            : `linear-gradient(145deg, ${cardColor}18 0%, #12151e 65%)`;
+            ? `linear-gradient(140deg, ${cardColor}35 0%, ${cardColor}18 50%, #111420 95%)`
+            : `linear-gradient(140deg, ${cardColor}26 0%, ${cardColor}12 50%, #0e111a 95%)`;
           if (isWorking) {
             card.style.borderColor = '';
             card.style.boxShadow = '';
           } else {
-            card.style.borderColor = `${cardColor}40`;
-            card.style.boxShadow = `0 4px 18px -3px ${cardColor}1a`;
+            card.style.borderColor = `${cardColor}50`;
+            card.style.boxShadow = `0 4px 18px -3px ${cardColor}25, 0 1px 3px rgba(0,0,0,0.5)`;
           }
 
           if (task.priority) {
-            card.style.borderLeft = `4px solid #ef4444`;
+            card.style.borderLeft = `4.5px solid #ef4444`;
+          } else {
+            card.style.borderLeft = `3.5px solid ${cardColor}`;
           }
           
           let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background-color: ${cardColor}25; color: ${cardColor}; border: 1px solid ${cardColor}55;">${task.project}</span>`;
