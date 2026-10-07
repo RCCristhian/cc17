@@ -34,54 +34,106 @@
     .kanban-column {
       flex: 1 1 0%;
       min-width: 280px;
+      background: #080a10 !important;
       border-radius: 1.25rem;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.85);
       height: 100%;
       transition: border-color 0.25s, box-shadow 0.25s;
     }
 
-    /* Tintes por columna para diferenciación visual */
     .kanban-column-todo {
-      background: #080a10 !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
     }
     .kanban-column-todo .kanban-column-header {
       background: #05070c !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
 
     .kanban-column-paused {
-      background: linear-gradient(180deg, rgba(245, 158, 11, 0.32) 0%, rgba(245, 158, 11, 0.22) 55%, rgba(245, 158, 11, 0.08) 80%, #090c12 100%) !important;
-      border: 1px solid rgba(245, 158, 11, 0.35) !important;
-      box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.15) !important;
+      border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 18px -4px rgba(245, 158, 11, 0.18) !important;
     }
     .kanban-column-paused .kanban-column-header {
-      background: rgba(245, 158, 11, 0.20) !important;
-      border-bottom: 1px solid rgba(245, 158, 11, 0.32) !important;
+      background: rgba(245, 158, 11, 0.04) !important;
+      border-bottom: 1px solid rgba(245, 158, 11, 0.25) !important;
     }
 
     .kanban-column-progress {
-      background: linear-gradient(180deg, rgba(168, 85, 247, 0.30) 0%, rgba(168, 85, 247, 0.20) 55%, rgba(168, 85, 247, 0.08) 80%, #090c12 100%) !important;
-      border: 1px solid rgba(168, 85, 247, 0.35) !important;
-      box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.15) !important;
+      border: 1.5px solid rgba(168, 85, 247, 0.45) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 18px -4px rgba(168, 85, 247, 0.18) !important;
     }
     .kanban-column-progress .kanban-column-header {
-      background: rgba(168, 85, 247, 0.20) !important;
-      border-bottom: 1px solid rgba(168, 85, 247, 0.32) !important;
+      background: rgba(168, 85, 247, 0.04) !important;
+      border-bottom: 1px solid rgba(168, 85, 247, 0.25) !important;
     }
 
     .kanban-column-done {
-      background: linear-gradient(180deg, rgba(16, 185, 129, 0.30) 0%, rgba(16, 185, 129, 0.20) 55%, rgba(16, 185, 129, 0.08) 80%, #090c12 100%) !important;
-      border: 1px solid rgba(16, 185, 129, 0.35) !important;
-      box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.15) !important;
+      border: 1.5px solid rgba(16, 185, 129, 0.45) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 18px -4px rgba(16, 185, 129, 0.18) !important;
     }
     .kanban-column-done .kanban-column-header {
-      background: rgba(16, 185, 129, 0.20) !important;
-      border-bottom: 1px solid rgba(16, 185, 129, 0.32) !important;
+      background: rgba(16, 185, 129, 0.04) !important;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.25) !important;
+    }
+
+    /* Responsividad para celulares y pantallas pequeñas */
+    @media (max-width: 768px) {
+      body {
+        overflow: hidden !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+      }
+
+      header {
+        padding: 0.65rem 0.75rem !important;
+        gap: 0.5rem;
+      }
+
+      .kanban-board {
+        display: flex !important;
+        flex-direction: row !important;
+        height: calc(100dvh - 3.85rem) !important;
+        padding: 0.6rem 0.75rem 0.85rem 0.75rem !important;
+        gap: 0.85rem !important;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+      }
+
+      .kanban-column {
+        flex: 0 0 85vw !important;
+        min-width: 85vw !important;
+        max-width: 85vw !important;
+        scroll-snap-align: center;
+        border-radius: 1.1rem !important;
+        height: 100% !important;
+      }
+
+      .kanban-column-header {
+        padding: 0.85rem 1rem !important;
+      }
+
+      .kanban-cards {
+        padding: 0.75rem 0.65rem !important;
+        gap: 0.75rem !important;
+        overflow-y: auto !important;
+      }
+
+      .kanban-card {
+        padding: 0.85rem !important;
+      }
+
+      .modal-content {
+        padding: 1.25rem !important;
+        border-radius: 1rem !important;
+        margin: 0.5rem !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+      }
     }
 
     .kanban-column-header {
@@ -400,30 +452,33 @@
 <body class="antialiased h-screen overflow-hidden flex flex-col m-0 select-none">
   
   <!-- Header con estética moderna CC17 -->
-  <header class="py-3 px-8 border-b border-white/[0.08] bg-[#090b10]/90 backdrop-blur-md flex justify-between items-center z-10 shrink-0">
+  <header class="py-2.5 sm:py-3 px-3 sm:px-8 border-b border-white/[0.08] bg-[#090b10]/95 backdrop-blur-md flex justify-between items-center z-10 shrink-0 gap-2">
     <!-- Logo a la izquierda -->
-    <div class="flex items-center">
-      <img src="logo.png" alt="CC17" class="h-9 w-auto object-contain select-none filter drop-shadow-[0_0_12px_rgba(185,28,28,0.5)]">
+    <div class="flex items-center shrink-0">
+      <img src="logo.png" alt="CC17" class="h-7 sm:h-9 w-auto object-contain select-none filter drop-shadow-[0_0_12px_rgba(185,28,28,0.5)]">
     </div>
 
     <!-- Filtro por proyecto y Botones a la derecha -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-1.5 sm:gap-3 flex-wrap justify-end">
       <!-- Selector de Filtro -->
-      <div class="flex items-center gap-2 bg-[#121622] border border-white/10 hover:border-white/20 rounded-xl px-3 py-2 shadow-sm transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-slate-400"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-        <span class="text-xs font-bold text-slate-400">Filtrar:</span>
-        <select id="projectFilterSelect" onchange="handleFilterChange(this.value)" class="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-1">
+      <div class="flex items-center gap-1.5 sm:gap-2 bg-[#121622] border border-white/10 hover:border-white/20 rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 shadow-sm transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-slate-400 shrink-0"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+        <span class="text-xs font-bold text-slate-400 hidden md:inline">Filtrar:</span>
+        <select id="projectFilterSelect" onchange="handleFilterChange(this.value)" class="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-1 max-w-[85px] sm:max-w-none truncate">
           <option value="ALL" class="bg-[#0c1017] text-white">Todos</option>
         </select>
       </div>
 
-      <button onclick="openProjectManagerModal()" class="flex items-center gap-2 text-sm font-semibold bg-[#131722] hover:bg-[#1a2030] text-slate-200 border border-white/10 hover:border-white/20 px-4 py-2 rounded-xl transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-        <span>Gestionar Proyectos</span>
+      <button onclick="openProjectManagerModal()" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold bg-[#131722] hover:bg-[#1a2030] text-slate-200 border border-white/10 hover:border-white/20 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        <span class="hidden sm:inline">Gestionar Proyectos</span>
+        <span class="sm:hidden">Proyectos</span>
       </button>
-      <button onclick="openAddModal()" class="flex items-center gap-2 text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98]">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        <span>Nueva Tarjeta</span>
+
+      <button onclick="openAddModal()" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98]">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span class="hidden sm:inline">Nueva Tarjeta</span>
+        <span class="sm:hidden">Nueva</span>
       </button>
     </div>
   </header>
