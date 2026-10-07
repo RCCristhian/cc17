@@ -57,13 +57,13 @@
     }
 
     .kanban-column-paused {
-      border: 1px solid rgba(6, 182, 212, 0.4) !important;
-      background: linear-gradient(180deg, rgba(6, 182, 212, 0.06) 0%, #080a10 140px) !important;
-      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(6, 182, 212, 0.18), inset 0 1px 0 rgba(6, 182, 212, 0.25) !important;
+      border: 1px solid rgba(249, 115, 22, 0.45) !important;
+      background: linear-gradient(180deg, rgba(249, 115, 22, 0.06) 0%, #080a10 140px) !important;
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(249, 115, 22, 0.18), inset 0 1px 0 rgba(249, 115, 22, 0.25) !important;
     }
     .kanban-column-paused .kanban-column-header {
-      background: linear-gradient(180deg, rgba(6, 182, 212, 0.15) 0%, rgba(6, 182, 212, 0.04) 100%) !important;
-      border-bottom: 1px solid rgba(6, 182, 212, 0.25) !important;
+      background: linear-gradient(180deg, rgba(249, 115, 22, 0.16) 0%, rgba(249, 115, 22, 0.04) 100%) !important;
+      border-bottom: 1px solid rgba(249, 115, 22, 0.25) !important;
       backdrop-filter: blur(16px);
     }
 
@@ -517,12 +517,12 @@
     <div class="kanban-column kanban-column-paused">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.3)]">
+          <div class="w-6 h-6 rounded-full bg-orange-500/20 border border-orange-400/40 text-orange-400 text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(249,115,22,0.3)]">
             2
           </div>
           <span class="text-sm font-bold tracking-tight text-white">En Pausa</span>
         </div>
-        <span class="bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 px-2.5 py-0.5 rounded-full text-xs font-semibold" id="count-paused">0</span>
+        <span class="bg-orange-500/15 text-orange-300 border border-orange-400/30 px-2.5 py-0.5 rounded-full text-xs font-semibold" id="count-paused">0</span>
       </div>
       <div class="kanban-cards dropzone" id="paused"></div>
     </div>
@@ -855,10 +855,13 @@
         try {
           deletedDefaults = JSON.parse(localStorage.getItem('cc17_deleted_defaults') || '[]');
         } catch (e) {}
-        if (!deletedDefaults.includes(oldName)) {
-          deletedDefaults.push(oldName);
-          localStorage.setItem('cc17_deleted_defaults', JSON.stringify(deletedDefaults));
+        deletedDefaults = deletedDefaults.filter(n => n !== newName);
+        if (oldName !== newName && defaultProjects.some(p => p.name === oldName)) {
+          if (!deletedDefaults.includes(oldName)) {
+            deletedDefaults.push(oldName);
+          }
         }
+        localStorage.setItem('cc17_deleted_defaults', JSON.stringify(deletedDefaults));
 
         // 5. Re-renderizar tablero y modal
         renderBoard();
@@ -963,6 +966,16 @@
       if (!deletedDefaults.includes("Paget 01 y 02")) {
         deletedDefaults.push("Paget 01 y 02");
       }
+
+      // Desbloquear automáticamente cualquier proyecto válido (como Paget 02) que tenga tareas activas
+      deletedDefaults = deletedDefaults.filter(name => {
+        if (name === "Paget 01 y 02") return true;
+        const hasTasks = tasksData.some(t => t.project === name);
+        return !hasTasks;
+      });
+      try {
+        localStorage.setItem('cc17_deleted_defaults', JSON.stringify(deletedDefaults));
+      } catch (e) {}
       
       defaultProjects.forEach(p => {
         if (!deletedDefaults.includes(p.name)) {
@@ -973,14 +986,14 @@
       try {
         const stored = JSON.parse(localStorage.getItem('cc17_custom_projects') || '[]');
         stored.forEach(p => {
-          if (!deletedDefaults.includes(p.name)) {
+          if (p.name !== "Paget 01 y 02") {
             map.set(p.name, p.color);
           }
         });
       } catch (e) {}
 
       tasksData.forEach(t => {
-        if (t.project && !map.has(t.project) && !deletedDefaults.includes(t.project)) {
+        if (t.project && !map.has(t.project) && t.project !== "Paget 01 y 02" && !deletedDefaults.includes(t.project)) {
           let c = t.tag_class && t.tag_class.startsWith('#') ? t.tag_class : '#3b82f6';
           map.set(t.project, c);
         }
@@ -1157,7 +1170,7 @@
           
           let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>`;
           if (colId === 'paused') {
-            tagsHtml += `<span class="tag" style="background: rgba(6, 182, 212, 0.18); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.45); box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);">⏸️ Pausado</span>`;
+            tagsHtml += `<span class="tag" style="background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.45); box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);">⏸️ Pausado</span>`;
           }
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
