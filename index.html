@@ -45,12 +45,13 @@
 
     /* Tintes por columna para diferenciación visual */
     .kanban-column-todo {
-      background: linear-gradient(180deg, rgba(30, 41, 59, 0.25) 0%, rgba(11, 14, 20, 0.98) 50%);
-      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.05) 28%, #090c12 65%, #020305 100%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
     .kanban-column-todo .kanban-column-header {
-      background: rgba(148, 163, 184, 0.04);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
     }
 
     .kanban-column-paused {
@@ -430,12 +431,12 @@
     <div class="kanban-column kanban-column-todo">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-slate-500/20 border border-slate-400/40 text-slate-300 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(148,163,184,0.2)]">
+          <div class="w-6 h-6 rounded-full bg-white/20 border border-white/60 text-white text-xs font-bold flex items-center justify-center shadow-[0_0_14px_rgba(255,255,255,0.4)]">
             1
           </div>
-          <span class="text-sm font-bold tracking-wide text-slate-200">Por Iniciar</span>
+          <span class="text-sm font-bold tracking-wide text-white">Por Iniciar</span>
         </div>
-        <span class="bg-slate-500/10 text-slate-300 border border-slate-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
+        <span class="bg-white/10 text-white border border-white/25 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
       </div>
       <div class="kanban-cards dropzone" id="todo"></div>
     </div>
