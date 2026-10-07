@@ -128,8 +128,8 @@
       }
 
       .kanban-cards {
-        padding: 0.75rem 0.65rem !important;
-        gap: 0.75rem !important;
+        padding: 1.35rem 0.75rem 1rem 0.75rem !important;
+        gap: 0.85rem !important;
         overflow-y: auto !important;
       }
 
@@ -183,7 +183,7 @@
       font-style: italic;
       letter-spacing: 0.02em;
       text-transform: none;
-      z-index: 10;
+      z-index: 20;
       pointer-events: none;
     }
 
@@ -326,6 +326,7 @@
     }
 
     .kanban-card.is-active-working {
+      margin-top: 1.65rem !important;
       animation: workingCardPulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite !important;
       border-width: 1px !important;
     }
