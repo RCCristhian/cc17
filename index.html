@@ -34,50 +34,59 @@
     .kanban-column {
       flex: 1 1 0%;
       min-width: 280px;
-      background: #080a10 !important;
-      border-radius: 1.25rem;
+      background: #080a10;
+      border-radius: 1.35rem;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.85);
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.75);
       height: 100%;
-      transition: border-color 0.25s, box-shadow 0.25s;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    /* iOS Glass Aesthetic: Bordes finos de 1px con sutil resplandor ambiental y bisel interior */
     .kanban-column-todo {
-      border: 2.5px solid rgba(255, 255, 255, 0.22) !important;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 15px -3px rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, #080a10 140px) !important;
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
     }
     .kanban-column-todo .kanban-column-header {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.16) !important;
+      background: rgba(255, 255, 255, 0.035) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      backdrop-filter: blur(16px);
     }
 
     .kanban-column-paused {
-      border: 2.5px solid rgba(245, 158, 11, 0.75) !important;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 24px -2px rgba(245, 158, 11, 0.28) !important;
+      border: 1px solid rgba(245, 158, 11, 0.4) !important;
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.06) 0%, #080a10 140px) !important;
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(245, 158, 11, 0.18), inset 0 1px 0 rgba(245, 158, 11, 0.25) !important;
     }
     .kanban-column-paused .kanban-column-header {
-      background: linear-gradient(180deg, rgba(245, 158, 11, 0.32) 0%, rgba(245, 158, 11, 0.14) 100%) !important;
-      border-bottom: 2px solid rgba(245, 158, 11, 0.55) !important;
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.04) 100%) !important;
+      border-bottom: 1px solid rgba(245, 158, 11, 0.25) !important;
+      backdrop-filter: blur(16px);
     }
 
     .kanban-column-progress {
-      border: 2.5px solid rgba(168, 85, 247, 0.75) !important;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 24px -2px rgba(168, 85, 247, 0.28) !important;
+      border: 1px solid rgba(168, 85, 247, 0.4) !important;
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.06) 0%, #080a10 140px) !important;
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(168, 85, 247, 0.18), inset 0 1px 0 rgba(168, 85, 247, 0.25) !important;
     }
     .kanban-column-progress .kanban-column-header {
-      background: linear-gradient(180deg, rgba(168, 85, 247, 0.32) 0%, rgba(168, 85, 247, 0.14) 100%) !important;
-      border-bottom: 2px solid rgba(168, 85, 247, 0.55) !important;
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.04) 100%) !important;
+      border-bottom: 1px solid rgba(168, 85, 247, 0.25) !important;
+      backdrop-filter: blur(16px);
     }
 
     .kanban-column-done {
-      border: 2.5px solid rgba(16, 185, 129, 0.75) !important;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 0 24px -2px rgba(16, 185, 129, 0.28) !important;
+      border: 1px solid rgba(16, 185, 129, 0.4) !important;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.06) 0%, #080a10 140px) !important;
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(16, 185, 129, 0.18), inset 0 1px 0 rgba(16, 185, 129, 0.25) !important;
     }
     .kanban-column-done .kanban-column-header {
-      background: linear-gradient(180deg, rgba(16, 185, 129, 0.32) 0%, rgba(16, 185, 129, 0.14) 100%) !important;
-      border-bottom: 2px solid rgba(16, 185, 129, 0.55) !important;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.04) 100%) !important;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.25) !important;
+      backdrop-filter: blur(16px);
     }
 
     /* Responsividad para celulares y pantallas pequeñas */
@@ -226,37 +235,42 @@
     }
 
     .kanban-cards::-webkit-scrollbar {
-      width: 6px;
+      width: 4px;
+    }
+    .kanban-cards::-webkit-scrollbar-track {
+      background: transparent;
     }
     .kanban-cards::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
       border-radius: 9999px;
+    }
+    .kanban-cards::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
     }
 
     .kanban-card {
-      background: #131722;
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 1rem;
-      padding: 1.15rem;
+      border-radius: 1.15rem;
+      padding: 1.1rem 1.15rem;
       cursor: grab;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
-      box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.4);
+      user-select: none;
     }
 
     .kanban-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6);
-      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-3px) scale(1.008);
+      box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), 0 0 20px -2px var(--card-glow, rgba(59, 130, 246, 0.35)) !important;
+      border-color: var(--card-color, #3b82f6) !important;
     }
 
     .kanban-card:active {
       cursor: grabbing;
+      transform: scale(0.985);
     }
 
     .kanban-card.dragging {
-      opacity: 0.35;
-      transform: scale(0.97);
+      opacity: 0.3;
+      transform: scale(0.96) rotate(-1deg);
     }
 
     .tag {
@@ -378,32 +392,33 @@
     .action-icon-btn {
       width: 28px;
       height: 28px;
-      border-radius: 0.5rem;
-      background: rgba(15, 23, 42, 0.85);
+      border-radius: 9999px;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.12);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #94a3b8;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .action-icon-btn:hover {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.16);
       color: #ffffff;
-      transform: scale(1.05);
+      transform: scale(1.1);
     }
 
     .action-icon-btn.duplicate:hover {
-      background: rgba(59, 130, 246, 0.25);
-      border-color: rgba(59, 130, 246, 0.4);
-      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.3);
+      border-color: rgba(59, 130, 246, 0.5);
+      color: #93c5fd;
     }
 
     .action-icon-btn.delete:hover {
-      background: rgba(239, 68, 68, 0.25);
-      border-color: rgba(239, 68, 68, 0.4);
-      color: #ef4444;
+      background: rgba(239, 68, 68, 0.3);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
     }
 
     /* Modal styles */
@@ -493,9 +508,9 @@
           <div class="w-6 h-6 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold flex items-center justify-center shadow-inner">
             1
           </div>
-          <span class="text-sm font-extrabold tracking-wide text-white">Por Iniciar</span>
+          <span class="text-sm font-bold tracking-tight text-white">Por Iniciar</span>
         </div>
-        <span class="bg-white/10 text-white border border-white/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
+        <span class="bg-white/10 text-slate-300 border border-white/15 px-2.5 py-0.5 rounded-full text-xs font-semibold" id="count-todo">0</span>
       </div>
       <div class="kanban-cards dropzone" id="todo"></div>
     </div>
@@ -504,12 +519,12 @@
     <div class="kanban-column kanban-column-paused">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-amber-500/25 border border-amber-400/50 text-amber-300 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.4)]">
+          <div class="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(245,158,11,0.3)]">
             2
           </div>
-          <span class="text-sm font-extrabold tracking-wide text-amber-100">En Pausa</span>
+          <span class="text-sm font-bold tracking-tight text-white">En Pausa</span>
         </div>
-        <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-paused">0</span>
+        <span class="bg-amber-500/15 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 rounded-full text-xs font-semibold" id="count-paused">0</span>
       </div>
       <div class="kanban-cards dropzone" id="paused"></div>
     </div>
@@ -518,12 +533,12 @@
     <div class="kanban-column kanban-column-progress">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-purple-500/25 border border-purple-400/50 text-purple-300 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.4)]">
+          <div class="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/40 text-purple-300 text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(168,85,247,0.3)]">
             3
           </div>
-          <span class="text-sm font-extrabold tracking-wide text-purple-100">En Progreso</span>
+          <span class="text-sm font-bold tracking-tight text-white">En Progreso</span>
         </div>
-        <span class="bg-purple-500/20 text-purple-300 border border-purple-400/40 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-in-progress">0</span>
+        <span class="bg-purple-500/15 text-purple-300 border border-purple-400/30 px-2.5 py-0.5 rounded-full text-xs font-semibold" id="count-in-progress">0</span>
       </div>
       <div class="kanban-cards dropzone" id="in-progress"></div>
     </div>
@@ -532,12 +547,12 @@
     <div class="kanban-column kanban-column-done">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-emerald-500/25 border border-emerald-400/50 text-emerald-300 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+          <div class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.3)]">
             4
           </div>
-          <span class="text-sm font-extrabold tracking-wide text-emerald-100">Terminado</span>
+          <span class="text-sm font-bold tracking-tight text-white">Terminado</span>
         </div>
-        <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-done-col">0</span>
+        <span class="bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 rounded-full text-xs font-semibold" id="count-done-col">0</span>
       </div>
       <div class="kanban-cards dropzone" id="done-col"></div>
     </div>
@@ -1115,39 +1130,36 @@
           card.style.setProperty('--card-glow', `rgba(${rgb}, 0.6)`);
           card.style.setProperty('--card-glow-soft', `rgba(${rgb}, 0.25)`);
 
-          // Fondo 100% OPACO (sin transparencia) para que el color de la columna NUNCA se transparente
-          const topR = Math.min(255, Math.round(cr * 0.35 + 8));
-          const topG = Math.min(255, Math.round(cg * 0.35 + 10));
-          const topB = Math.min(255, Math.round(cb * 0.35 + 16));
+          // Fondo distintivo opaco estilo iOS Dark Glass (con tinte sutil y elegante del proyecto)
+          const topR = Math.min(255, Math.round(cr * 0.24 + 10));
+          const topG = Math.min(255, Math.round(cg * 0.24 + 12));
+          const topB = Math.min(255, Math.round(cb * 0.24 + 18));
 
-          const midR = Math.min(255, Math.round(cr * 0.22 + 8));
-          const midG = Math.min(255, Math.round(cg * 0.22 + 9));
-          const midB = Math.min(255, Math.round(cb * 0.22 + 13));
+          const botR = Math.min(255, Math.round(cr * 0.09 + 8));
+          const botG = Math.min(255, Math.round(cg * 0.09 + 9));
+          const botB = Math.min(255, Math.round(cb * 0.09 + 12));
 
-          const botR = Math.min(255, Math.round(cr * 0.12 + 6));
-          const botG = Math.min(255, Math.round(cg * 0.12 + 7));
-          const botB = Math.min(255, Math.round(cb * 0.12 + 10));
-
-          card.style.background = `linear-gradient(145deg, rgb(${topR}, ${topG}, ${topB}) 0%, rgb(${midR}, ${midG}, ${midB}) 55%, rgb(${botR}, ${botG}, ${botB}) 100%)`;
-          card.style.backgroundColor = `rgb(${midR}, ${midG}, ${midB})`;
+          card.style.background = `linear-gradient(155deg, rgb(${topR}, ${topG}, ${topB}) 0%, rgb(${botR}, ${botG}, ${botB}) 100%)`;
+          card.style.backgroundColor = `rgb(${botR}, ${botG}, ${botB})`;
+          card.style.border = `1px solid rgba(${rgb}, 0.40)`;
 
           if (isWorking) {
             card.style.borderColor = '';
             card.style.boxShadow = '';
           } else {
-            card.style.borderColor = `${cardColor}88`;
-            card.style.boxShadow = `0 8px 24px -4px rgba(${rgb}, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12)`;
+            card.style.boxShadow = `0 10px 26px -6px rgba(0, 0, 0, 0.65), 0 0 16px -4px rgba(${rgb}, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12)`;
           }
 
+          // Lomo izquierdo refinado estilo iOS (3.5px de grosor)
           if (task.priority) {
-            card.style.borderLeft = `5.5px solid #ef4444`;
+            card.style.borderLeft = `3.5px solid #ef4444`;
           } else {
-            card.style.borderLeft = `4.5px solid ${cardColor}`;
+            card.style.borderLeft = `3.5px solid ${cardColor}`;
           }
           
-          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background-color: rgba(0, 0, 0, 0.45); color: #ffffff; border: 1.5px solid ${cardColor}; font-weight: 800; box-shadow: 0 0 10px ${cardColor}55;">${task.project}</span>`;
+          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>`;
           if (colId === 'paused') {
-            tagsHtml += `<span class="tag" style="background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);">⏸️ Pausado</span>`;
+            tagsHtml += `<span class="tag" style="background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);">⏸️ Pausado</span>`;
           }
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
