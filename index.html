@@ -22,25 +22,62 @@
     
     .kanban-board {
       display: flex;
-      gap: 1.5rem;
+      gap: 1.25rem;
       height: calc(100vh - 5.75rem);
-      padding: 1.25rem 1.75rem 1.75rem 1.75rem;
+      padding: 1.25rem 1.5rem 1.5rem 1.5rem;
       width: 100%;
       box-sizing: border-box;
       align-items: stretch;
+      overflow-x: auto;
     }
 
     .kanban-column {
       flex: 1 1 0%;
-      min-width: 0;
-      background: #0d1118;
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      min-width: 280px;
       border-radius: 1.25rem;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
       height: 100%;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    /* Tintes por columna para diferenciación visual */
+    .kanban-column-todo {
+      background: linear-gradient(180deg, rgba(30, 64, 175, 0.12) 0%, rgba(13, 17, 24, 0.98) 50%);
+      border: 1px solid rgba(59, 130, 246, 0.22);
+    }
+    .kanban-column-todo .kanban-column-header {
+      background: rgba(59, 130, 246, 0.06);
+      border-bottom: 1px solid rgba(59, 130, 246, 0.16);
+    }
+
+    .kanban-column-paused {
+      background: linear-gradient(180deg, rgba(217, 119, 6, 0.14) 0%, rgba(13, 17, 24, 0.98) 50%);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+    .kanban-column-paused .kanban-column-header {
+      background: rgba(245, 158, 11, 0.07);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.18);
+    }
+
+    .kanban-column-progress {
+      background: linear-gradient(180deg, rgba(147, 51, 234, 0.12) 0%, rgba(13, 17, 24, 0.98) 50%);
+      border: 1px solid rgba(168, 85, 247, 0.24);
+    }
+    .kanban-column-progress .kanban-column-header {
+      background: rgba(168, 85, 247, 0.06);
+      border-bottom: 1px solid rgba(168, 85, 247, 0.18);
+    }
+
+    .kanban-column-done {
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(13, 17, 24, 0.98) 50%);
+      border: 1px solid rgba(16, 185, 129, 0.22);
+    }
+    .kanban-column-done .kanban-column-header {
+      background: rgba(16, 185, 129, 0.06);
+      border-bottom: 1px solid rgba(16, 185, 129, 0.18);
     }
 
     .kanban-column-header {
@@ -389,26 +426,40 @@
   
   <!-- Kanban Board -->
   <main class="kanban-board">
-    <!-- Columna 1: Por Hacer -->
-    <div class="kanban-column">
+    <!-- Columna 1: Por Iniciar -->
+    <div class="kanban-column kanban-column-todo">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
           <div class="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(59,130,246,0.3)]">
             1
           </div>
-          <span class="text-sm font-bold tracking-wide text-white">Por Hacer</span>
+          <span class="text-sm font-bold tracking-wide text-white">Por Iniciar</span>
         </div>
         <span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-todo">0</span>
       </div>
       <div class="kanban-cards dropzone" id="todo"></div>
     </div>
+
+    <!-- Columna 2: En Pausa -->
+    <div class="kanban-column kanban-column-paused">
+      <div class="kanban-column-header">
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.3)]">
+            2
+          </div>
+          <span class="text-sm font-bold tracking-wide text-white">En Pausa</span>
+        </div>
+        <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold" id="count-paused">0</span>
+      </div>
+      <div class="kanban-cards dropzone" id="paused"></div>
+    </div>
     
-    <!-- Columna 2: En Progreso -->
-    <div class="kanban-column">
+    <!-- Columna 3: En Progreso -->
+    <div class="kanban-column kanban-column-progress">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
           <div class="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/40 text-purple-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.3)]">
-            2
+            3
           </div>
           <span class="text-sm font-bold tracking-wide text-white">En Progreso</span>
         </div>
@@ -417,12 +468,12 @@
       <div class="kanban-cards dropzone" id="in-progress"></div>
     </div>
     
-    <!-- Columna 3: Terminado -->
-    <div class="kanban-column">
+    <!-- Columna 4: Terminado -->
+    <div class="kanban-column kanban-column-done">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
           <div class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-400 text-xs font-bold flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.3)]">
-            3
+            4
           </div>
           <span class="text-sm font-bold tracking-wide text-white">Terminado</span>
         </div>
@@ -900,7 +951,7 @@
     function renderBoard() {
       updateProjectFilterDropdown();
 
-      ['todo', 'in-progress', 'done-col'].forEach(colId => {
+      ['todo', 'paused', 'in-progress', 'done-col'].forEach(colId => {
         const col = document.getElementById(colId);
         if (!col) return;
         col.innerHTML = '';
@@ -912,8 +963,8 @@
           colTasks = colTasks.filter(t => t.project === currentProjectFilter);
         }
 
-        // 2. Ordenar y agrupar siempre por proyectos en "Por Hacer" y "Terminado"
-        if (colId === 'todo' || colId === 'done-col') {
+        // 2. Ordenar y agrupar siempre por proyectos en "Por Iniciar", "En Pausa" y "Terminado"
+        if (colId === 'todo' || colId === 'paused' || colId === 'done-col') {
           colTasks.sort((a, b) => {
             const pCompare = (a.project || '').localeCompare(b.project || '', undefined, { sensitivity: 'base' });
             if (pCompare !== 0) return pCompare;
@@ -965,6 +1016,9 @@
           }
           
           let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background-color: ${cardColor}25; color: ${cardColor}; border: 1px solid ${cardColor}55;">${task.project}</span>`;
+          if (colId === 'paused') {
+            tagsHtml += `<span class="tag" style="background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);">⏸️ Pausado</span>`;
+          }
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
           }
