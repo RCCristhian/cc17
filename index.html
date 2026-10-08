@@ -1766,7 +1766,7 @@
 
           // Parsear descripción y subtareas
           const { text: cleanDescription, subtasks } = parseTaskDescription(task.description);
-          const showProgress = (colId === 'in-progress' || colId === 'paused');
+          const showProgress = (colId === 'in-progress' || colId === 'paused' || colId === 'review');
           const totalSubtasks = subtasks.length;
           const completedSubtasks = subtasks.filter(s => s.done).length;
           const percent = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
