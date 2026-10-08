@@ -303,22 +303,153 @@
       box-shadow: 0 0 10px -2px rgba(239, 68, 68, 0.3);
     }
 
-    .card-actions {
-      display: none;
+    /* Controles superiores de la tarjeta (Flechita de menú + Botón Trabajando / Falta Info) */
+    .card-top-controls {
       position: absolute;
       top: 0.85rem;
       right: 0.85rem;
-      gap: 0.4rem;
-      z-index: 20;
-    }
-
-    .kanban-card.has-working-btn .card-actions,
-    .kanban-card.has-paused-btn .card-actions {
-      right: 3.1rem;
-    }
-
-    .kanban-card:hover .card-actions {
       display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      z-index: 30;
+    }
+
+    .card-menu-container {
+      position: relative;
+    }
+
+    .card-menu-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .kanban-card:hover .card-menu-btn,
+    .card-menu-btn.active {
+      background: rgba(30, 41, 59, 0.95);
+      border-color: rgba(255, 255, 255, 0.35);
+      color: #ffffff;
+    }
+
+    .card-menu-btn:hover {
+      background: rgba(51, 65, 85, 0.95);
+      transform: scale(1.08);
+      color: #ffffff;
+    }
+
+    .card-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 5px);
+      right: 0;
+      min-width: 148px;
+      background: #0f1420;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 0.75rem;
+      box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.85), 0 0 1px rgba(255, 255, 255, 0.2);
+      padding: 0.35rem;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+    }
+
+    .card-dropdown-menu.show {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      animation: menuFadeIn 0.15s ease-out;
+    }
+
+    @keyframes menuFadeIn {
+      from { opacity: 0; transform: translateY(-4px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      border-radius: 0.5rem;
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 3px 0;
+    }
+
+    /* Subtareas y barra de progreso verde jade (#00E599) */
+    .card-progress-section {
+      cursor: default;
+    }
+
+    .subtasks-panel {
+      display: none;
+    }
+
+    .subtasks-panel.expanded {
+      display: flex;
+      animation: subtasksSlideDown 0.2s ease-out;
+    }
+
+    @keyframes subtasksSlideDown {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .custom-subtask-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border: 1.5px solid #475569;
+      border-radius: 4px;
+      outline: none;
+      background-color: rgba(15, 23, 42, 0.9);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .custom-subtask-checkbox:checked {
+      background-color: #00E599;
+      border-color: #00E599;
+      box-shadow: 0 0 8px rgba(0, 229, 153, 0.55);
+    }
+
+    .custom-subtask-checkbox:checked::after {
+      content: '';
+      position: absolute;
+      left: 4.5px;
+      top: 1.5px;
+      width: 4px;
+      height: 8px;
+      border: solid #041a11;
+      border-width: 0 2.2px 2.2px 0;
+      transform: rotate(45deg);
     }
 
     /* Pulso ultra fluido y orgánico estilo iOS breathing glow en el color propio de la tarjeta */
@@ -368,10 +499,8 @@
       border: 1.5px solid rgba(255, 255, 255, 0.25);
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      position: absolute;
-      top: 0.85rem;
-      right: 0.85rem;
-      z-index: 10;
+      position: relative;
+      flex-shrink: 0;
     }
 
     .working-circle-btn:hover {
@@ -412,10 +541,8 @@
       color: #94a3b8;
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      position: absolute;
-      top: 0.85rem;
-      right: 0.85rem;
-      z-index: 10;
+      position: relative;
+      flex-shrink: 0;
     }
 
     .missing-info-btn:hover {
@@ -1285,6 +1412,219 @@
       });
     }
 
+    // Subtareas y Plantillas por defecto
+    const DEFAULT_SUBTASK_TEMPLATES = [
+      "Modelado",
+      "Texturizado",
+      "Amoblado",
+      "Iluminación",
+      "Pruebas de render",
+      "Afinación de detalles"
+    ];
+
+    const expandedSubtasksCards = new Set();
+    let openCardMenuId = null;
+
+    function parseTaskDescription(rawDesc) {
+      if (!rawDesc) return { text: '', subtasks: [] };
+      const match = rawDesc.match(/<!--subtasks:([\s\S]*?)-->/);
+      if (match) {
+        try {
+          const subtasks = JSON.parse(match[1]);
+          const cleanText = rawDesc.replace(/<!--subtasks:[\s\S]*?-->/, '').trim();
+          return { text: cleanText, subtasks: Array.isArray(subtasks) ? subtasks : [] };
+        } catch(e) {
+          console.warn("Error al procesar JSON de subtareas:", e);
+        }
+      }
+      return { text: (rawDesc || '').trim(), subtasks: [] };
+    }
+
+    function formatTaskDescription(text, subtasks) {
+      const clean = (text || '').trim();
+      if (!subtasks || subtasks.length === 0) return clean;
+      return `${clean}\n\n<!--subtasks:${JSON.stringify(subtasks)}-->`.trim();
+    }
+
+    function toggleCardMenu(taskId, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      const menu = document.getElementById(`card-menu-${taskId}`);
+      if (!menu) return;
+      
+      const isAlreadyOpen = menu.classList.contains('show');
+      closeAllCardMenus();
+      
+      if (!isAlreadyOpen) {
+        menu.classList.add('show');
+        openCardMenuId = taskId;
+        const btn = menu.previousElementSibling;
+        if (btn) btn.classList.add('active');
+      }
+    }
+
+    function closeAllCardMenus() {
+      document.querySelectorAll('.card-dropdown-menu.show').forEach(m => m.classList.remove('show'));
+      document.querySelectorAll('.card-menu-btn.active').forEach(b => b.classList.remove('active'));
+      openCardMenuId = null;
+    }
+
+    document.addEventListener('click', () => {
+      closeAllCardMenus();
+    });
+
+    function toggleSubtasksList(taskId, event) {
+      if (event) event.stopPropagation();
+      const panel = document.getElementById(`subtasks-panel-${taskId}`);
+      const btn = document.getElementById(`subtasks-toggle-btn-${taskId}`);
+      if (!panel) return;
+
+      if (expandedSubtasksCards.has(taskId)) {
+        expandedSubtasksCards.delete(taskId);
+        panel.classList.remove('expanded');
+        if (btn) {
+          btn.innerHTML = `<span>Subtareas</span><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+        }
+      } else {
+        expandedSubtasksCards.add(taskId);
+        panel.classList.add('expanded');
+        if (btn) {
+          btn.innerHTML = `<span>Ocultar</span><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="rotate-180"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+        }
+        const input = document.getElementById(`new-subtask-input-${taskId}`);
+        if (input) setTimeout(() => input.focus(), 60);
+      }
+    }
+
+    async function loadDefaultSubtasks(taskId, event) {
+      if (event) event.stopPropagation();
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks } = parseTaskDescription(task.description);
+      const existingTexts = new Set(subtasks.map(s => s.text.toLowerCase().trim()));
+      const newSubtasks = [...subtasks];
+      DEFAULT_SUBTASK_TEMPLATES.forEach(title => {
+        if (!existingTexts.has(title.toLowerCase())) {
+          newSubtasks.push({ text: title, done: false });
+        }
+      });
+
+      task.description = formatTaskDescription(text, newSubtasks);
+      expandedSubtasksCards.add(taskId);
+      renderBoard();
+
+      try {
+        await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: task.description })
+        });
+      } catch (e) {
+        console.error("Error al guardar subtareas por defecto:", e);
+      }
+    }
+
+    async function addNewSubtask(taskId, textVal) {
+      const clean = (textVal || '').trim();
+      if (!clean) return;
+
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks } = parseTaskDescription(task.description);
+      subtasks.push({ text: clean, done: false });
+      task.description = formatTaskDescription(text, subtasks);
+      expandedSubtasksCards.add(taskId);
+      renderBoard();
+
+      try {
+        await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: task.description })
+        });
+      } catch (e) {
+        console.error("Error al añadir subtarea:", e);
+      }
+    }
+
+    async function removeSubtask(taskId, index, event) {
+      if (event) event.stopPropagation();
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks } = parseTaskDescription(task.description);
+      if (!subtasks[index]) return;
+
+      subtasks.splice(index, 1);
+      task.description = formatTaskDescription(text, subtasks);
+      renderBoard();
+
+      try {
+        await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: task.description })
+        });
+      } catch (e) {
+        console.error("Error al eliminar subtarea:", e);
+      }
+    }
+
+    async function toggleSubtaskCheck(taskId, index, isChecked, event) {
+      if (event) event.stopPropagation();
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks } = parseTaskDescription(task.description);
+      if (!subtasks[index]) return;
+
+      subtasks[index].done = isChecked;
+      task.description = formatTaskDescription(text, subtasks);
+
+      // Actualización visual instantánea en el DOM
+      const total = subtasks.length;
+      const completed = subtasks.filter(s => s.done).length;
+      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      const card = document.getElementById(taskId);
+      if (card) {
+        const fill = card.querySelector('.progress-bar-fill');
+        if (fill) fill.style.width = `${pct}%`;
+        const pctLabel = card.querySelector('.progress-pct-value');
+        if (pctLabel) pctLabel.textContent = `${pct}%`;
+        const countLabel = card.querySelector('.progress-count-label');
+        if (countLabel) countLabel.textContent = `(${completed}/${total})`;
+
+        const subtaskRows = card.querySelectorAll('.subtask-item');
+        if (subtaskRows[index]) {
+          const labelText = subtaskRows[index].querySelector('.subtask-text');
+          if (labelText) {
+            if (isChecked) {
+              labelText.classList.add('line-through', 'text-slate-500');
+              labelText.classList.remove('text-slate-200');
+            } else {
+              labelText.classList.remove('line-through', 'text-slate-500');
+              labelText.classList.add('text-slate-200');
+            }
+          }
+        }
+      }
+
+      try {
+        await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: task.description })
+        });
+      } catch (e) {
+        console.error("Error al actualizar estado de subtarea:", e);
+      }
+    }
+
     function renderBoard() {
       updateProjectFilterDropdown();
 
@@ -1429,28 +1769,128 @@
               </button>
             `;
           }
+
+          // Parsear descripción y subtareas
+          const { text: cleanDescription, subtasks } = parseTaskDescription(task.description);
+          const showProgress = (colId === 'in-progress' || colId === 'paused');
+          const totalSubtasks = subtasks.length;
+          const completedSubtasks = subtasks.filter(s => s.done).length;
+          const percent = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+          const isExpanded = expandedSubtasksCards.has(task.id);
+
+          let progressBarHtml = '';
+          if (showProgress) {
+            let subtaskListHtml = '';
+            if (totalSubtasks === 0) {
+              subtaskListHtml = `
+                <div class="py-2.5 px-3 rounded-xl bg-slate-900/60 border border-white/5 text-center">
+                  <p class="text-[11px] text-slate-400 mb-2">Sin fases ni subtareas asignadas</p>
+                  <button onclick="loadDefaultSubtasks('${task.id}', event)" class="w-full text-xs font-bold bg-[#00E599]/15 hover:bg-[#00E599]/25 text-[#00E599] border border-[#00E599]/30 py-1.5 px-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <span>+ Cargar fases por defecto (Modelado, etc.)</span>
+                  </button>
+                </div>
+              `;
+            } else {
+              const itemsHtml = subtasks.map((st, sIdx) => `
+                <div class="subtask-item flex items-center justify-between group/st py-1 px-1.5 rounded-md hover:bg-white/[0.04] transition-colors" onclick="event.stopPropagation()">
+                  <label class="flex items-center gap-2 cursor-pointer flex-1 min-w-0 select-none">
+                    <input type="checkbox" ${st.done ? 'checked' : ''} onchange="toggleSubtaskCheck('${task.id}', ${sIdx}, this.checked, event)" class="custom-subtask-checkbox">
+                    <span class="subtask-text text-xs ${st.done ? 'line-through text-slate-500' : 'text-slate-200'} truncate transition-all">
+                      ${st.text}
+                    </span>
+                  </label>
+                  <button onclick="removeSubtask('${task.id}', ${sIdx}, event)" class="opacity-0 group-hover/st:opacity-100 text-slate-500 hover:text-red-400 p-0.5 rounded transition-all" title="Eliminar fase">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                </div>
+              `).join('');
+
+              subtaskListHtml = `
+                <div class="flex flex-col gap-0.5">
+                  ${itemsHtml}
+                </div>
+                <div class="flex items-center gap-1.5 mt-2 pt-1.5 border-t border-white/[0.06]" onclick="event.stopPropagation()">
+                  <input type="text" id="new-subtask-input-${task.id}" placeholder="+ Agregar otra fase..." 
+                         onkeydown="if(event.key==='Enter'){ addNewSubtask('${task.id}', this.value); this.value=''; }"
+                         class="bg-[#0b0f17] border border-white/10 rounded-md px-2 py-1 text-xs text-white placeholder-slate-500 flex-1 focus:outline-none focus:border-[#00E599]/60">
+                  <button onclick="const inp=document.getElementById('new-subtask-input-${task.id}'); if(inp.value.trim()){ addNewSubtask('${task.id}', inp.value); inp.value=''; }"
+                          class="bg-[#00E599]/20 hover:bg-[#00E599]/30 text-[#00E599] border border-[#00E599]/30 text-xs px-2.5 py-1 rounded-md font-bold transition-all">
+                    +
+                  </button>
+                </div>
+              `;
+            }
+
+            progressBarHtml = `
+              <div class="card-progress-section mt-3 pt-2.5 border-t border-white/[0.08]" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-between mb-1.5 text-xs">
+                  <div class="flex items-center gap-1.5 font-semibold text-slate-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00E599" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 11 12 14 22 4"></polyline>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span class="text-slate-300 font-bold">Progreso</span>
+                    <span class="progress-count-label text-[11px] text-slate-400 font-medium">${totalSubtasks > 0 ? `(${completedSubtasks}/${totalSubtasks})` : ''}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="progress-pct-value font-extrabold text-[12px] text-[#00E599] font-mono tracking-tight">${percent}%</span>
+                    <button id="subtasks-toggle-btn-${task.id}" onclick="toggleSubtasksList('${task.id}', event)" class="text-[11px] font-semibold text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-white/10 transition-colors flex items-center gap-1" title="Ver / editar subtareas">
+                      <span>${isExpanded ? 'Ocultar' : 'Subtareas'}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="w-full bg-[#0a0d14] rounded-full h-2 overflow-hidden border border-white/5 relative p-[0.5px]">
+                  <div class="progress-bar-fill h-full rounded-full transition-all duration-300 ease-out" 
+                       style="width: ${percent}%; background: linear-gradient(90deg, #00B377, #00E599, #5CFFC6); box-shadow: 0 0 10px rgba(0, 229, 153, 0.5);">
+                  </div>
+                </div>
+                <div id="subtasks-panel-${task.id}" class="subtasks-panel ${isExpanded ? 'expanded' : ''} mt-2.5 pt-2 border-t border-white/5 flex flex-col gap-1">
+                  ${subtaskListHtml}
+                </div>
+              </div>
+            `;
+          }
           
           card.innerHTML = `
             ${workingStatusHtml}
-            ${workingButtonHtml}
-            ${pausedButtonHtml}
-            <div class="card-actions">
-              <button class="action-icon-btn duplicate" onclick="duplicateTask('${task.id}', event)" title="Duplicar tarjeta">
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-              </button>
-              <button class="action-icon-btn" onclick="editTask('${task.id}')" title="Editar tarjeta">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              </button>
-              <button class="action-icon-btn delete" onclick="deleteTask('${task.id}')" title="Eliminar tarjeta">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
+            <div class="card-top-controls" onclick="event.stopPropagation()">
+              <div class="card-menu-container">
+                <button class="card-menu-btn" onclick="toggleCardMenu('${task.id}', event)" title="Opciones (Duplicar, Editar, Eliminar)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+                <div id="card-menu-${task.id}" class="card-dropdown-menu" onclick="event.stopPropagation()">
+                  <button class="dropdown-item" onclick="duplicateTask('${task.id}', event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>Duplicar</span>
+                  </button>
+                  <button class="dropdown-item" onclick="editTask('${task.id}', event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    <span>Editar</span>
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item text-red-400 hover:text-red-300 hover:bg-red-500/10" onclick="deleteTask('${task.id}', event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Eliminar</span>
+                  </button>
+                </div>
+              </div>
+              ${pausedButtonHtml}
+              ${workingButtonHtml}
             </div>
-            <div class="mb-2 flex flex-wrap items-center gap-1">${tagsHtml}</div>
-            <div class="font-bold text-base mb-1.5 text-white ${colId === 'in-progress' || colId === 'paused' ? 'pr-36' : 'pr-28'} leading-snug">${task.title}</div>
-            <div class="text-slate-400 text-xs leading-relaxed font-normal">${task.description}</div>
+
+            <div class="mb-2 flex flex-wrap items-center gap-1 ${colId === 'in-progress' || colId === 'paused' ? 'pr-20' : 'pr-12'}">${tagsHtml}</div>
+            <div class="font-bold text-base mb-1 text-white ${colId === 'in-progress' || colId === 'paused' ? 'pr-16' : 'pr-10'} leading-snug">${task.title}</div>
+            ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
+            ${progressBarHtml}
           `;
           
           card.addEventListener('dragstart', handleDragStart);
@@ -1561,6 +2001,10 @@
           const oldTask = tasksData.find(t => t.id === editingId);
           taskObj.col_id = oldTask ? oldTask.col_id : 'todo';
           
+          // Preservar subtareas existentes
+          const { subtasks } = parseTaskDescription(oldTask ? oldTask.description : '');
+          taskObj.description = formatTaskDescription(desc, subtasks);
+
           const res = await fetch(`${SUPABASE_URL}?id=eq.${editingId}`, {
             method: 'PATCH',
             headers: HEADERS,
@@ -1588,14 +2032,18 @@
       }
     }
 
-    function editTask(id) {
+    function editTask(id, event) {
+      if (event) event.stopPropagation();
+      closeAllCardMenus();
       const task = tasksData.find(t => t.id === id);
       if (!task) return;
       
       document.getElementById('modalTitle').innerText = 'Editar Tarjeta';
       document.getElementById('editingTaskId').value = task.id;
       document.getElementById('newTaskTitle').value = task.title;
-      document.getElementById('newTaskDesc').value = task.description;
+      
+      const { text } = parseTaskDescription(task.description);
+      document.getElementById('newTaskDesc').value = text;
       document.getElementById('newTaskPriority').checked = task.priority;
       const rawTag = task.tag_class || '';
       document.getElementById('newTaskMissingInfo').checked = rawTag.includes(':missing_info');
@@ -1613,19 +2061,26 @@
 
     async function duplicateTask(id, event) {
       if (event) event.stopPropagation();
+      closeAllCardMenus();
       const original = tasksData.find(t => t.id === id);
       if (!original) return;
 
       try {
         const cleanTag = (original.tag_class || '#3b82f6').replace(':working', '');
         const newId = 't' + Date.now();
+        
+        // Copiar subtareas con estado desmarcado para empezar fresco
+        const { text, subtasks } = parseTaskDescription(original.description);
+        const freshSubtasks = subtasks.map(s => ({ text: s.text, done: false }));
+        const newDesc = formatTaskDescription(text, freshSubtasks);
+
         const newTask = {
           id: newId,
           col_id: original.col_id || 'todo',
           project: original.project || 'Sin Proyecto',
           tag_class: cleanTag,
           title: original.title ? `${original.title} (Copia)` : 'Copia',
-          description: original.description || '',
+          description: newDesc,
           priority: Boolean(original.priority)
         };
 
@@ -1651,7 +2106,9 @@
       }
     }
 
-    async function deleteTask(id) {
+    async function deleteTask(id, event) {
+      if (event) event.stopPropagation();
+      closeAllCardMenus();
       if(!confirm("¿Estás seguro de eliminar esta tarjeta?")) return;
       try {
         const res = await fetch(`${SUPABASE_URL}?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
