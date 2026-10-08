@@ -22,9 +22,9 @@
     
     .kanban-board {
       display: flex;
-      gap: 1.25rem;
+      gap: 1.15rem;
       height: calc(100vh - 5.75rem);
-      padding: 1.25rem 1.5rem 1.5rem 1.5rem;
+      padding: 1.15rem 1.25rem 1.25rem 1.25rem;
       width: 100%;
       box-sizing: border-box;
       align-items: stretch;
@@ -33,7 +33,7 @@
 
     .kanban-column {
       flex: 1 1 0%;
-      min-width: 280px;
+      min-width: 250px;
       background: #080a10;
       border-radius: 1.35rem;
       display: flex;
@@ -75,6 +75,17 @@
     .kanban-column-progress .kanban-column-header {
       background: linear-gradient(180deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.04) 100%) !important;
       border-bottom: 1px solid rgba(168, 85, 247, 0.25) !important;
+      backdrop-filter: blur(16px);
+    }
+
+    .kanban-column-review {
+      border: 1px solid rgba(6, 182, 212, 0.45) !important;
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.06) 0%, #080a10 140px) !important;
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(6, 182, 212, 0.18), inset 0 1px 0 rgba(6, 182, 212, 0.25) !important;
+    }
+    .kanban-column-review .kanban-column-header {
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.16) 0%, rgba(6, 182, 212, 0.04) 100%) !important;
+      border-bottom: 1px solid rgba(6, 182, 212, 0.25) !important;
       backdrop-filter: blur(16px);
     }
 
@@ -672,12 +683,26 @@
       <div class="kanban-cards dropzone" id="in-progress"></div>
     </div>
     
-    <!-- Columna 4: Terminado -->
+    <!-- Columna 4: En Revisión -->
+    <div class="kanban-column kanban-column-review">
+      <div class="kanban-column-header">
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.3)]">
+            4
+          </div>
+          <span class="text-sm font-bold tracking-tight text-white">En Revisión</span>
+        </div>
+        <span class="bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 px-2.5 py-0.5 rounded-full text-xs font-semibold" id="count-review">0</span>
+      </div>
+      <div class="kanban-cards dropzone" id="review"></div>
+    </div>
+
+    <!-- Columna 5: Terminado -->
     <div class="kanban-column kanban-column-done">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
           <div class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-            4
+            5
           </div>
           <span class="text-sm font-bold tracking-tight text-white">Terminado</span>
         </div>
@@ -1212,7 +1237,7 @@
     function renderBoard() {
       updateProjectFilterDropdown();
 
-      ['todo', 'paused', 'in-progress', 'done-col'].forEach(colId => {
+      ['todo', 'paused', 'in-progress', 'review', 'done-col'].forEach(colId => {
         const col = document.getElementById(colId);
         if (!col) return;
         col.innerHTML = '';
@@ -1224,8 +1249,8 @@
           colTasks = colTasks.filter(t => t.project === currentProjectFilter);
         }
 
-        // 2. Ordenar y agrupar siempre por proyectos en "Por Iniciar", "En Pausa" y "Terminado"
-        if (colId === 'todo' || colId === 'paused' || colId === 'done-col') {
+        // 2. Ordenar y agrupar siempre por proyectos en "Por Iniciar", "En Pausa", "En Revisión" y "Terminado"
+        if (colId === 'todo' || colId === 'paused' || colId === 'review' || colId === 'done-col') {
           colTasks.sort((a, b) => {
             const pCompare = (a.project || '').localeCompare(b.project || '', undefined, { sensitivity: 'base' });
             if (pCompare !== 0) return pCompare;
@@ -1302,6 +1327,9 @@
           let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>`;
           if (colId === 'paused') {
             tagsHtml += `<span class="tag" style="background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.45); box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);">⏸️ Pausado</span>`;
+          }
+          if (colId === 'review') {
+            tagsHtml += `<span class="tag" style="background: rgba(6, 182, 212, 0.18); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.45); box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);">🔍 En Revisión</span>`;
           }
           if (task.priority) {
             tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
