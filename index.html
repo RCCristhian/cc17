@@ -1426,24 +1426,114 @@
     let openCardMenuId = null;
 
     function parseTaskDescription(rawDesc) {
-      if (!rawDesc) return { text: '', subtasks: [] };
-      const match = rawDesc.match(/<!--subtasks:([\s\S]*?)-->/);
+      if (!rawDesc) return { text: '', subtasks: [], order: null };
+      let cleanText = rawDesc;
+      let order = null;
+      let subtasks = [];
+
+      const orderMatch = cleanText.match(/<!--order:(-?\d+)-->/);
+      if (orderMatch) {
+        order = parseInt(orderMatch[1], 10);
+        cleanText = cleanText.replace(/<!--order:-?\d+-->/, '').trim();
+      }
+
+      const match = cleanText.match(/<!--subtasks:([\s\S]*?)-->/);
       if (match) {
         try {
-          const subtasks = JSON.parse(match[1]);
-          const cleanText = rawDesc.replace(/<!--subtasks:[\s\S]*?-->/, '').trim();
-          return { text: cleanText, subtasks: Array.isArray(subtasks) ? subtasks : [] };
+          const parsed = JSON.parse(match[1]);
+          subtasks = Array.isArray(parsed) ? parsed : [];
+          cleanText = cleanText.replace(/<!--subtasks:[\s\S]*?-->/, '').trim();
         } catch(e) {
           console.warn("Error al procesar JSON de subtareas:", e);
         }
       }
-      return { text: (rawDesc || '').trim(), subtasks: [] };
+
+      return { text: cleanText.trim(), subtasks, order };
     }
 
-    function formatTaskDescription(text, subtasks) {
+    function formatTaskDescription(text, subtasks, order) {
       const clean = (text || '').trim();
-      if (!subtasks || subtasks.length === 0) return clean;
-      return `${clean}\n\n<!--subtasks:${JSON.stringify(subtasks)}-->`.trim();
+      const parts = [];
+      if (clean) parts.push(clean);
+      if (order !== undefined && order !== null && !isNaN(order)) {
+        parts.push(`<!--order:${order}-->`);
+      }
+      if (subtasks && subtasks.length > 0) {
+        parts.push(`<!--subtasks:${JSON.stringify(subtasks)}-->`);
+      }
+      return parts.join('\n\n').trim();
+    }
+
+    function getTaskOrder(task) {
+      if (!task) return null;
+      const { order } = parseTaskDescription(task.description);
+      if (order !== null && !isNaN(order)) return order;
+      return null;
+    }
+
+    async function moveTaskWithinProject(taskId, direction, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      closeAllCardMenus();
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const colId = task.col_id;
+      const projectTasks = tasksData
+        .filter(t => t.col_id === colId && (t.project || '').trim().toLowerCase() === (task.project || '').trim().toLowerCase());
+
+      if (projectTasks.length <= 1) return;
+
+      // Ordenar según el orden visual actual en el tablero
+      projectTasks.sort((a, b) => {
+        const orderA = getTaskOrder(a);
+        const orderB = getTaskOrder(b);
+        if (orderA !== null && orderB !== null) {
+          if (orderA !== orderB) return orderA - orderB;
+        } else if (orderA !== null) {
+          return -1;
+        } else if (orderB !== null) {
+          return 1;
+        }
+        const prioDiff = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+        if (prioDiff !== 0) return prioDiff;
+        return tasksData.indexOf(a) - tasksData.indexOf(b);
+      });
+
+      const currIdx = projectTasks.findIndex(t => t.id === taskId);
+      if (currIdx === -1) return;
+
+      const targetIdx = direction === 'up' ? currIdx - 1 : currIdx + 1;
+      if (targetIdx < 0 || targetIdx >= projectTasks.length) return;
+
+      // Intercambiar
+      const temp = projectTasks[currIdx];
+      projectTasks[currIdx] = projectTasks[targetIdx];
+      projectTasks[targetIdx] = temp;
+
+      // Asignar nuevos órdenes correlativos
+      const updates = [];
+      projectTasks.forEach((t, idx) => {
+        const { text, subtasks } = parseTaskDescription(t.description);
+        t.description = formatTaskDescription(text, subtasks, idx);
+        updates.push(
+          fetch(`${SUPABASE_URL}?id=eq.${t.id}`, {
+            method: 'PATCH',
+            headers: HEADERS,
+            body: JSON.stringify({ description: t.description })
+          })
+        );
+      });
+
+      renderBoard();
+
+      try {
+        await Promise.allSettled(updates);
+      } catch (err) {
+        console.error("Error al persistir reordenamiento:", err);
+      }
     }
 
     function toggleCardMenu(taskId, event) {
@@ -1497,7 +1587,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks } = parseTaskDescription(task.description);
+      const { text, subtasks, order } = parseTaskDescription(task.description);
       const existingTexts = new Set(subtasks.map(s => s.text.toLowerCase().trim()));
       const newSubtasks = [...subtasks];
       DEFAULT_SUBTASK_TEMPLATES.forEach(title => {
@@ -1506,7 +1596,7 @@
         }
       });
 
-      task.description = formatTaskDescription(text, newSubtasks);
+      task.description = formatTaskDescription(text, newSubtasks, order);
       expandedSubtasksCards.add(taskId);
       renderBoard();
 
@@ -1528,9 +1618,9 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks } = parseTaskDescription(task.description);
+      const { text, subtasks, order } = parseTaskDescription(task.description);
       subtasks.push({ text: clean, done: false });
-      task.description = formatTaskDescription(text, subtasks);
+      task.description = formatTaskDescription(text, subtasks, order);
       expandedSubtasksCards.add(taskId);
       renderBoard();
 
@@ -1550,11 +1640,11 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks } = parseTaskDescription(task.description);
+      const { text, subtasks, order } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       subtasks.splice(index, 1);
-      task.description = formatTaskDescription(text, subtasks);
+      task.description = formatTaskDescription(text, subtasks, order);
       renderBoard();
 
       try {
@@ -1573,11 +1663,11 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks } = parseTaskDescription(task.description);
+      const { text, subtasks, order } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       subtasks[index].done = isChecked;
-      task.description = formatTaskDescription(text, subtasks);
+      task.description = formatTaskDescription(text, subtasks, order);
 
       // Actualización visual instantánea en el DOM
       const total = subtasks.length;
@@ -1634,16 +1724,35 @@
           colTasks = colTasks.filter(t => t.project === currentProjectFilter);
         }
 
-        // 2. Ordenar y agrupar siempre por proyectos en "Por Iniciar", "En Pausa", "En Revisión" y "Terminado"
-        if (colId === 'todo' || colId === 'paused' || colId === 'review' || colId === 'done-col') {
-          colTasks.sort((a, b) => {
-            const pCompare = (a.project || '').localeCompare(b.project || '', undefined, { sensitivity: 'base' });
-            if (pCompare !== 0) return pCompare;
-            return (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
-          });
-        }
+        // 2. Ordenar y agrupar siempre por proyectos en todas las columnas
+        colTasks.sort((a, b) => {
+          const pCompare = (a.project || '').localeCompare(b.project || '', undefined, { sensitivity: 'base' });
+          if (pCompare !== 0) return pCompare;
+
+          const orderA = getTaskOrder(a);
+          const orderB = getTaskOrder(b);
+
+          if (orderA !== null && orderB !== null) {
+            if (orderA !== orderB) return orderA - orderB;
+          } else if (orderA !== null) {
+            return -1;
+          } else if (orderB !== null) {
+            return 1;
+          }
+
+          const prioDiff = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+          if (prioDiff !== 0) return prioDiff;
+
+          return tasksData.indexOf(a) - tasksData.indexOf(b);
+        });
         
         colTasks.forEach(task => {
+          const sameProjectInCol = colTasks.filter(t => (t.project || '').trim().toLowerCase() === (task.project || '').trim().toLowerCase());
+          const projIdx = sameProjectInCol.findIndex(t => t.id === task.id);
+          const hasMultipleInProject = sameProjectInCol.length > 1;
+          const isFirstInProject = (projIdx === 0);
+          const isLastInProject = (projIdx === sameProjectInCol.length - 1);
+
           const card = document.createElement('div');
           card.draggable = true;
           card.id = task.id;
@@ -1858,6 +1967,25 @@
                   </svg>
                 </button>
                 <div id="card-menu-${task.id}" class="card-dropdown-menu" onclick="event.stopPropagation()">
+                  ${hasMultipleInProject ? `
+                    <button class="dropdown-item ${isFirstInProject ? 'opacity-30 pointer-events-none' : ''}" 
+                            onclick="${isFirstInProject ? '' : `moveTaskWithinProject('${task.id}', 'up', event)`}"
+                            title="Mover arriba dentro del proyecto">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                      </svg>
+                      <span>Mover arriba</span>
+                    </button>
+                    <button class="dropdown-item ${isLastInProject ? 'opacity-30 pointer-events-none' : ''}" 
+                            onclick="${isLastInProject ? '' : `moveTaskWithinProject('${task.id}', 'down', event)`}"
+                            title="Mover abajo dentro del proyecto">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                      <span>Mover abajo</span>
+                    </button>
+                    <div class="dropdown-divider"></div>
+                  ` : ''}
                   <button class="dropdown-item" onclick="duplicateTask('${task.id}', event)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -1994,9 +2122,9 @@
           const oldTask = tasksData.find(t => t.id === editingId);
           taskObj.col_id = oldTask ? oldTask.col_id : 'todo';
           
-          // Preservar subtareas existentes
-          const { subtasks } = parseTaskDescription(oldTask ? oldTask.description : '');
-          taskObj.description = formatTaskDescription(desc, subtasks);
+          // Preservar subtareas y orden existentes
+          const { subtasks, order } = parseTaskDescription(oldTask ? oldTask.description : '');
+          taskObj.description = formatTaskDescription(desc, subtasks, order);
 
           const res = await fetch(`${SUPABASE_URL}?id=eq.${editingId}`, {
             method: 'PATCH',
@@ -2062,10 +2190,11 @@
         const cleanTag = (original.tag_class || '#3b82f6').replace(':working', '');
         const newId = 't' + Date.now();
         
-        // Copiar subtareas con estado desmarcado para empezar fresco
-        const { text, subtasks } = parseTaskDescription(original.description);
+        // Copiar subtareas con estado desmarcado para empezar fresco y calcular orden siguiente
+        const { text, subtasks, order } = parseTaskDescription(original.description);
         const freshSubtasks = subtasks.map(s => ({ text: s.text, done: false }));
-        const newDesc = formatTaskDescription(text, freshSubtasks);
+        const newOrder = (order !== null && !isNaN(order)) ? order + 1 : null;
+        const newDesc = formatTaskDescription(text, freshSubtasks, newOrder);
 
         const newTask = {
           id: newId,
@@ -2142,11 +2271,22 @@
 
     async function handleDragEnd(e) {
       this.classList.remove('dragging');
-      const newColId = this.parentElement.id;
+      const targetCol = this.parentElement;
+      if (!targetCol) {
+        draggedCard = null;
+        return;
+      }
+      const newColId = targetCol.id;
       const id = this.id;
       
       const task = tasksData.find(t => t.id === id);
-      if (task && task.col_id !== newColId) {
+      if (!task) {
+        draggedCard = null;
+        return;
+      }
+
+      const colChanged = (task.col_id !== newColId);
+      if (colChanged) {
         task.col_id = newColId;
         // Si sale de en-progreso, limpiar el estado ':working'
         if (newColId !== 'in-progress' && task.tag_class && task.tag_class.includes(':working')) {
@@ -2156,20 +2296,52 @@
         if (newColId !== 'paused' && task.tag_class && task.tag_class.includes(':missing_info')) {
           task.tag_class = task.tag_class.replace(':missing_info', '');
         }
-        renderBoard();
-        try {
-          const res = await fetch(`${SUPABASE_URL}?id=eq.${id}`, {
+      }
+
+      // Reordenar las tarjetas de este proyecto según la posición visual resultante en la columna
+      const domCards = [...targetCol.querySelectorAll('.kanban-card')];
+      const sameProjectCards = domCards
+        .map(el => tasksData.find(t => t.id === el.id))
+        .filter(t => t && (t.project || '').trim().toLowerCase() === (task.project || '').trim().toLowerCase());
+
+      const updates = [];
+      if (sameProjectCards.length > 0) {
+        sameProjectCards.forEach((t, idx) => {
+          const { text, subtasks } = parseTaskDescription(t.description);
+          t.description = formatTaskDescription(text, subtasks, idx);
+          const payload = { description: t.description };
+          if (t.id === id && colChanged) {
+            payload.col_id = newColId;
+            payload.tag_class = t.tag_class;
+          }
+          updates.push(
+            fetch(`${SUPABASE_URL}?id=eq.${t.id}`, {
+              method: 'PATCH',
+              headers: HEADERS,
+              body: JSON.stringify(payload)
+            })
+          );
+        });
+      } else if (colChanged) {
+        const { text, subtasks } = parseTaskDescription(task.description);
+        task.description = formatTaskDescription(text, subtasks, 0);
+        updates.push(
+          fetch(`${SUPABASE_URL}?id=eq.${id}`, {
             method: 'PATCH',
             headers: HEADERS,
-            body: JSON.stringify({ col_id: newColId, tag_class: task.tag_class })
-          });
-          if (!res.ok) throw new Error("HTTP " + res.status + " " + await res.text());
-        } catch (e) {
-          alert("Error al guardar posición: " + e.message);
-          console.error("No se pudo guardar la posición en el servidor");
-        }
+            body: JSON.stringify({ col_id: newColId, tag_class: task.tag_class, description: task.description })
+          })
+        );
       }
+
+      renderBoard();
       draggedCard = null;
+
+      try {
+        await Promise.allSettled(updates);
+      } catch (err) {
+        console.error("Error al persistir orden en el servidor:", err);
+      }
     }
 
     document.querySelectorAll('.dropzone').forEach(zone => {
