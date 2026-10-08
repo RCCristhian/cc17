@@ -406,11 +406,11 @@
     }
 
     .subtasks-panel {
-      display: none;
+      display: none !important;
     }
 
     .subtasks-panel.expanded {
-      display: flex;
+      display: flex !important;
       animation: subtasksSlideDown 0.2s ease-out;
     }
 
@@ -1476,23 +1476,17 @@
     });
 
     function toggleSubtasksList(taskId, event) {
-      if (event) event.stopPropagation();
-      const panel = document.getElementById(`subtasks-panel-${taskId}`);
-      const btn = document.getElementById(`subtasks-toggle-btn-${taskId}`);
-      if (!panel) return;
-
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
       if (expandedSubtasksCards.has(taskId)) {
         expandedSubtasksCards.delete(taskId);
-        panel.classList.remove('expanded');
-        if (btn) {
-          btn.innerHTML = `<span>Subtareas</span><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-        }
       } else {
         expandedSubtasksCards.add(taskId);
-        panel.classList.add('expanded');
-        if (btn) {
-          btn.innerHTML = `<span>Ocultar</span><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="rotate-180"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-        }
+      }
+      renderBoard();
+      if (expandedSubtasksCards.has(taskId)) {
         const input = document.getElementById(`new-subtask-input-${taskId}`);
         if (input) setTimeout(() => input.focus(), 60);
       }
@@ -1835,9 +1829,8 @@
                   </div>
                   <div class="flex items-center gap-2">
                     <span class="progress-pct-value font-extrabold text-[12px] text-[#00E599] font-mono tracking-tight">${percent}%</span>
-                    <button id="subtasks-toggle-btn-${task.id}" onclick="toggleSubtasksList('${task.id}', event)" class="text-[11px] font-semibold text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-white/10 transition-colors flex items-center gap-1" title="Ver / editar subtareas">
-                      <span>${isExpanded ? 'Ocultar' : 'Subtareas'}</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}">
+                    <button onclick="toggleSubtasksList('${task.id}', event)" class="w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-60 hover:opacity-100" title="${isExpanded ? 'Ocultar subtareas' : 'Ver subtareas'}">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-200 ${isExpanded ? 'rotate-180 text-[#00E599]' : ''}">
                         <polyline points="6 9 12 15 18 9"></polyline>
                       </svg>
                     </button>
@@ -1848,7 +1841,7 @@
                        style="width: ${percent}%; background: linear-gradient(90deg, #00B377, #00E599, #5CFFC6); box-shadow: 0 0 10px rgba(0, 229, 153, 0.5);">
                   </div>
                 </div>
-                <div id="subtasks-panel-${task.id}" class="subtasks-panel ${isExpanded ? 'expanded' : ''} mt-2.5 pt-2 border-t border-white/5 flex flex-col gap-1">
+                <div id="subtasks-panel-${task.id}" class="subtasks-panel ${isExpanded ? 'expanded' : ''} mt-2.5 pt-2 border-t border-white/5 flex-col gap-1">
                   ${subtaskListHtml}
                 </div>
               </div>
