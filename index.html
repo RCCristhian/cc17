@@ -1471,71 +1471,6 @@
       return null;
     }
 
-    async function moveTaskWithinProject(taskId, direction, event) {
-      if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-      }
-      closeAllCardMenus();
-      const task = tasksData.find(t => t.id === taskId);
-      if (!task) return;
-
-      const colId = task.col_id;
-      const projectTasks = tasksData
-        .filter(t => t.col_id === colId && (t.project || '').trim().toLowerCase() === (task.project || '').trim().toLowerCase());
-
-      if (projectTasks.length <= 1) return;
-
-      // Ordenar según el orden visual actual en el tablero
-      projectTasks.sort((a, b) => {
-        const orderA = getTaskOrder(a);
-        const orderB = getTaskOrder(b);
-        if (orderA !== null && orderB !== null) {
-          if (orderA !== orderB) return orderA - orderB;
-        } else if (orderA !== null) {
-          return -1;
-        } else if (orderB !== null) {
-          return 1;
-        }
-        const prioDiff = (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
-        if (prioDiff !== 0) return prioDiff;
-        return tasksData.indexOf(a) - tasksData.indexOf(b);
-      });
-
-      const currIdx = projectTasks.findIndex(t => t.id === taskId);
-      if (currIdx === -1) return;
-
-      const targetIdx = direction === 'up' ? currIdx - 1 : currIdx + 1;
-      if (targetIdx < 0 || targetIdx >= projectTasks.length) return;
-
-      // Intercambiar
-      const temp = projectTasks[currIdx];
-      projectTasks[currIdx] = projectTasks[targetIdx];
-      projectTasks[targetIdx] = temp;
-
-      // Asignar nuevos órdenes correlativos
-      const updates = [];
-      projectTasks.forEach((t, idx) => {
-        const { text, subtasks } = parseTaskDescription(t.description);
-        t.description = formatTaskDescription(text, subtasks, idx);
-        updates.push(
-          fetch(`${SUPABASE_URL}?id=eq.${t.id}`, {
-            method: 'PATCH',
-            headers: HEADERS,
-            body: JSON.stringify({ description: t.description })
-          })
-        );
-      });
-
-      renderBoard();
-
-      try {
-        await Promise.allSettled(updates);
-      } catch (err) {
-        console.error("Error al persistir reordenamiento:", err);
-      }
-    }
-
     function toggleCardMenu(taskId, event) {
       if (event) {
         event.stopPropagation();
@@ -1747,12 +1682,6 @@
         });
         
         colTasks.forEach(task => {
-          const sameProjectInCol = colTasks.filter(t => (t.project || '').trim().toLowerCase() === (task.project || '').trim().toLowerCase());
-          const projIdx = sameProjectInCol.findIndex(t => t.id === task.id);
-          const hasMultipleInProject = sameProjectInCol.length > 1;
-          const isFirstInProject = (projIdx === 0);
-          const isLastInProject = (projIdx === sameProjectInCol.length - 1);
-
           const card = document.createElement('div');
           card.draggable = true;
           card.id = task.id;
@@ -1967,25 +1896,6 @@
                   </svg>
                 </button>
                 <div id="card-menu-${task.id}" class="card-dropdown-menu" onclick="event.stopPropagation()">
-                  ${hasMultipleInProject ? `
-                    <button class="dropdown-item ${isFirstInProject ? 'opacity-30 pointer-events-none' : ''}" 
-                            onclick="${isFirstInProject ? '' : `moveTaskWithinProject('${task.id}', 'up', event)`}"
-                            title="Mover arriba dentro del proyecto">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="18 15 12 9 6 15"></polyline>
-                      </svg>
-                      <span>Mover arriba</span>
-                    </button>
-                    <button class="dropdown-item ${isLastInProject ? 'opacity-30 pointer-events-none' : ''}" 
-                            onclick="${isLastInProject ? '' : `moveTaskWithinProject('${task.id}', 'down', event)`}"
-                            title="Mover abajo dentro del proyecto">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                      </svg>
-                      <span>Mover abajo</span>
-                    </button>
-                    <div class="dropdown-divider"></div>
-                  ` : ''}
                   <button class="dropdown-item" onclick="duplicateTask('${task.id}', event)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
