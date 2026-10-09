@@ -552,13 +552,13 @@
       100% { box-shadow: 0 0 16px rgba(0, 229, 153, 0.85); }
     }
 
-    /* Delimitador de límite de avance delgado en color blanco (para En Progreso y En Revisión) */
+    /* Delimitador de límite de avance ultra fino en color blanco (para En Pausa y En Revisión) */
     .progress-limit-pin {
       position: absolute;
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 8px;
-      height: 14px;
+      width: 4px;
+      height: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -569,30 +569,30 @@
 
     .progress-limit-pin .pin-line {
       position: absolute;
-      width: 1.5px;
+      width: 1px;
       height: 100%;
       background: #ffffff;
       border-radius: 9999px;
-      box-shadow: 0 0 4px #ffffff, 0 0 8px rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 3px #ffffff, 0 0 6px rgba(255, 255, 255, 0.75);
     }
 
     .progress-limit-pin .pin-bead {
       position: absolute;
-      width: 5px;
-      height: 5px;
+      width: 2.5px;
+      height: 2.5px;
       border-radius: 50%;
       background: #ffffff;
-      box-shadow: 0 0 4px #ffffff, 0 0 8px rgba(255, 255, 255, 0.95), 0 0 12px rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 3px #ffffff, 0 0 5px rgba(255, 255, 255, 0.9);
     }
 
     @keyframes limitPinPulse {
       0%, 100% {
-        transform: translate(-50%, -50%) scale(1);
-        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+        opacity: 0.85;
+        filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.6));
       }
       50% {
-        transform: translate(-50%, -50%) scale(1.12);
-        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 1)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+        opacity: 1;
+        filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95));
       }
     }
 
@@ -2395,8 +2395,10 @@
             const fillAnimClass = hasProgressAnim ? 'is-in-progress' : '';
             const minWidthStyle = (hasProgressAnim && percent === 0) ? 'min-width: 6px;' : '';
 
+            // El límite blanco ultra fino solo aparece en Pausado y en Revisión (no en En Progreso)
+            const showLimitPin = (colId === 'paused' || colId === 'review') && percent > 0;
             let limitPinHtml = '';
-            if (hasProgressAnim && percent > 0) {
+            if (showLimitPin) {
               limitPinHtml = `
                 <span class="progress-limit-pin" style="left: ${percent}%;">
                   <span class="pin-line"></span>
