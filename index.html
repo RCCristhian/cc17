@@ -517,6 +517,40 @@
       box-shadow: 0 0 12px rgba(0, 229, 153, 0.25);
     }
 
+    /* Animación sutil de haz de luz y pulso activo en barra de progreso de En Progreso */
+    .progress-bar-fill.is-in-progress {
+      position: relative;
+      overflow: hidden;
+      animation: progressGlowPulse 2.8s infinite alternate ease-in-out;
+    }
+
+    .progress-bar-fill.is-in-progress::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.65) 50%,
+        transparent 100%
+      );
+      transform: translateX(-100%);
+      animation: progressBeamMove 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes progressBeamMove {
+      0% { transform: translateX(-100%); }
+      60%, 100% { transform: translateX(100%); }
+    }
+
+    @keyframes progressGlowPulse {
+      0% { box-shadow: 0 0 6px rgba(0, 229, 153, 0.35); }
+      100% { box-shadow: 0 0 16px rgba(0, 229, 153, 0.85); }
+    }
+
     /* Pulso ultra fluido y orgánico estilo iOS breathing glow en el color propio de la tarjeta */
     @keyframes workingCardPulse {
       0%, 100% {
@@ -859,16 +893,26 @@
         </select>
       </div>
 
-      <button onclick="openProjectManagerModal()" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold bg-[#131722] hover:bg-[#1a2030] text-slate-200 border border-white/10 hover:border-white/20 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]">
+      <button id="btnManageProjects" onclick="openProjectManagerModal()" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold bg-[#131722] hover:bg-[#1a2030] text-slate-200 border border-white/10 hover:border-white/20 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         <span class="hidden sm:inline">Gestionar Proyectos</span>
         <span class="sm:hidden">Proyectos</span>
       </button>
 
-      <button onclick="openAddModal()" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98]">
+      <button id="btnNewTask" onclick="openAddModal()" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98]">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         <span class="hidden sm:inline">Nueva Tarjeta</span>
         <span class="sm:hidden">Nueva</span>
+      </button>
+
+      <!-- Botón discreto de acceso Administrador -->
+      <button id="adminAuthBtn" onclick="handleAdminAuthClick()" 
+              class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-200 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/20 transition-all opacity-35 hover:opacity-90 shrink-0" 
+              title="Modo Visor">
+        <svg id="adminAuthIcon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
       </button>
     </div>
   </header>
@@ -1080,6 +1124,70 @@
     </div>
   </div>
 
+  <!-- Modal de Autenticación de Administrador (PIN) -->
+  <div id="adminAuthModal" class="modal-overlay">
+    <div class="modal-content max-w-sm text-center">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-700 border border-white/10 flex items-center justify-center mx-auto mb-3 shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00E599" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+
+      <h2 class="text-base font-extrabold tracking-tight text-white mb-1">
+        Acceso de Edición
+      </h2>
+      <p class="text-xs text-slate-400 mb-4">
+        Ingresa tu PIN para desbloquear el modo administrador y editar el tablero.
+      </p>
+
+      <form id="adminPinForm" onsubmit="submitAdminPin(event)">
+        <div class="flex justify-center mb-3">
+          <input type="password" id="adminPinInput" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="••••" autocomplete="off"
+                 class="w-40 text-center tracking-[0.5em] text-xl font-bold bg-[#080a0f] border border-white/15 focus:border-[#00E599] rounded-xl py-2 px-3 text-white focus:outline-none focus:ring-1 focus:ring-[#00E599]/50 transition-all">
+        </div>
+        <div id="adminPinError" class="text-xs text-red-400 font-semibold mb-3 hidden">
+          PIN incorrecto. Inténtalo de nuevo.
+        </div>
+        
+        <div class="flex gap-2">
+          <button type="button" onclick="closeAdminAuthModal()" class="flex-1 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 py-2 text-xs font-bold text-black bg-[#00E599] hover:bg-[#5CFFC6] shadow-md shadow-[#00E599]/20 rounded-xl transition-all active:scale-95">
+            Desbloquear
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para confirmar salir de Modo Administrador -->
+  <div id="adminLogoutModal" class="modal-overlay">
+    <div class="modal-content max-w-sm text-center">
+      <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-[#00E599]/30 flex items-center justify-center mx-auto mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00E599" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+        </svg>
+      </div>
+      <h2 class="text-base font-extrabold tracking-tight text-white mb-1">
+        Modo Administrador Activo
+      </h2>
+      <p class="text-xs text-slate-400 mb-4">
+        Actualmente puedes editar y mover tarjetas. ¿Deseas bloquear el tablero y volver al modo solo visualización?
+      </p>
+      <div class="flex gap-2">
+        <button type="button" onclick="closeAdminLogoutModal()" class="flex-1 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all">
+          Continuar editando
+        </button>
+        <button type="button" onclick="logoutAdmin()" class="flex-1 py-2 text-xs font-bold text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-xl transition-all active:scale-95">
+          Bloquear Tablero
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = 'https://cegnqgqftdiramaoebsy.supabase.co/rest/v1/tasks';
     const SUPABASE_KEY = 'sb_publishable_oOBGRvcqeH1QxFnG7zIY0g_A_eNAk6u';
@@ -1098,6 +1206,114 @@
     ];
 
     let tasksData = [];
+
+    // --- SISTEMA DE ACCESO Y SEGURIDAD (ADMIN PIN: 4322) ---
+    const ADMIN_PIN = "4322";
+    let isAdmin = false;
+
+    function initAdminAuth() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === ADMIN_PIN) {
+          localStorage.setItem('cc17_is_admin', 'true');
+          const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+          window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        }
+      } catch (e) {
+        console.warn("Error leyendo URL params:", e);
+      }
+      isAdmin = (localStorage.getItem('cc17_is_admin') === 'true');
+      updateAdminUI();
+    }
+
+    function updateAdminUI() {
+      const btnManage = document.getElementById('btnManageProjects');
+      const btnNew = document.getElementById('btnNewTask');
+      const authBtn = document.getElementById('adminAuthBtn');
+      const authIcon = document.getElementById('adminAuthIcon');
+
+      if (btnManage) {
+        btnManage.style.display = isAdmin ? 'inline-flex' : 'none';
+      }
+      if (btnNew) {
+        btnNew.style.display = isAdmin ? 'inline-flex' : 'none';
+      }
+
+      if (authBtn && authIcon) {
+        if (isAdmin) {
+          authBtn.className = "w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-[#00E599] bg-[#00E599]/10 border border-[#00E599]/30 transition-all opacity-85 hover:opacity-100 shrink-0";
+          authBtn.title = "Modo Administrador (Clic para bloquear)";
+          authIcon.innerHTML = `
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+          `;
+        } else {
+          authBtn.className = "w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-200 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/20 transition-all opacity-35 hover:opacity-90 shrink-0";
+          authBtn.title = "Modo Visor";
+          authIcon.innerHTML = `
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          `;
+        }
+      }
+    }
+
+    function handleAdminAuthClick() {
+      if (isAdmin) {
+        document.getElementById('adminLogoutModal').classList.add('active');
+      } else {
+        openAdminAuthModal();
+      }
+    }
+
+    function openAdminAuthModal() {
+      const modal = document.getElementById('adminAuthModal');
+      const inp = document.getElementById('adminPinInput');
+      const err = document.getElementById('adminPinError');
+      if (err) err.classList.add('hidden');
+      if (inp) inp.value = '';
+      if (modal) modal.classList.add('active');
+      setTimeout(() => { if (inp) inp.focus(); }, 120);
+    }
+
+    function closeAdminAuthModal() {
+      const modal = document.getElementById('adminAuthModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function closeAdminLogoutModal() {
+      const modal = document.getElementById('adminLogoutModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function submitAdminPin(event) {
+      if (event) event.preventDefault();
+      const inp = document.getElementById('adminPinInput');
+      const err = document.getElementById('adminPinError');
+      const val = (inp ? inp.value : '').trim();
+
+      if (val === ADMIN_PIN) {
+        isAdmin = true;
+        localStorage.setItem('cc17_is_admin', 'true');
+        closeAdminAuthModal();
+        updateAdminUI();
+        renderBoard();
+      } else {
+        if (err) err.classList.remove('hidden');
+        if (inp) {
+          inp.value = '';
+          inp.focus();
+        }
+      }
+    }
+
+    function logoutAdmin() {
+      isAdmin = false;
+      localStorage.removeItem('cc17_is_admin');
+      closeAdminLogoutModal();
+      updateAdminUI();
+      renderBoard();
+    }
 
     function selectPresetColor(hex) {
       document.getElementById('taskColorInput').value = hex;
@@ -1120,6 +1336,7 @@
 
     // --- GESTIÓN DE PROYECTOS ---
     function openProjectManagerModal() {
+      if (!isAdmin) return;
       document.getElementById('projectManagerModal').classList.add('active');
       renderProjectManagerList();
     }
@@ -1588,6 +1805,7 @@
     }
 
     async function loadDefaultSubtasks(taskId, event) {
+      if (!isAdmin) return;
       if (event) event.stopPropagation();
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
@@ -1617,6 +1835,7 @@
     }
 
     async function addNewSubtask(taskId, textVal) {
+      if (!isAdmin) return;
       const clean = (textVal || '').trim();
       if (!clean) return;
 
@@ -1641,6 +1860,7 @@
     }
 
     async function removeSubtask(taskId, index, event) {
+      if (!isAdmin) return;
       if (event) event.stopPropagation();
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
@@ -1671,6 +1891,7 @@
     }
 
     async function cycleSubtaskStatus(taskId, index, event) {
+      if (!isAdmin) return;
       if (event) {
         event.stopPropagation();
         event.preventDefault();
@@ -1710,6 +1931,7 @@
     }
 
     async function cycleSubtaskStatusReverse(taskId, index, event) {
+      if (!isAdmin) return;
       if (event) {
         event.stopPropagation();
         event.preventDefault();
@@ -1749,6 +1971,7 @@
     }
 
     async function setSubtaskStatusDirect(taskId, index, nextStatus, event) {
+      if (!isAdmin) return;
       if (event) {
         event.stopPropagation();
         event.preventDefault();
@@ -1948,15 +2171,23 @@
           if (showProgress) {
             let subtaskListHtml = '';
             if (totalSubtasks === 0) {
-              subtaskListHtml = `
-                <div class="py-2.5 px-3 rounded-xl bg-slate-900/60 border border-white/5 text-center">
-                  <p class="text-[11px] text-slate-400 mb-2">Sin fases ni subtareas asignadas</p>
-                  <button onclick="loadDefaultSubtasks('${task.id}', event)" class="w-full text-xs font-bold bg-[#00E599]/15 hover:bg-[#00E599]/25 text-[#00E599] border border-[#00E599]/30 py-1.5 px-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    <span>+ Cargar fases por defecto (Modelado, etc.)</span>
-                  </button>
-                </div>
-              `;
+              if (isAdmin) {
+                subtaskListHtml = `
+                  <div class="py-2.5 px-3 rounded-xl bg-slate-900/60 border border-white/5 text-center">
+                    <p class="text-[11px] text-slate-400 mb-2">Sin fases ni subtareas asignadas</p>
+                    <button onclick="loadDefaultSubtasks('${task.id}', event)" class="w-full text-xs font-bold bg-[#00E599]/15 hover:bg-[#00E599]/25 text-[#00E599] border border-[#00E599]/30 py-1.5 px-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      <span>+ Cargar fases por defecto (Modelado, etc.)</span>
+                    </button>
+                  </div>
+                `;
+              } else {
+                subtaskListHtml = `
+                  <div class="py-2 px-3 rounded-xl bg-slate-900/40 border border-white/5 text-center">
+                    <p class="text-[11px] text-slate-400">Sin fases ni subtareas asignadas</p>
+                  </div>
+                `;
+              }
             } else {
               const itemsHtml = subtasks.map((st, sIdx) => {
                 const status = getSubtaskStatus(st);
@@ -1964,37 +2195,59 @@
                 const isDone = status === 'done';
 
                 let checkBtnHtml = '';
-                if (isDone) {
-                  checkBtnHtml = `
-                    <button type="button" 
-                            onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
-                            oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
-                            class="subtask-checkbox-btn done" 
-                            title="Fase completada ✓. Clic para reiniciar a pendiente">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#041a11" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                    </button>
-                  `;
-                } else if (isWorking) {
-                  checkBtnHtml = `
-                    <button type="button" 
-                            onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
-                            oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
-                            class="subtask-checkbox-btn working" 
-                            title="Fase en desarrollo actual. Clic para marcar como Terminada">
-                      <span class="subtask-working-dot"></span>
-                    </button>
-                  `;
+                if (isAdmin) {
+                  if (isDone) {
+                    checkBtnHtml = `
+                      <button type="button" 
+                              onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
+                              oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
+                              class="subtask-checkbox-btn done" 
+                              title="Fase completada ✓. Clic para reiniciar a pendiente">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#041a11" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </button>
+                    `;
+                  } else if (isWorking) {
+                    checkBtnHtml = `
+                      <button type="button" 
+                              onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
+                              oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
+                              class="subtask-checkbox-btn working" 
+                              title="Fase en desarrollo actual. Clic para marcar como Terminada">
+                        <span class="subtask-working-dot"></span>
+                      </button>
+                    `;
+                  } else {
+                    checkBtnHtml = `
+                      <button type="button" 
+                              onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
+                              oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
+                              class="subtask-checkbox-btn pending" 
+                              title="Pendiente. Clic para marcar que estás trabajando en esta fase">
+                      </button>
+                    `;
+                  }
                 } else {
-                  checkBtnHtml = `
-                    <button type="button" 
-                            onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
-                            oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
-                            class="subtask-checkbox-btn pending" 
-                            title="Pendiente. Clic para marcar que estás trabajando en esta fase">
-                    </button>
-                  `;
+                  if (isDone) {
+                    checkBtnHtml = `
+                      <span class="subtask-checkbox-btn done pointer-events-none cursor-default" title="Fase completada">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#041a11" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </span>
+                    `;
+                  } else if (isWorking) {
+                    checkBtnHtml = `
+                      <span class="subtask-checkbox-btn working pointer-events-none cursor-default" title="Fase en desarrollo actual">
+                        <span class="subtask-working-dot"></span>
+                      </span>
+                    `;
+                  } else {
+                    checkBtnHtml = `
+                      <span class="subtask-checkbox-btn pending pointer-events-none cursor-default" title="Fase pendiente"></span>
+                    `;
+                  }
                 }
 
                 let badgeHtml = '';
@@ -2008,28 +2261,40 @@
                 }
 
                 let quickActionHtml = '';
-                if (isWorking) {
-                  quickActionHtml = `
-                    <button onclick="setSubtaskStatusDirect('${task.id}', ${sIdx}, 'done', event)" 
-                            class="text-slate-400 hover:text-[#00E599] p-0.5 rounded transition-all" 
-                            title="Terminar fase (marcar ✓)">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </button>
-                  `;
-                } else if (!isDone) {
-                  quickActionHtml = `
-                    <button onclick="setSubtaskStatusDirect('${task.id}', ${sIdx}, 'working', event)" 
-                            class="text-slate-400 hover:text-[#00E599] p-0.5 rounded transition-all" 
-                            title="Empezar a trabajar en esta fase">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    </button>
-                  `;
+                if (isAdmin) {
+                  if (isWorking) {
+                    quickActionHtml = `
+                      <button onclick="setSubtaskStatusDirect('${task.id}', ${sIdx}, 'done', event)" 
+                              class="text-slate-400 hover:text-[#00E599] p-0.5 rounded transition-all" 
+                              title="Terminar fase (marcar ✓)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </button>
+                    `;
+                  } else if (!isDone) {
+                    quickActionHtml = `
+                      <button onclick="setSubtaskStatusDirect('${task.id}', ${sIdx}, 'working', event)" 
+                              class="text-slate-400 hover:text-[#00E599] p-0.5 rounded transition-all" 
+                              title="Empezar a trabajar en esta fase">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                      </button>
+                    `;
+                  }
                 }
 
+                const removeBtnHtml = isAdmin ? `
+                  <button onclick="removeSubtask('${task.id}', ${sIdx}, event)" class="text-slate-500 hover:text-red-400 p-0.5 rounded transition-all" title="Eliminar fase">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                ` : '';
+
+                const rowClickAttrs = isAdmin ? `
+                  onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
+                  oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
+                ` : '';
+
                 return `
-                  <div class="subtask-item ${isWorking ? 'is-working' : ''} flex items-center justify-between group/st py-1 px-1.5 rounded-md hover:bg-white/[0.04] transition-all cursor-pointer" 
-                       onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
-                       oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)">
+                  <div class="subtask-item ${isWorking ? 'is-working' : ''} flex items-center justify-between ${isAdmin ? 'group/st cursor-pointer hover:bg-white/[0.04]' : 'cursor-default'} py-1 px-1.5 rounded-md transition-all" 
+                       ${rowClickAttrs}>
                     <div class="flex items-center gap-2 flex-1 min-w-0 select-none">
                       ${checkBtnHtml}
                       <span class="subtask-text text-xs ${isDone ? 'line-through text-slate-500' : isWorking ? 'text-white font-semibold' : 'text-slate-200'} truncate transition-all">
@@ -2037,20 +2302,17 @@
                       </span>
                       ${badgeHtml}
                     </div>
-                    <div class="flex items-center gap-1 opacity-0 group-hover/st:opacity-100 transition-opacity">
-                      ${quickActionHtml}
-                      <button onclick="removeSubtask('${task.id}', ${sIdx}, event)" class="text-slate-500 hover:text-red-400 p-0.5 rounded transition-all" title="Eliminar fase">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                    </div>
+                    ${isAdmin ? `
+                      <div class="flex items-center gap-1 opacity-0 group-hover/st:opacity-100 transition-opacity">
+                        ${quickActionHtml}
+                        ${removeBtnHtml}
+                      </div>
+                    ` : ''}
                   </div>
                 `;
               }).join('');
 
-              subtaskListHtml = `
-                <div class="flex flex-col gap-0.5">
-                  ${itemsHtml}
-                </div>
+              const addSubtaskInputHtml = isAdmin ? `
                 <div class="flex items-center gap-1.5 mt-2 pt-1.5 border-t border-white/[0.06]" onclick="event.stopPropagation()">
                   <input type="text" id="new-subtask-input-${task.id}" placeholder="+ Agregar otra fase..." 
                          onkeydown="if(event.key==='Enter'){ addNewSubtask('${task.id}', this.value); this.value=''; }"
@@ -2060,6 +2322,13 @@
                     +
                   </button>
                 </div>
+              ` : '';
+
+              subtaskListHtml = `
+                <div class="flex flex-col gap-0.5">
+                  ${itemsHtml}
+                </div>
+                ${addSubtaskInputHtml}
               `;
             }
 
@@ -2074,6 +2343,9 @@
                 </span>
               `;
             }
+
+            const inProgClass = (colId === 'in-progress') ? 'is-in-progress' : '';
+            const minWidthStyle = (colId === 'in-progress' && percent === 0) ? 'min-width: 6px;' : '';
 
             progressBarHtml = `
               <div class="card-progress-section mt-3 pt-2.5 border-t border-white/[0.08]" onclick="event.stopPropagation()">
@@ -2092,8 +2364,8 @@
                   </div>
                 </div>
                 <div class="w-full bg-[#0a0d14] rounded-full h-2 overflow-hidden border border-white/5 relative p-[0.5px]">
-                  <div class="progress-bar-fill h-full rounded-full transition-all duration-300 ease-out" 
-                       style="width: ${percent}%; background: linear-gradient(90deg, #00B377, #00E599, #5CFFC6); box-shadow: 0 0 10px rgba(0, 229, 153, 0.5);">
+                  <div class="progress-bar-fill ${inProgClass} h-full rounded-full transition-all duration-300 ease-out" 
+                       style="width: ${percent}%; ${minWidthStyle} background: linear-gradient(90deg, #00B377, #00E599, #5CFFC6); box-shadow: 0 0 10px rgba(0, 229, 153, 0.5);">
                   </div>
                 </div>
                 <div id="subtasks-panel-${task.id}" class="subtasks-panel ${isExpanded ? 'expanded' : ''} mt-2.5 pt-2 border-t border-white/5 flex-col gap-1">
@@ -2114,46 +2386,87 @@
             `;
           }
           
+          let cardControlsHtml = '';
+          if (isAdmin) {
+            cardControlsHtml = `
+              <div class="card-top-controls" onclick="event.stopPropagation()">
+                <div class="card-menu-container">
+                  <button class="card-menu-btn" onclick="toggleCardMenu('${task.id}', event)" title="Opciones (Duplicar, Editar, Eliminar)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div id="card-menu-${task.id}" class="card-dropdown-menu" onclick="event.stopPropagation()">
+                    <button class="dropdown-item" onclick="duplicateTask('${task.id}', event)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      <span>Duplicar</span>
+                    </button>
+                    <button class="dropdown-item" onclick="editTask('${task.id}', event)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                      <span>Editar</span>
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item text-red-400 hover:text-red-300 hover:bg-red-500/10" onclick="deleteTask('${task.id}', event)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      <span>Eliminar</span>
+                    </button>
+                  </div>
+                </div>
+                ${pausedButtonHtml}
+                ${workingButtonHtml}
+              </div>
+            `;
+          } else {
+            let readOnlyBadges = '';
+            if (isMissingInfo) {
+              readOnlyBadges += `
+                <div class="missing-info-btn is-active pointer-events-none cursor-default" title="En pausa por falta de información">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </div>
+              `;
+            }
+            if (isWorking) {
+              readOnlyBadges += `
+                <div class="working-circle-btn is-active pointer-events-none cursor-default" style="--card-color: #00E599; --card-glow: rgba(0, 229, 153, 0.65);" title="En desarrollo">
+                  <span class="circle-inner"></span>
+                </div>
+              `;
+            }
+            if (readOnlyBadges) {
+              cardControlsHtml = `
+                <div class="card-top-controls pointer-events-none" onclick="event.stopPropagation()">
+                  ${readOnlyBadges}
+                </div>
+              `;
+            }
+          }
+
           card.innerHTML = `
             ${workingStatusHtml}
-            <div class="card-top-controls" onclick="event.stopPropagation()">
-              <div class="card-menu-container">
-                <button class="card-menu-btn" onclick="toggleCardMenu('${task.id}', event)" title="Opciones (Duplicar, Editar, Eliminar)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </button>
-                <div id="card-menu-${task.id}" class="card-dropdown-menu" onclick="event.stopPropagation()">
-                  <button class="dropdown-item" onclick="duplicateTask('${task.id}', event)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    <span>Duplicar</span>
-                  </button>
-                  <button class="dropdown-item" onclick="editTask('${task.id}', event)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    <span>Editar</span>
-                  </button>
-                  <div class="dropdown-divider"></div>
-                  <button class="dropdown-item text-red-400 hover:text-red-300 hover:bg-red-500/10" onclick="deleteTask('${task.id}', event)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    <span>Eliminar</span>
-                  </button>
-                </div>
-              </div>
-              ${pausedButtonHtml}
-              ${workingButtonHtml}
-            </div>
-
-            <div class="mb-2 flex flex-wrap items-center gap-1 ${colId === 'in-progress' || colId === 'paused' ? 'pr-20' : 'pr-12'}">${tagsHtml}</div>
-            <div class="font-bold text-base mb-1 text-white ${colId === 'in-progress' || colId === 'paused' ? 'pr-16' : 'pr-10'} leading-snug">${task.title}</div>
+            ${cardControlsHtml}
+            <div class="mb-2 flex flex-wrap items-center gap-1 ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-20' : 'pr-12') : 'pr-2'}">${tagsHtml}</div>
+            <div class="font-bold text-base mb-1 text-white ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-16' : 'pr-10') : 'pr-2'} leading-snug">${task.title}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
             ${progressBarHtml}
           `;
           
-          card.addEventListener('dragstart', handleDragStart);
-          card.addEventListener('dragend', handleDragEnd);
+          if (isAdmin) {
+            card.setAttribute('draggable', 'true');
+            card.classList.add('cursor-grab');
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+          } else {
+            card.setAttribute('draggable', 'false');
+            card.classList.remove('cursor-grab');
+            card.classList.add('cursor-default');
+          }
           col.appendChild(card);
         });
         
@@ -2163,6 +2476,7 @@
     }
 
     async function toggleWorking(taskId, event) {
+      if (!isAdmin) return;
       if (event) event.stopPropagation();
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
@@ -2188,6 +2502,7 @@
     }
 
     async function toggleMissingInfo(taskId, event) {
+      if (!isAdmin) return;
       if (event) event.stopPropagation();
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
@@ -2212,6 +2527,7 @@
     }
 
     async function saveTask() {
+      if (!isAdmin) return;
       try {
         const title = document.getElementById('newTaskTitle').value.trim();
         const desc = document.getElementById('newTaskDesc').value.trim();
@@ -2292,6 +2608,7 @@
     }
 
     function editTask(id, event) {
+      if (!isAdmin) return;
       if (event) event.stopPropagation();
       closeAllCardMenus();
       const task = tasksData.find(t => t.id === id);
@@ -2319,6 +2636,7 @@
     }
 
     async function duplicateTask(id, event) {
+      if (!isAdmin) return;
       if (event) event.stopPropagation();
       closeAllCardMenus();
       const original = tasksData.find(t => t.id === id);
@@ -2367,6 +2685,7 @@
     }
 
     async function deleteTask(id, event) {
+      if (!isAdmin) return;
       if (event) event.stopPropagation();
       closeAllCardMenus();
       if(!confirm("¿Estás seguro de eliminar esta tarjeta?")) return;
@@ -2381,6 +2700,7 @@
     }
 
     function openAddModal() { 
+      if (!isAdmin) return;
       document.getElementById('modalTitle').innerText = 'Nueva Tarjeta';
       document.getElementById('editingTaskId').value = '';
       document.getElementById('newTaskTitle').value = '';
@@ -2401,6 +2721,10 @@
     let draggedCard = null;
 
     function handleDragStart(e) {
+      if (!isAdmin) {
+        e.preventDefault();
+        return;
+      }
       draggedCard = this;
       setTimeout(() => this.classList.add('dragging'), 0);
       e.dataTransfer.effectAllowed = 'move';
@@ -2484,6 +2808,7 @@
 
     document.querySelectorAll('.dropzone').forEach(zone => {
       zone.addEventListener('dragover', e => {
+        if (!isAdmin) return;
         e.preventDefault();
         const afterElement = getDragAfterElement(zone, e.clientY);
         if (draggedCard) {
@@ -2553,7 +2878,8 @@
       requestAnimationFrame(updateProgress);
     }
 
-    // Inicializar preloader y cargar datos en paralelo
+    // Inicializar autenticación de admin, preloader y cargar datos
+    initAdminAuth();
     runPreloader();
     loadTasks();
   </script>
