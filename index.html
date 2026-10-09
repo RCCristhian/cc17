@@ -966,11 +966,11 @@
         <span class="sm:hidden">Nueva</span>
       </button>
 
-      <!-- Botón discreto de acceso Administrador -->
+      <!-- Botón de acceso Administrador (Blanco y visible) -->
       <button id="adminAuthBtn" onclick="handleAdminAuthClick()" 
-              class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-200 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/20 transition-all opacity-35 hover:opacity-90 shrink-0" 
-              title="Modo Visor">
-        <svg id="adminAuthIcon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-white hover:text-white bg-[#131722] hover:bg-[#1a2030] border border-white/20 hover:border-white/40 shadow-sm transition-all active:scale-95 shrink-0" 
+              title="Desbloquear Edición">
+        <svg id="adminAuthIcon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
@@ -1302,15 +1302,17 @@
 
       if (authBtn && authIcon) {
         if (isAdmin) {
-          authBtn.className = "w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-[#00E599] bg-[#00E599]/10 border border-[#00E599]/30 transition-all opacity-85 hover:opacity-100 shrink-0";
-          authBtn.title = "Modo Administrador (Clic para bloquear)";
+          authBtn.className = "flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-[#00E599] bg-[#00E599]/15 border border-[#00E599]/40 shadow-sm transition-all active:scale-95 shrink-0";
+          authBtn.title = "Modo Administrador Activo (Clic para bloquear)";
+          authIcon.setAttribute('stroke', '#00E599');
           authIcon.innerHTML = `
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
           `;
         } else {
-          authBtn.className = "w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-200 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/20 transition-all opacity-35 hover:opacity-90 shrink-0";
-          authBtn.title = "Modo Visor";
+          authBtn.className = "flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-white hover:text-white bg-[#131722] hover:bg-[#1a2030] border border-white/20 hover:border-white/40 shadow-sm transition-all active:scale-95 shrink-0";
+          authBtn.title = "Desbloquear Edición";
+          authIcon.setAttribute('stroke', '#ffffff');
           authIcon.innerHTML = `
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
