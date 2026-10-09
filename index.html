@@ -357,20 +357,20 @@
       box-shadow: 0 0 14px rgba(245, 158, 11, 0.8);
     }
 
-    /* En Revisión: Lavanda / Índigo elegante con lentes */
+    /* En Revisión: Cyan / Turquesa brillante que coincide con la columna */
     .status-icon-badge.badge-review {
-      background: rgba(167, 139, 250, 0.24);
-      border: 1.5px solid #a78bfa;
-      color: #c4b5fd;
-      box-shadow: 0 0 10px rgba(167, 139, 250, 0.45), inset 0 0 6px rgba(167, 139, 250, 0.2);
+      background: rgba(6, 182, 212, 0.22);
+      border: 1.5px solid #06b6d4;
+      color: #22d3ee;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.45), inset 0 0 6px rgba(6, 182, 212, 0.2);
     }
 
     .status-tooltip-wrapper:hover .status-icon-badge.badge-review {
       transform: scale(1.12);
-      background: rgba(167, 139, 250, 0.42);
-      border-color: #c4b5fd;
+      background: rgba(6, 182, 212, 0.4);
+      border-color: #22d3ee;
       color: #ffffff;
-      box-shadow: 0 0 14px rgba(167, 139, 250, 0.8);
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.8);
     }
 
     /* Tooltip flotante compartido */
@@ -431,8 +431,8 @@
     }
 
     .status-floating-tooltip.tooltip-review {
-      border: 1px solid rgba(167, 139, 250, 0.7);
-      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.95), 0 0 14px rgba(167, 139, 250, 0.4);
+      border: 1px solid rgba(6, 182, 212, 0.7);
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.95), 0 0 14px rgba(6, 182, 212, 0.4);
     }
 
     .status-floating-tooltip.tooltip-review::before {
@@ -444,8 +444,26 @@
       width: 7px;
       height: 7px;
       background: #0b0f17;
-      border-top: 1px solid rgba(167, 139, 250, 0.7);
-      border-left: 1px solid rgba(167, 139, 250, 0.7);
+      border-top: 1px solid rgba(6, 182, 212, 0.7);
+      border-left: 1px solid rgba(6, 182, 212, 0.7);
+    }
+
+    .status-floating-tooltip.tooltip-working {
+      border: 1px solid rgba(0, 229, 153, 0.7);
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 229, 153, 0.4);
+    }
+
+    .status-floating-tooltip.tooltip-working::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 7px;
+      height: 7px;
+      background: #0b0f17;
+      border-top: 1px solid rgba(0, 229, 153, 0.7);
+      border-left: 1px solid rgba(0, 229, 153, 0.7);
     }
 
     .status-tooltip-wrapper:hover .status-floating-tooltip {
@@ -2365,9 +2383,6 @@
                   </svg>
                 </span>
                 <div class="status-floating-tooltip tooltip-priority">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" class="text-red-400">
-                    <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
-                  </svg>
                   <span class="font-extrabold text-red-300 text-[10.5px] tracking-wider uppercase">Alta Prioridad</span>
                 </div>
               </div>
@@ -2376,19 +2391,73 @@
 
           let colStatusBadgeHtml = '';
           if (colId === 'paused') {
-            colStatusBadgeHtml = `
-              <div class="status-tooltip-wrapper">
-                <span class="status-icon-badge badge-paused" title="Pausado">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
-                  </svg>
-                </span>
-                <div class="status-floating-tooltip tooltip-paused">
-                  <span class="text-xs">⏸️</span>
-                  <span class="font-extrabold text-amber-300 text-[10.5px] tracking-wider uppercase">Pausado</span>
-                </div>
-              </div>
+            const pausedIconSvg = isMissingInfo ? `
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            ` : `
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+              </svg>
             `;
+            const pausedTooltipText = isMissingInfo ? 'Falta Información' : 'Pausado';
+            
+            if (isAdmin) {
+              colStatusBadgeHtml = `
+                <div class="status-tooltip-wrapper">
+                  <button onclick="toggleMissingInfo('${task.id}', event)" 
+                    class="status-icon-badge ${isMissingInfo ? 'missing-info-btn is-active' : 'badge-paused'}" 
+                    title="">
+                    ${pausedIconSvg}
+                  </button>
+                  <div class="status-floating-tooltip tooltip-paused">
+                    <span class="font-extrabold text-amber-300 text-[10.5px] tracking-wider uppercase">${pausedTooltipText}</span>
+                  </div>
+                </div>
+              `;
+            } else {
+              colStatusBadgeHtml = `
+                <div class="status-tooltip-wrapper pointer-events-auto">
+                  <span class="status-icon-badge ${isMissingInfo ? 'missing-info-btn is-active' : 'badge-paused'} cursor-help">
+                    ${pausedIconSvg}
+                  </span>
+                  <div class="status-floating-tooltip tooltip-paused">
+                    <span class="font-extrabold text-amber-300 text-[10.5px] tracking-wider uppercase">${pausedTooltipText}</span>
+                  </div>
+                </div>
+              `;
+            }
+          } else if (colId === 'in-progress') {
+            if (isAdmin) {
+              colStatusBadgeHtml = `
+                <div class="status-tooltip-wrapper">
+                  <button onclick="toggleWorking('${task.id}', event)" 
+                    class="status-icon-badge working-circle-btn ${isWorking ? 'is-active' : ''}" 
+                    style="--card-color: #00E599; --card-glow: rgba(0, 229, 153, 0.65);" 
+                    title="">
+                    <span class="circle-inner"></span>
+                  </button>
+                  <div class="status-floating-tooltip tooltip-working">
+                    <span class="font-extrabold text-emerald-300 text-[10.5px] tracking-wider uppercase">${isWorking ? 'Trabajando' : 'Marcar Trabajando'}</span>
+                  </div>
+                </div>
+              `;
+            } else if (isWorking) {
+              colStatusBadgeHtml = `
+                <div class="status-tooltip-wrapper pointer-events-auto">
+                  <span class="status-icon-badge working-circle-btn is-active cursor-help" 
+                    style="--card-color: #00E599; --card-glow: rgba(0, 229, 153, 0.65);" 
+                    title="">
+                    <span class="circle-inner"></span>
+                  </span>
+                  <div class="status-floating-tooltip tooltip-working">
+                    <span class="font-extrabold text-emerald-300 text-[10.5px] tracking-wider uppercase">Trabajando</span>
+                  </div>
+                </div>
+              `;
+            }
           } else if (colId === 'review') {
             colStatusBadgeHtml = `
               <div class="status-tooltip-wrapper">
@@ -2402,8 +2471,7 @@
                   </svg>
                 </span>
                 <div class="status-floating-tooltip tooltip-review">
-                  <span class="text-xs">👓</span>
-                  <span class="font-extrabold text-purple-300 text-[10.5px] tracking-wider uppercase">En Revisión</span>
+                  <span class="font-extrabold text-cyan-300 text-[10.5px] tracking-wider uppercase">En Revisión</span>
                 </div>
               </div>
             `;
@@ -2423,54 +2491,6 @@
               <div class="working-outer-badge">
                 <span class="pulse-dot !w-2 !h-2 !mr-1" style="background-color: #00E599; box-shadow: 0 0 12px #00E599;"></span>
                 <span class="typewriter-working">Trabajando...</span>
-              </div>
-            `;
-          }
-
-          let workingButtonHtml = '';
-          if (colId === 'in-progress') {
-            workingButtonHtml = `
-              <button onclick="toggleWorking('${task.id}', event)" 
-                class="working-circle-btn ${isWorking ? 'is-active' : ''}" 
-                style="--card-color: #00E599; --card-glow: rgba(0, 229, 153, 0.65);" 
-                title="${isWorking ? 'Activo: Trabajando actualmente. Clic para desactivar' : 'Clic para marcar: Trabajando ahora'}">
-                <span class="circle-inner"></span>
-              </button>
-            `;
-          }
-
-          let pausedButtonHtml = '';
-          if (colId === 'paused') {
-            pausedButtonHtml = `
-              <div class="missing-info-tooltip-wrapper">
-                <button onclick="toggleMissingInfo('${task.id}', event)" 
-                  class="missing-info-btn ${isMissingInfo ? 'is-active' : ''}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                  </svg>
-                </button>
-                ${isMissingInfo ? `
-                  <div class="missing-info-floating-tooltip">
-                    <div class="flex items-center gap-1.5 font-extrabold text-[12px] text-amber-300 tracking-wide mb-1">
-                      <span class="text-sm">⚠️</span>
-                      <span>FALTA INFORMACIÓN</span>
-                    </div>
-                    <div class="text-[11px] font-medium text-slate-300 leading-snug">
-                      Esta tarea está en pausa porque requiere datos o definiciones pendientes.
-                    </div>
-                    <div class="text-[10px] text-amber-400/80 font-semibold mt-1.5 pt-1.5 border-t border-white/10">
-                      Clic para volver a pausa normal
-                    </div>
-                  </div>
-                ` : `
-                  <div class="missing-info-floating-tooltip !min-w-[170px]">
-                    <div class="text-[11px] font-bold text-slate-200">
-                      ⚠️ Marcar falta de info
-                    </div>
-                  </div>
-                `}
               </div>
             `;
           }
@@ -2746,55 +2766,15 @@
                     </button>
                   </div>
                 </div>
-                ${pausedButtonHtml}
-                ${workingButtonHtml}
               </div>
             `;
-          } else {
-            let readOnlyBadges = '';
-            if (isMissingInfo) {
-              readOnlyBadges += `
-                <div class="missing-info-tooltip-wrapper pointer-events-auto">
-                  <div class="missing-info-btn is-active cursor-help">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                      <line x1="12" y1="9" x2="12" y2="13"></line>
-                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                  </div>
-                  <div class="missing-info-floating-tooltip">
-                    <div class="flex items-center gap-1.5 font-extrabold text-[12px] text-amber-300 tracking-wide mb-1">
-                      <span class="text-sm">⚠️</span>
-                      <span>FALTA INFORMACIÓN</span>
-                    </div>
-                    <div class="text-[11px] font-medium text-slate-300 leading-snug">
-                      Esta tarea está en pausa porque requiere datos o definiciones pendientes.
-                    </div>
-                  </div>
-                </div>
-              `;
-            }
-            if (isWorking) {
-              readOnlyBadges += `
-                <div class="working-circle-btn is-active pointer-events-none cursor-default" style="--card-color: #00E599; --card-glow: rgba(0, 229, 153, 0.65);" title="En desarrollo">
-                  <span class="circle-inner"></span>
-                </div>
-              `;
-            }
-            if (readOnlyBadges) {
-              cardControlsHtml = `
-                <div class="card-top-controls pointer-events-none" onclick="event.stopPropagation()">
-                  ${readOnlyBadges}
-                </div>
-              `;
-            }
           }
 
           card.innerHTML = `
             ${workingStatusHtml}
             ${cardControlsHtml}
-            <div class="mb-2 flex items-center gap-1.5 min-w-0 max-w-full ${cardControlsHtml ? (colId === 'in-progress' || (colId === 'paused' && isMissingInfo) ? 'pr-16' : 'pr-10') : 'pr-2'}">${tagsHtml}</div>
-            <div class="font-bold text-base mb-1 text-white ${cardControlsHtml ? (colId === 'in-progress' || (colId === 'paused' && isMissingInfo) ? 'pr-16' : 'pr-10') : 'pr-2'} leading-snug">${task.title}</div>
+            <div class="mb-2 flex items-center gap-1.5 min-w-0 max-w-full ${isAdmin ? 'pr-9' : 'pr-1'}">${tagsHtml}</div>
+            <div class="font-bold text-base mb-1 text-white ${isAdmin ? 'pr-9' : 'pr-1'} leading-snug">${task.title}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
             ${progressBarHtml}
           `;
