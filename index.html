@@ -2384,10 +2384,10 @@
             if (workingItems.length > 0) {
               const names = workingItems.map(s => s.text).join(' - ');
               workingCountBadge = `
-                <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#00E599] italic tracking-tight ml-1.5 max-w-[150px] sm:max-w-[220px] truncate" title="${names} en curso">
+                <div class="flex items-center gap-1.5 text-[11px] font-semibold text-[#00E599] italic tracking-tight mb-1.5 min-w-0 max-w-full overflow-hidden" title="${names} en curso">
                   <span class="pulse-dot !w-1.5 !h-1.5 !mr-0 !bg-[#00E599] flex-shrink-0" style="box-shadow: 0 0 8px #00E599;"></span>
-                  <span class="truncate">${names} en curso</span>
-                </span>
+                  <span class="truncate min-w-0">${names} en curso</span>
+                </div>
               `;
             }
 
@@ -2409,20 +2409,20 @@
 
             progressBarHtml = `
               <div class="card-progress-section mt-3 pt-2.5 border-t border-white/[0.08]" onclick="event.stopPropagation()">
-                <div class="flex items-center justify-between mb-1.5 text-xs">
-                  <div class="flex items-center gap-1.5 font-semibold text-slate-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00E599" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <div class="flex items-center justify-between ${workingItems.length > 0 ? 'mb-1' : 'mb-1.5'} text-xs min-w-0">
+                  <div class="flex items-center gap-1.5 font-semibold text-slate-300 min-w-0 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00E599" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
                       <polyline points="9 11 12 14 22 4"></polyline>
                       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
-                    <span class="text-slate-300 font-bold">Progreso</span>
-                    <span class="progress-count-label text-[11px] text-slate-400 font-medium">${totalSubtasks > 0 ? `(${completedSubtasks}/${totalSubtasks})` : ''}</span>
-                    ${workingCountBadge}
+                    <span class="text-slate-300 font-bold shrink-0">Progreso</span>
+                    <span class="progress-count-label text-[11px] text-slate-400 font-medium shrink-0">${totalSubtasks > 0 ? `(${completedSubtasks}/${totalSubtasks})` : ''}</span>
                   </div>
-                  <div class="flex items-center">
+                  <div class="flex items-center shrink-0 ml-2">
                     <span class="progress-pct-value font-extrabold text-[12px] text-[#00E599] font-mono tracking-tight">${percent}%</span>
                   </div>
                 </div>
+                ${workingCountBadge}
                 <div class="w-full bg-[#0a0d14] rounded-full h-2 border border-white/5 relative p-[0.5px]">
                   <div class="progress-bar-fill ${fillAnimClass} h-full rounded-full transition-all duration-300 ease-out" 
                        style="width: ${percent}%; ${minWidthStyle} background: linear-gradient(90deg, #00B377, #00E599, #5CFFC6); box-shadow: 0 0 10px rgba(0, 229, 153, 0.5);">
