@@ -517,22 +517,20 @@
       box-shadow: 0 0 12px rgba(0, 229, 153, 0.25);
     }
 
-    /* Animación sutil de haz de luz y pulso activo en barra de progreso de En Progreso y En Pausa */
-    .progress-bar-fill.is-in-progress,
-    .progress-bar-fill.is-paused {
+    /* Animación sutil de haz de luz y pulso activo en barra de progreso de En Progreso y En Revisión */
+    .progress-bar-fill.is-in-progress {
       position: relative;
+      overflow: hidden;
       animation: progressGlowPulse 2.8s infinite alternate ease-in-out;
     }
 
-    .progress-bar-fill.is-in-progress::after,
-    .progress-bar-fill.is-paused::after {
+    .progress-bar-fill.is-in-progress::after {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       bottom: 0;
       width: 100%;
-      border-radius: 9999px;
       background: linear-gradient(
         90deg,
         transparent 0%,
@@ -554,61 +552,47 @@
       100% { box-shadow: 0 0 16px rgba(0, 229, 153, 0.85); }
     }
 
-    /* Spark y barrera delimitadora que marca dónde se quedó detenido el avance en pausa */
-    .paused-barrier-spark {
+    /* Delimitador de límite de avance delgado en color blanco (para En Progreso y En Revisión) */
+    .progress-limit-pin {
       position: absolute;
-      right: -2px;
       top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 13px;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 15;
+      z-index: 10;
       pointer-events: none;
-      animation: barrierSparkPulse 1.6s infinite ease-in-out;
+      animation: limitPinPulse 2.2s infinite ease-in-out;
     }
 
-    .paused-barrier-line {
-      width: 3px;
-      height: 100%;
-      border-radius: 9999px;
-      background: linear-gradient(180deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
-      box-shadow: 0 0 6px #f59e0b, 0 0 12px rgba(245, 158, 11, 0.85);
-    }
-
-    .paused-barrier-core {
+    .progress-limit-pin .pin-line {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 7px;
-      height: 7px;
-      border-radius: 9999px;
+      width: 1.5px;
+      height: 100%;
       background: #ffffff;
-      box-shadow: 0 0 5px #fff, 0 0 10px #fbbf24, 0 0 16px #f59e0b;
-      animation: sparkCoreFlicker 1.2s infinite ease-in-out;
+      border-radius: 9999px;
+      box-shadow: 0 0 4px #ffffff, 0 0 8px rgba(255, 255, 255, 0.8);
     }
 
-    @keyframes barrierSparkPulse {
-      0%, 100% {
-        transform: translateY(-50%) scale(1);
-        filter: drop-shadow(0 0 2px #f59e0b);
-      }
-      50% {
-        transform: translateY(-50%) scale(1.2);
-        filter: drop-shadow(0 0 6px #fbbf24) drop-shadow(0 0 12px rgba(245, 158, 11, 0.9));
-      }
+    .progress-limit-pin .pin-bead {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 0 4px #ffffff, 0 0 8px rgba(255, 255, 255, 0.95), 0 0 12px rgba(255, 255, 255, 0.7);
     }
 
-    @keyframes sparkCoreFlicker {
+    @keyframes limitPinPulse {
       0%, 100% {
-        transform: translate(-50%, -50%) scale(0.9);
-        opacity: 0.85;
+        transform: translate(-50%, -50%) scale(1);
+        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
       }
       50% {
-        transform: translate(-50%, -50%) scale(1.35);
-        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.12);
+        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 1)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
       }
     }
 
@@ -2407,17 +2391,16 @@
               `;
             }
 
-            const isPausedCol = (colId === 'paused');
-            const isInProgCol = (colId === 'in-progress');
-            const fillAnimClass = isInProgCol ? 'is-in-progress' : (isPausedCol ? 'is-paused' : '');
-            const minWidthStyle = ((isInProgCol || isPausedCol) && percent === 0) ? 'min-width: 6px;' : '';
+            const hasProgressAnim = (colId === 'in-progress' || colId === 'review');
+            const fillAnimClass = hasProgressAnim ? 'is-in-progress' : '';
+            const minWidthStyle = (hasProgressAnim && percent === 0) ? 'min-width: 6px;' : '';
 
-            let sparkHtml = '';
-            if (isPausedCol) {
-              sparkHtml = `
-                <span class="paused-barrier-spark" title="Pausado en este punto">
-                  <span class="paused-barrier-line"></span>
-                  <span class="paused-barrier-core"></span>
+            let limitPinHtml = '';
+            if (hasProgressAnim && percent > 0) {
+              limitPinHtml = `
+                <span class="progress-limit-pin" style="left: ${percent}%;">
+                  <span class="pin-line"></span>
+                  <span class="pin-bead"></span>
                 </span>
               `;
             }
@@ -2439,10 +2422,10 @@
                   </div>
                 </div>
                 <div class="w-full bg-[#0a0d14] rounded-full h-2 border border-white/5 relative p-[0.5px]">
-                  <div class="progress-bar-fill ${fillAnimClass} h-full rounded-full transition-all duration-300 ease-out relative" 
+                  <div class="progress-bar-fill ${fillAnimClass} h-full rounded-full transition-all duration-300 ease-out" 
                        style="width: ${percent}%; ${minWidthStyle} background: linear-gradient(90deg, #00B377, #00E599, #5CFFC6); box-shadow: 0 0 10px rgba(0, 229, 153, 0.5);">
-                    ${sparkHtml}
                   </div>
+                  ${limitPinHtml}
                 </div>
                 <div id="subtasks-panel-${task.id}" class="subtasks-panel ${isExpanded ? 'expanded' : ''} mt-2.5 pt-2 border-t border-white/5 flex-col gap-1">
                   ${subtaskListHtml}
