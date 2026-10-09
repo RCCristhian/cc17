@@ -302,31 +302,32 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
       vertical-align: middle;
     }
 
-    .priority-flame-badge {
+    .priority-star-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 22px;
-      height: 22px;
-      border-radius: 9999px;
-      background: rgba(239, 68, 68, 0.18);
-      border: 1px solid rgba(239, 68, 68, 0.45);
-      font-size: 11.5px;
-      line-height: 1;
-      box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.45);
+      color: #fb7185;
+      box-shadow: 0 0 10px rgba(244, 63, 94, 0.25);
       cursor: help;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
     }
 
-    .priority-indicator-wrapper:hover .priority-flame-badge {
+    .priority-indicator-wrapper:hover .priority-star-badge {
       transform: scale(1.15);
-      background: rgba(239, 68, 68, 0.3);
-      border-color: rgba(239, 68, 68, 0.75);
-      box-shadow: 0 0 14px rgba(239, 68, 68, 0.55);
+      background: rgba(244, 63, 94, 0.3);
+      border-color: rgba(244, 63, 94, 0.8);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(244, 63, 94, 0.55);
     }
 
     .priority-floating-tooltip {
@@ -339,9 +340,9 @@
       gap: 5px;
       padding: 0.3rem 0.6rem;
       background: #0b0f17;
-      border: 1px solid rgba(239, 68, 68, 0.65);
+      border: 1px solid rgba(244, 63, 94, 0.6);
       border-radius: 0.5rem;
-      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.9), 0 0 14px rgba(239, 68, 68, 0.35);
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.9), 0 0 14px rgba(244, 63, 94, 0.35);
       backdrop-filter: blur(12px);
       white-space: nowrap;
       opacity: 0;
@@ -360,8 +361,8 @@
       width: 7px;
       height: 7px;
       background: #0b0f17;
-      border-top: 1px solid rgba(239, 68, 68, 0.65);
-      border-left: 1px solid rgba(239, 68, 68, 0.65);
+      border-top: 1px solid rgba(244, 63, 94, 0.6);
+      border-left: 1px solid rgba(244, 63, 94, 0.6);
     }
 
     .priority-indicator-wrapper:hover .priority-floating-tooltip {
@@ -1215,9 +1216,12 @@
         <!-- Opciones de Estado: Prioritario & Falta Información -->
         <div class="flex flex-wrap items-center gap-5 pt-1">
           <div class="flex items-center gap-2">
-            <input type="checkbox" id="newTaskPriority" class="w-4 h-4 rounded text-red-600 bg-[#080a0f] border-white/20 focus:ring-red-500 cursor-pointer">
-            <label for="newTaskPriority" class="text-xs font-bold text-red-400 flex items-center gap-1 cursor-pointer select-none">
-              🔥 Marcar como Prioritario
+            <input type="checkbox" id="newTaskPriority" class="w-4 h-4 rounded text-rose-500 bg-[#080a0f] border-white/20 focus:ring-rose-500 cursor-pointer">
+            <label for="newTaskPriority" class="text-xs font-bold text-rose-400 flex items-center gap-1.5 cursor-pointer select-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
+              </svg>
+              Marcar como Prioritario
             </label>
           </div>
 
@@ -2271,17 +2275,23 @@
           let priorityHtml = '';
           if (task.priority) {
             priorityHtml = `
-              <div class="priority-indicator-wrapper">
-                <span class="priority-flame-badge">🔥</span>
+              <div class="priority-indicator-wrapper shrink-0">
+                <span class="priority-star-badge" title="Alta Prioridad">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
+                  </svg>
+                </span>
                 <div class="priority-floating-tooltip">
-                  <span class="text-xs">🔥</span>
-                  <span class="font-extrabold text-red-400 text-[11px] tracking-wide uppercase">Prioritario</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-rose-400">
+                    <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
+                  </svg>
+                  <span class="font-bold text-rose-300 text-[10.5px] tracking-wider uppercase">Alta Prioridad</span>
                 </div>
               </div>
             `;
           }
 
-          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>${priorityHtml}`;
+          let tagsHtml = `<span class="tag truncate shrink min-w-0 ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);" title="${task.project}">${task.project}</span>${priorityHtml}`;
 
           let workingStatusHtml = '';
           if (isWorking) {
@@ -2659,7 +2669,7 @@
           card.innerHTML = `
             ${workingStatusHtml}
             ${cardControlsHtml}
-            <div class="mb-2 flex flex-wrap items-center gap-1.5 ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-20' : 'pr-12') : 'pr-2'}">${tagsHtml}</div>
+            <div class="mb-2 flex flex-nowrap items-center gap-1.5 min-w-0 max-w-full ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-20' : 'pr-12') : 'pr-2'}">${tagsHtml}</div>
             <div class="font-bold text-base mb-1 text-white ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-16' : 'pr-10') : 'pr-2'} leading-snug">${task.title}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
             ${progressBarHtml}
