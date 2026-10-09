@@ -419,37 +419,93 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .custom-subtask-checkbox {
-      appearance: none;
-      -webkit-appearance: none;
+    .subtask-checkbox-btn {
       width: 15px;
       height: 15px;
+      border-radius: 4.5px;
       border: 1.5px solid #475569;
-      border-radius: 4px;
-      outline: none;
-      background-color: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.9);
       cursor: pointer;
-      position: relative;
-      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 0;
+      outline: none;
+      user-select: none;
     }
 
-    .custom-subtask-checkbox:checked {
+    .subtask-checkbox-btn.pending:hover {
+      border-color: #00E599;
+      background: rgba(0, 229, 153, 0.12);
+      box-shadow: 0 0 8px rgba(0, 229, 153, 0.35);
+      transform: scale(1.08);
+    }
+
+    .subtask-checkbox-btn.working {
+      border-color: #00E599;
+      background: rgba(0, 229, 153, 0.2);
+      box-shadow: 0 0 10px rgba(0, 229, 153, 0.55);
+      animation: pulseWorkingBorder 2s infinite ease-in-out;
+    }
+
+    .subtask-working-dot {
+      width: 6.5px;
+      height: 6.5px;
+      border-radius: 9999px;
+      background: #00E599;
+      box-shadow: 0 0 8px #00E599;
+      animation: pulseWorkingDot 1.1s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseWorkingBorder {
+      0%, 100% { border-color: #00E599; box-shadow: 0 0 8px rgba(0, 229, 153, 0.45); }
+      50% { border-color: #5CFFC6; box-shadow: 0 0 14px rgba(0, 229, 153, 0.75); }
+    }
+
+    @keyframes pulseWorkingDot {
+      0% { transform: scale(0.7); opacity: 0.75; }
+      100% { transform: scale(1.3); opacity: 1; }
+    }
+
+    .subtask-checkbox-btn.done {
       background-color: #00E599;
       border-color: #00E599;
       box-shadow: 0 0 8px rgba(0, 229, 153, 0.55);
     }
 
-    .custom-subtask-checkbox:checked::after {
-      content: '';
-      position: absolute;
-      left: 4.5px;
-      top: 1.5px;
-      width: 4px;
-      height: 8px;
-      border: solid #041a11;
-      border-width: 0 2.2px 2.2px 0;
-      transform: rotate(45deg);
+    .subtask-item {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .subtask-item.is-working {
+      background: linear-gradient(90deg, rgba(0, 229, 153, 0.12) 0%, rgba(0, 229, 153, 0.02) 100%) !important;
+      border-left: 2.5px solid #00E599;
+      padding-left: 0.45rem !important;
+      box-shadow: inset 0 0 12px rgba(0, 229, 153, 0.05);
+    }
+
+    .subtask-working-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 6px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: rgba(0, 229, 153, 0.16);
+      color: #00E599;
+      border: 1px solid rgba(0, 229, 153, 0.35);
+      box-shadow: 0 0 8px rgba(0, 229, 153, 0.25);
+      flex-shrink: 0;
+      animation: workingBadgeFade 2s infinite alternate ease-in-out;
+    }
+
+    @keyframes workingBadgeFade {
+      0% { opacity: 0.85; border-color: rgba(0, 229, 153, 0.3); }
+      100% { opacity: 1; border-color: rgba(0, 229, 153, 0.6); box-shadow: 0 0 10px rgba(0, 229, 153, 0.4); }
     }
 
     /* Pulso ultra fluido y orgánico estilo iOS breathing glow en el color propio de la tarjeta */
@@ -1527,7 +1583,7 @@
       const newSubtasks = [...subtasks];
       DEFAULT_SUBTASK_TEMPLATES.forEach(title => {
         if (!existingTexts.has(title.toLowerCase())) {
-          newSubtasks.push({ text: title, done: false });
+          newSubtasks.push({ text: title, done: false, status: 'pending' });
         }
       });
 
@@ -1554,7 +1610,7 @@
       if (!task) return;
 
       const { text, subtasks, order } = parseTaskDescription(task.description);
-      subtasks.push({ text: clean, done: false });
+      subtasks.push({ text: clean, done: false, status: 'pending' });
       task.description = formatTaskDescription(text, subtasks, order);
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -1593,45 +1649,40 @@
       }
     }
 
-    async function toggleSubtaskCheck(taskId, index, isChecked, event) {
-      if (event) event.stopPropagation();
+    function getSubtaskStatus(st) {
+      if (!st) return 'pending';
+      if (st.status) return st.status;
+      if (st.done) return 'done';
+      return 'pending';
+    }
+
+    async function cycleSubtaskStatus(taskId, index, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
       const { text, subtasks, order } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
-      subtasks[index].done = isChecked;
+      const currentStatus = getSubtaskStatus(subtasks[index]);
+      let nextStatus = 'working';
+      if (currentStatus === 'pending') {
+        nextStatus = 'working';
+      } else if (currentStatus === 'working') {
+        nextStatus = 'done';
+      } else if (currentStatus === 'done') {
+        nextStatus = 'pending';
+      }
+
+      subtasks[index].status = nextStatus;
+      subtasks[index].done = (nextStatus === 'done');
       task.description = formatTaskDescription(text, subtasks, order);
 
-      // Actualización visual instantánea en el DOM
-      const total = subtasks.length;
-      const completed = subtasks.filter(s => s.done).length;
-      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-      const card = document.getElementById(taskId);
-      if (card) {
-        const fill = card.querySelector('.progress-bar-fill');
-        if (fill) fill.style.width = `${pct}%`;
-        const pctLabel = card.querySelector('.progress-pct-value');
-        if (pctLabel) pctLabel.textContent = `${pct}%`;
-        const countLabel = card.querySelector('.progress-count-label');
-        if (countLabel) countLabel.textContent = `(${completed}/${total})`;
-
-        const subtaskRows = card.querySelectorAll('.subtask-item');
-        if (subtaskRows[index]) {
-          const labelText = subtaskRows[index].querySelector('.subtask-text');
-          if (labelText) {
-            if (isChecked) {
-              labelText.classList.add('line-through', 'text-slate-500');
-              labelText.classList.remove('text-slate-200');
-            } else {
-              labelText.classList.remove('line-through', 'text-slate-500');
-              labelText.classList.add('text-slate-200');
-            }
-          }
-        }
-      }
+      expandedSubtasksCards.add(taskId);
+      renderBoard();
 
       try {
         await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
@@ -1641,6 +1692,74 @@
         });
       } catch (e) {
         console.error("Error al actualizar estado de subtarea:", e);
+      }
+    }
+
+    async function cycleSubtaskStatusReverse(taskId, index, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks, order } = parseTaskDescription(task.description);
+      if (!subtasks[index]) return;
+
+      const currentStatus = getSubtaskStatus(subtasks[index]);
+      let nextStatus = 'done';
+      if (currentStatus === 'pending') {
+        nextStatus = 'done';
+      } else if (currentStatus === 'done') {
+        nextStatus = 'working';
+      } else if (currentStatus === 'working') {
+        nextStatus = 'pending';
+      }
+
+      subtasks[index].status = nextStatus;
+      subtasks[index].done = (nextStatus === 'done');
+      task.description = formatTaskDescription(text, subtasks, order);
+
+      expandedSubtasksCards.add(taskId);
+      renderBoard();
+
+      try {
+        await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: task.description })
+        });
+      } catch (e) {
+        console.error("Error al actualizar estado de subtarea:", e);
+      }
+    }
+
+    async function setSubtaskStatusDirect(taskId, index, nextStatus, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks, order } = parseTaskDescription(task.description);
+      if (!subtasks[index]) return;
+
+      subtasks[index].status = nextStatus;
+      subtasks[index].done = (nextStatus === 'done');
+      task.description = formatTaskDescription(text, subtasks, order);
+
+      expandedSubtasksCards.add(taskId);
+      renderBoard();
+
+      try {
+        await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: task.description })
+        });
+      } catch (e) {
+        console.error("Error al actualizar estado directo de subtarea:", e);
       }
     }
 
@@ -1806,7 +1925,8 @@
           const { text: cleanDescription, subtasks } = parseTaskDescription(task.description);
           const showProgress = (colId === 'in-progress' || colId === 'paused' || colId === 'review');
           const totalSubtasks = subtasks.length;
-          const completedSubtasks = subtasks.filter(s => s.done).length;
+          const completedSubtasks = subtasks.filter(s => getSubtaskStatus(s) === 'done').length;
+          const workingSubtasks = subtasks.filter(s => getSubtaskStatus(s) === 'working').length;
           const percent = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
           const isExpanded = expandedSubtasksCards.has(task.id);
 
@@ -1824,19 +1944,94 @@
                 </div>
               `;
             } else {
-              const itemsHtml = subtasks.map((st, sIdx) => `
-                <div class="subtask-item flex items-center justify-between group/st py-1 px-1.5 rounded-md hover:bg-white/[0.04] transition-colors" onclick="event.stopPropagation()">
-                  <label class="flex items-center gap-2 cursor-pointer flex-1 min-w-0 select-none">
-                    <input type="checkbox" ${st.done ? 'checked' : ''} onchange="toggleSubtaskCheck('${task.id}', ${sIdx}, this.checked, event)" class="custom-subtask-checkbox">
-                    <span class="subtask-text text-xs ${st.done ? 'line-through text-slate-500' : 'text-slate-200'} truncate transition-all">
-                      ${st.text}
+              const itemsHtml = subtasks.map((st, sIdx) => {
+                const status = getSubtaskStatus(st);
+                const isWorking = status === 'working';
+                const isDone = status === 'done';
+
+                let checkBtnHtml = '';
+                if (isDone) {
+                  checkBtnHtml = `
+                    <button type="button" 
+                            onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
+                            oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
+                            class="subtask-checkbox-btn done" 
+                            title="Fase completada ✓. Clic para reiniciar a pendiente">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#041a11" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </button>
+                  `;
+                } else if (isWorking) {
+                  checkBtnHtml = `
+                    <button type="button" 
+                            onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
+                            oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
+                            class="subtask-checkbox-btn working" 
+                            title="Fase en desarrollo actual. Clic para marcar como Terminada">
+                      <span class="subtask-working-dot"></span>
+                    </button>
+                  `;
+                } else {
+                  checkBtnHtml = `
+                    <button type="button" 
+                            onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
+                            oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)"
+                            class="subtask-checkbox-btn pending" 
+                            title="Pendiente. Clic para marcar que estás trabajando en esta fase">
+                    </button>
+                  `;
+                }
+
+                let badgeHtml = '';
+                if (isWorking) {
+                  badgeHtml = `
+                    <span class="subtask-working-badge" title="Fase en desarrollo actual">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[#00E599] animate-ping"></span>
+                      Trabajando
                     </span>
-                  </label>
-                  <button onclick="removeSubtask('${task.id}', ${sIdx}, event)" class="opacity-0 group-hover/st:opacity-100 text-slate-500 hover:text-red-400 p-0.5 rounded transition-all" title="Eliminar fase">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-                </div>
-              `).join('');
+                  `;
+                }
+
+                let quickActionHtml = '';
+                if (isWorking) {
+                  quickActionHtml = `
+                    <button onclick="setSubtaskStatusDirect('${task.id}', ${sIdx}, 'done', event)" 
+                            class="text-slate-400 hover:text-[#00E599] p-0.5 rounded transition-all" 
+                            title="Terminar fase (marcar ✓)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                  `;
+                } else if (!isDone) {
+                  quickActionHtml = `
+                    <button onclick="setSubtaskStatusDirect('${task.id}', ${sIdx}, 'working', event)" 
+                            class="text-slate-400 hover:text-[#00E599] p-0.5 rounded transition-all" 
+                            title="Empezar a trabajar en esta fase">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    </button>
+                  `;
+                }
+
+                return `
+                  <div class="subtask-item ${isWorking ? 'is-working' : ''} flex items-center justify-between group/st py-1 px-1.5 rounded-md hover:bg-white/[0.04] transition-all cursor-pointer" 
+                       onclick="cycleSubtaskStatus('${task.id}', ${sIdx}, event)" 
+                       oncontextmenu="cycleSubtaskStatusReverse('${task.id}', ${sIdx}, event)">
+                    <div class="flex items-center gap-2 flex-1 min-w-0 select-none">
+                      ${checkBtnHtml}
+                      <span class="subtask-text text-xs ${isDone ? 'line-through text-slate-500' : isWorking ? 'text-white font-semibold' : 'text-slate-200'} truncate transition-all">
+                        ${st.text}
+                      </span>
+                      ${badgeHtml}
+                    </div>
+                    <div class="flex items-center gap-1 opacity-0 group-hover/st:opacity-100 transition-opacity">
+                      ${quickActionHtml}
+                      <button onclick="removeSubtask('${task.id}', ${sIdx}, event)" class="text-slate-500 hover:text-red-400 p-0.5 rounded transition-all" title="Eliminar fase">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('');
 
               subtaskListHtml = `
                 <div class="flex flex-col gap-0.5">
@@ -1854,6 +2049,11 @@
               `;
             }
 
+            let workingCountBadge = '';
+            if (workingSubtasks > 0) {
+              workingCountBadge = `<span class="text-[#00E599] font-bold text-[10.5px] ml-1.5 px-1.5 py-0.2 rounded-full bg-[#00E599]/15 border border-[#00E599]/30">● ${workingSubtasks} en curso</span>`;
+            }
+
             progressBarHtml = `
               <div class="card-progress-section mt-3 pt-2.5 border-t border-white/[0.08]" onclick="event.stopPropagation()">
                 <div class="flex items-center justify-between mb-1.5 text-xs">
@@ -1864,6 +2064,7 @@
                     </svg>
                     <span class="text-slate-300 font-bold">Progreso</span>
                     <span class="progress-count-label text-[11px] text-slate-400 font-medium">${totalSubtasks > 0 ? `(${completedSubtasks}/${totalSubtasks})` : ''}</span>
+                    ${workingCountBadge}
                   </div>
                   <div class="flex items-center gap-2">
                     <span class="progress-pct-value font-extrabold text-[12px] text-[#00E599] font-mono tracking-tight">${percent}%</span>
@@ -2102,7 +2303,7 @@
         
         // Copiar subtareas con estado desmarcado para empezar fresco y calcular orden siguiente
         const { text, subtasks, order } = parseTaskDescription(original.description);
-        const freshSubtasks = subtasks.map(s => ({ text: s.text, done: false }));
+        const freshSubtasks = subtasks.map(s => ({ text: s.text, done: false, status: 'pending' }));
         const newOrder = (order !== null && !isNaN(order)) ? order + 1 : null;
         const newDesc = formatTaskDescription(text, freshSubtasks, newOrder);
 
