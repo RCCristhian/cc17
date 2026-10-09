@@ -285,52 +285,96 @@
     .tag {
       display: inline-flex;
       align-items: center;
-      padding: 0.25rem 0.65rem;
+      height: 26px;
+      padding: 0 0.75rem;
       border-radius: 9999px;
       font-size: 0.72rem;
       font-weight: 700;
-      margin-bottom: 0.65rem;
-      margin-right: 0.35rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       transition: all 0.2s;
+      white-space: nowrap;
+      margin: 0;
+      box-sizing: border-box;
+      line-height: 1;
     }
 
-    /* Indicador compacto de Prioridad junto al proyecto con mensaje flotante */
-    .priority-indicator-wrapper {
+    /* Indicadores de estado alineados al título/proyecto con mensaje flotante */
+    .status-tooltip-wrapper {
       position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
       vertical-align: middle;
+      height: 26px;
     }
 
-    .priority-star-badge {
+    .status-icon-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      background: rgba(244, 63, 94, 0.15);
-      border: 1px solid rgba(244, 63, 94, 0.45);
-      color: #fb7185;
-      box-shadow: 0 0 10px rgba(244, 63, 94, 0.25);
+      width: 26px;
+      height: 26px;
+      border-radius: 9999px;
+      flex-shrink: 0;
+      margin: 0;
+      box-sizing: border-box;
       cursor: help;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
     }
 
-    .priority-indicator-wrapper:hover .priority-star-badge {
-      transform: scale(1.15);
-      background: rgba(244, 63, 94, 0.3);
-      border-color: rgba(244, 63, 94, 0.8);
-      color: #ffffff;
-      box-shadow: 0 0 14px rgba(244, 63, 94, 0.55);
+    /* Prioridad: Rojo brillante de alto impacto */
+    .status-icon-badge.badge-priority {
+      background: rgba(239, 68, 68, 0.28);
+      border: 1.5px solid #ff334b;
+      color: #ff334b;
+      box-shadow: 0 0 12px rgba(255, 51, 75, 0.55), inset 0 0 6px rgba(255, 51, 75, 0.25);
     }
 
-    .priority-floating-tooltip {
+    .status-tooltip-wrapper:hover .status-icon-badge.badge-priority {
+      transform: scale(1.12);
+      background: rgba(239, 68, 68, 0.5);
+      border-color: #ff4d64;
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(255, 51, 75, 0.85);
+    }
+
+    /* En Pausa: Ámbar refinado con icono de pausa */
+    .status-icon-badge.badge-paused {
+      background: rgba(245, 158, 11, 0.24);
+      border: 1.5px solid #f59e0b;
+      color: #fbbf24;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.45), inset 0 0 6px rgba(245, 158, 11, 0.2);
+    }
+
+    .status-tooltip-wrapper:hover .status-icon-badge.badge-paused {
+      transform: scale(1.12);
+      background: rgba(245, 158, 11, 0.42);
+      border-color: #fbbf24;
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.8);
+    }
+
+    /* En Revisión: Lavanda / Índigo elegante con lentes */
+    .status-icon-badge.badge-review {
+      background: rgba(167, 139, 250, 0.24);
+      border: 1.5px solid #a78bfa;
+      color: #c4b5fd;
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.45), inset 0 0 6px rgba(167, 139, 250, 0.2);
+    }
+
+    .status-tooltip-wrapper:hover .status-icon-badge.badge-review {
+      transform: scale(1.12);
+      background: rgba(167, 139, 250, 0.42);
+      border-color: #c4b5fd;
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(167, 139, 250, 0.8);
+    }
+
+    /* Tooltip flotante compartido */
+    .status-floating-tooltip {
       position: absolute;
       top: calc(100% + 6px);
       left: 50%;
@@ -338,12 +382,10 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      padding: 0.3rem 0.6rem;
+      padding: 0.28rem 0.65rem;
       background: #0b0f17;
-      border: 1px solid rgba(244, 63, 94, 0.6);
       border-radius: 0.5rem;
-      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.9), 0 0 14px rgba(244, 63, 94, 0.35);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
       white-space: nowrap;
       opacity: 0;
       visibility: hidden;
@@ -352,7 +394,12 @@
       z-index: 60;
     }
 
-    .priority-floating-tooltip::before {
+    .status-floating-tooltip.tooltip-priority {
+      border: 1px solid rgba(255, 51, 75, 0.7);
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.95), 0 0 14px rgba(255, 51, 75, 0.4);
+    }
+
+    .status-floating-tooltip.tooltip-priority::before {
       content: '';
       position: absolute;
       top: -4px;
@@ -361,11 +408,47 @@
       width: 7px;
       height: 7px;
       background: #0b0f17;
-      border-top: 1px solid rgba(244, 63, 94, 0.6);
-      border-left: 1px solid rgba(244, 63, 94, 0.6);
+      border-top: 1px solid rgba(255, 51, 75, 0.7);
+      border-left: 1px solid rgba(255, 51, 75, 0.7);
     }
 
-    .priority-indicator-wrapper:hover .priority-floating-tooltip {
+    .status-floating-tooltip.tooltip-paused {
+      border: 1px solid rgba(245, 158, 11, 0.7);
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.95), 0 0 14px rgba(245, 158, 11, 0.4);
+    }
+
+    .status-floating-tooltip.tooltip-paused::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 7px;
+      height: 7px;
+      background: #0b0f17;
+      border-top: 1px solid rgba(245, 158, 11, 0.7);
+      border-left: 1px solid rgba(245, 158, 11, 0.7);
+    }
+
+    .status-floating-tooltip.tooltip-review {
+      border: 1px solid rgba(167, 139, 250, 0.7);
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.95), 0 0 14px rgba(167, 139, 250, 0.4);
+    }
+
+    .status-floating-tooltip.tooltip-review::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 7px;
+      height: 7px;
+      background: #0b0f17;
+      border-top: 1px solid rgba(167, 139, 250, 0.7);
+      border-left: 1px solid rgba(167, 139, 250, 0.7);
+    }
+
+    .status-tooltip-wrapper:hover .status-floating-tooltip {
       opacity: 1;
       visibility: visible;
       transform: translateX(-50%) translateY(0);
@@ -2265,7 +2348,7 @@
 
           // Lomo izquierdo refinado estilo iOS (3.5px de grosor)
           if (task.priority) {
-            card.style.borderLeft = `3.5px solid #ef4444`;
+            card.style.borderLeft = `3.5px solid #ff334b`;
           } else if (colId === 'paused' && isMissingInfo) {
             card.style.borderLeft = `3.5px solid #f59e0b`;
           } else {
@@ -2275,23 +2358,64 @@
           let priorityHtml = '';
           if (task.priority) {
             priorityHtml = `
-              <div class="priority-indicator-wrapper shrink-0">
-                <span class="priority-star-badge" title="Alta Prioridad">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <div class="status-tooltip-wrapper">
+                <span class="status-icon-badge badge-priority" title="Alta Prioridad">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
                   </svg>
                 </span>
-                <div class="priority-floating-tooltip">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-rose-400">
+                <div class="status-floating-tooltip tooltip-priority">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" class="text-red-400">
                     <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
                   </svg>
-                  <span class="font-bold text-rose-300 text-[10.5px] tracking-wider uppercase">Alta Prioridad</span>
+                  <span class="font-extrabold text-red-300 text-[10.5px] tracking-wider uppercase">Alta Prioridad</span>
                 </div>
               </div>
             `;
           }
 
-          let tagsHtml = `<span class="tag truncate shrink min-w-0 ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);" title="${task.project}">${task.project}</span>${priorityHtml}`;
+          let colStatusBadgeHtml = '';
+          if (colId === 'paused') {
+            colStatusBadgeHtml = `
+              <div class="status-tooltip-wrapper">
+                <span class="status-icon-badge badge-paused" title="Pausado">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+                  </svg>
+                </span>
+                <div class="status-floating-tooltip tooltip-paused">
+                  <span class="text-xs">⏸️</span>
+                  <span class="font-extrabold text-amber-300 text-[10.5px] tracking-wider uppercase">Pausado</span>
+                </div>
+              </div>
+            `;
+          } else if (colId === 'review') {
+            colStatusBadgeHtml = `
+              <div class="status-tooltip-wrapper">
+                <span class="status-icon-badge badge-review" title="En Revisión">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="6" cy="13" r="4"></circle>
+                    <circle cx="18" cy="13" r="4"></circle>
+                    <path d="M10 13h4"></path>
+                    <path d="M2 11l3.5-1"></path>
+                    <path d="M22 11l-3.5-1"></path>
+                  </svg>
+                </span>
+                <div class="status-floating-tooltip tooltip-review">
+                  <span class="text-xs">👓</span>
+                  <span class="font-extrabold text-purple-300 text-[10.5px] tracking-wider uppercase">En Revisión</span>
+                </div>
+              </div>
+            `;
+          }
+
+          let tagsHtml = `
+            <div class="inline-flex items-center gap-1.5 flex-nowrap shrink-0">
+              <span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>
+              ${priorityHtml}
+              ${colStatusBadgeHtml}
+            </div>
+          `;
 
           let workingStatusHtml = '';
           if (isWorking) {
@@ -2669,8 +2793,8 @@
           card.innerHTML = `
             ${workingStatusHtml}
             ${cardControlsHtml}
-            <div class="mb-2 flex flex-nowrap items-center gap-1.5 min-w-0 max-w-full ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-20' : 'pr-12') : 'pr-2'}">${tagsHtml}</div>
-            <div class="font-bold text-base mb-1 text-white ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-16' : 'pr-10') : 'pr-2'} leading-snug">${task.title}</div>
+            <div class="mb-2 flex items-center gap-1.5 min-w-0 max-w-full ${cardControlsHtml ? (colId === 'in-progress' || (colId === 'paused' && isMissingInfo) ? 'pr-16' : 'pr-10') : 'pr-2'}">${tagsHtml}</div>
+            <div class="font-bold text-base mb-1 text-white ${cardControlsHtml ? (colId === 'in-progress' || (colId === 'paused' && isMissingInfo) ? 'pr-16' : 'pr-10') : 'pr-2'} leading-snug">${task.title}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
             ${progressBarHtml}
           `;
