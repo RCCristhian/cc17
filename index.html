@@ -142,6 +142,7 @@
         padding: 1.35rem 0.75rem 1rem 0.75rem !important;
         gap: 0.85rem !important;
         overflow-y: auto !important;
+        overflow-x: hidden !important;
       }
 
       .kanban-card {
@@ -171,6 +172,7 @@
       flex: 1;
       padding: 1.5rem 1.25rem 1.25rem 1.25rem;
       overflow-y: auto;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
@@ -286,11 +288,11 @@
       display: inline-flex;
       align-items: center;
       height: 26px;
-      padding: 0 0.75rem;
+      padding: 0 0.62rem;
       border-radius: 9999px;
       font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
       transition: all 0.2s;
       white-space: nowrap;
@@ -2820,8 +2822,8 @@
           card.innerHTML = `
             ${workingStatusHtml}
             ${cardControlsHtml}
-            <div class="mb-2 flex items-center gap-1.5 min-w-0 max-w-full ${isAdmin ? 'pr-9' : 'pr-1'}">${tagsHtml}</div>
-            <div class="font-bold text-base mb-1 text-white ${isAdmin ? 'pr-9' : 'pr-1'} leading-snug">${task.title}</div>
+            <div class="mb-2 flex items-center gap-1.5 min-w-0 max-w-full">${tagsHtml}</div>
+            <div class="font-bold text-base mb-1 text-white pr-7 leading-snug">${task.title}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
             ${progressBarHtml}
           `;
