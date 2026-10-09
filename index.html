@@ -489,23 +489,32 @@
     .subtask-working-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 1px 6px;
-      border-radius: 9999px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      background: rgba(0, 229, 153, 0.16);
+      gap: 4.5px;
+      padding: 0;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
       color: #00E599;
-      border: 1px solid rgba(0, 229, 153, 0.35);
-      box-shadow: 0 0 8px rgba(0, 229, 153, 0.25);
+      font-size: 11px;
+      font-weight: 600;
+      font-style: italic;
+      letter-spacing: 0.02em;
       flex-shrink: 0;
-      animation: workingBadgeFade 2s infinite alternate ease-in-out;
+      user-select: none;
     }
 
-    @keyframes workingBadgeFade {
-      0% { opacity: 0.85; border-color: rgba(0, 229, 153, 0.3); }
-      100% { opacity: 1; border-color: rgba(0, 229, 153, 0.6); box-shadow: 0 0 10px rgba(0, 229, 153, 0.4); }
+    .subtasks-toggle-bottom-btn {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      cursor: pointer;
+    }
+
+    .subtasks-toggle-bottom-btn:hover {
+      background: rgba(30, 41, 59, 0.95);
+      border-color: rgba(0, 229, 153, 0.45);
+      box-shadow: 0 0 12px rgba(0, 229, 153, 0.25);
     }
 
     /* Pulso ultra fluido y orgánico estilo iOS breathing glow en el color propio de la tarjeta */
@@ -1987,8 +1996,8 @@
                 if (isWorking) {
                   badgeHtml = `
                     <span class="subtask-working-badge" title="Fase en desarrollo actual">
-                      <span class="w-1.5 h-1.5 rounded-full bg-[#00E599] animate-ping"></span>
-                      Trabajando
+                      <span class="pulse-dot !w-1.5 !h-1.5 !mr-0 !bg-[#00E599]" style="box-shadow: 0 0 8px #00E599;"></span>
+                      <span>Trabajando</span>
                     </span>
                   `;
                 }
@@ -2049,9 +2058,16 @@
               `;
             }
 
+            const workingItems = subtasks.filter(s => getSubtaskStatus(s) === 'working');
             let workingCountBadge = '';
-            if (workingSubtasks > 0) {
-              workingCountBadge = `<span class="text-[#00E599] font-bold text-[10.5px] ml-1.5 px-1.5 py-0.2 rounded-full bg-[#00E599]/15 border border-[#00E599]/30">● ${workingSubtasks} en curso</span>`;
+            if (workingItems.length > 0) {
+              const names = workingItems.map(s => s.text).join(' - ');
+              workingCountBadge = `
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#00E599] italic tracking-tight ml-1.5 max-w-[150px] sm:max-w-[220px] truncate" title="${names} en curso">
+                  <span class="pulse-dot !w-1.5 !h-1.5 !mr-0 !bg-[#00E599] flex-shrink-0" style="box-shadow: 0 0 8px #00E599;"></span>
+                  <span class="truncate">${names} en curso</span>
+                </span>
+              `;
             }
 
             progressBarHtml = `
@@ -2066,13 +2082,8 @@
                     <span class="progress-count-label text-[11px] text-slate-400 font-medium">${totalSubtasks > 0 ? `(${completedSubtasks}/${totalSubtasks})` : ''}</span>
                     ${workingCountBadge}
                   </div>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center">
                     <span class="progress-pct-value font-extrabold text-[12px] text-[#00E599] font-mono tracking-tight">${percent}%</span>
-                    <button onclick="toggleSubtasksList('${task.id}', event)" class="w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-60 hover:opacity-100" title="${isExpanded ? 'Ocultar subtareas' : 'Ver subtareas'}">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-200 ${isExpanded ? 'rotate-180 text-[#00E599]' : ''}">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                      </svg>
-                    </button>
                   </div>
                 </div>
                 <div class="w-full bg-[#0a0d14] rounded-full h-2 overflow-hidden border border-white/5 relative p-[0.5px]">
@@ -2082,6 +2093,17 @@
                 </div>
                 <div id="subtasks-panel-${task.id}" class="subtasks-panel ${isExpanded ? 'expanded' : ''} mt-2.5 pt-2 border-t border-white/5 flex-col gap-1">
                   ${subtaskListHtml}
+                </div>
+                <div class="flex justify-center mt-2 pt-0.5">
+                  <button type="button" 
+                          onclick="toggleSubtasksList('${task.id}', event)" 
+                          class="subtasks-toggle-bottom-btn flex items-center gap-1.5 py-1 px-3.5 rounded-full text-[11px] font-bold text-slate-300 hover:text-white transition-all active:scale-95 group/btn" 
+                          title="${isExpanded ? 'Ocultar fases' : 'Ver fases y subtareas'}">
+                    <span>${isExpanded ? 'Ocultar fases' : 'Ver fases'}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-[#00E599] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
                 </div>
               </div>
             `;
