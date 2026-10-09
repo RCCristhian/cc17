@@ -296,11 +296,78 @@
       transition: all 0.2s;
     }
 
-    .tag-priority {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      box-shadow: 0 0 10px -2px rgba(239, 68, 68, 0.3);
+    /* Indicador compacto de Prioridad junto al proyecto con mensaje flotante */
+    .priority-indicator-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+    }
+
+    .priority-flame-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      background: rgba(239, 68, 68, 0.18);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      font-size: 11.5px;
+      line-height: 1;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+      cursor: help;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+
+    .priority-indicator-wrapper:hover .priority-flame-badge {
+      transform: scale(1.15);
+      background: rgba(239, 68, 68, 0.3);
+      border-color: rgba(239, 68, 68, 0.75);
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.55);
+    }
+
+    .priority-floating-tooltip {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-4px);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0.3rem 0.6rem;
+      background: #0b0f17;
+      border: 1px solid rgba(239, 68, 68, 0.65);
+      border-radius: 0.5rem;
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.9), 0 0 14px rgba(239, 68, 68, 0.35);
+      backdrop-filter: blur(12px);
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+      pointer-events: none;
+      z-index: 60;
+    }
+
+    .priority-floating-tooltip::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 7px;
+      height: 7px;
+      background: #0b0f17;
+      border-top: 1px solid rgba(239, 68, 68, 0.65);
+      border-left: 1px solid rgba(239, 68, 68, 0.65);
+    }
+
+    .priority-indicator-wrapper:hover .priority-floating-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
     }
 
     /* Controles superiores de la tarjeta (Flechita de menú + Botón Trabajando / Falta Info) */
@@ -2201,16 +2268,20 @@
             card.style.borderLeft = `3.5px solid ${cardColor}`;
           }
           
-          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>`;
-          if (colId === 'paused' && !isMissingInfo) {
-            tagsHtml += `<span class="tag" style="background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.45); box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);">⏸️ Pausado</span>`;
-          }
-          if (colId === 'review') {
-            tagsHtml += `<span class="tag" style="background: rgba(6, 182, 212, 0.18); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.45); box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);">🔍 En Revisión</span>`;
-          }
+          let priorityHtml = '';
           if (task.priority) {
-            tagsHtml += `<span class="tag tag-priority">🔥 Prioritario</span>`;
+            priorityHtml = `
+              <div class="priority-indicator-wrapper">
+                <span class="priority-flame-badge">🔥</span>
+                <div class="priority-floating-tooltip">
+                  <span class="text-xs">🔥</span>
+                  <span class="font-extrabold text-red-400 text-[11px] tracking-wide uppercase">Prioritario</span>
+                </div>
+              </div>
+            `;
           }
+
+          let tagsHtml = `<span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>${priorityHtml}`;
 
           let workingStatusHtml = '';
           if (isWorking) {
@@ -2588,7 +2659,7 @@
           card.innerHTML = `
             ${workingStatusHtml}
             ${cardControlsHtml}
-            <div class="mb-2 flex flex-wrap items-center gap-1 ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-20' : 'pr-12') : 'pr-2'}">${tagsHtml}</div>
+            <div class="mb-2 flex flex-wrap items-center gap-1.5 ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-20' : 'pr-12') : 'pr-2'}">${tagsHtml}</div>
             <div class="font-bold text-base mb-1 text-white ${cardControlsHtml ? (colId === 'in-progress' || colId === 'paused' ? 'pr-16' : 'pr-10') : 'pr-2'} leading-snug">${task.title}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
             ${progressBarHtml}
