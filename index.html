@@ -57,13 +57,13 @@
     }
 
     .kanban-column-paused {
-      border: 1px solid rgba(249, 115, 22, 0.45) !important;
-      background: linear-gradient(180deg, rgba(249, 115, 22, 0.06) 0%, #080a10 140px) !important;
-      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(249, 115, 22, 0.18), inset 0 1px 0 rgba(249, 115, 22, 0.25) !important;
+      border: 1px solid rgba(214, 199, 161, 0.35) !important;
+      background: linear-gradient(180deg, rgba(214, 199, 161, 0.05) 0%, #080a10 140px) !important;
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(214, 199, 161, 0.14), inset 0 1px 0 rgba(214, 199, 161, 0.2) !important;
     }
     .kanban-column-paused .kanban-column-header {
-      background: linear-gradient(180deg, rgba(249, 115, 22, 0.16) 0%, rgba(249, 115, 22, 0.04) 100%) !important;
-      border-bottom: 1px solid rgba(249, 115, 22, 0.25) !important;
+      background: linear-gradient(180deg, rgba(214, 199, 161, 0.12) 0%, rgba(214, 199, 161, 0.03) 100%) !important;
+      border-bottom: 1px solid rgba(214, 199, 161, 0.2) !important;
       backdrop-filter: blur(16px);
     }
 
@@ -286,6 +286,11 @@
       transform: scale(0.96) rotate(-1deg);
     }
 
+    .kanban-card.is-missing-info-card {
+      border-color: rgba(245, 158, 11, 0.65) !important;
+      box-shadow: 0 14px 32px -6px rgba(0, 0, 0, 0.75), 0 0 18px -2px rgba(245, 158, 11, 0.35) !important;
+    }
+
     .tag {
       display: inline-flex;
       align-items: center;
@@ -345,20 +350,20 @@
       box-shadow: 0 0 16px rgba(255, 51, 75, 0.85);
     }
 
-    /* En Pausa: Ámbar refinado con icono de pausa */
+    /* En Pausa (Normal): Beige / arena claro atenuado para contrastar con Falta Información */
     .status-icon-badge.badge-paused {
-      background: rgba(245, 158, 11, 0.24);
-      border: 1.5px solid #f59e0b;
-      color: #fbbf24;
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.45), inset 0 0 6px rgba(245, 158, 11, 0.2);
+      background: rgba(220, 208, 185, 0.16);
+      border: 1.5px solid rgba(220, 208, 185, 0.55);
+      color: #dfd3be;
+      box-shadow: 0 0 8px rgba(220, 208, 185, 0.22), inset 0 0 4px rgba(220, 208, 185, 0.12);
     }
 
     .status-tooltip-wrapper:hover .status-icon-badge.badge-paused {
       transform: scale(1.12);
-      background: rgba(245, 158, 11, 0.42);
-      border-color: #fbbf24;
+      background: rgba(220, 208, 185, 0.28);
+      border-color: #f1e7d4;
       color: #ffffff;
-      box-shadow: 0 0 14px rgba(245, 158, 11, 0.8);
+      box-shadow: 0 0 12px rgba(220, 208, 185, 0.55);
     }
 
     /* En Revisión: Cyan / Turquesa brillante que coincide con la columna */
@@ -417,8 +422,8 @@
     }
 
     .status-floating-tooltip.tooltip-paused {
-      border: 1px solid rgba(245, 158, 11, 0.7);
-      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.95), 0 0 14px rgba(245, 158, 11, 0.4);
+      border: 1px solid rgba(220, 208, 185, 0.6);
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.95), 0 0 12px rgba(220, 208, 185, 0.25);
     }
 
     .status-floating-tooltip.tooltip-paused::before {
@@ -430,8 +435,26 @@
       width: 7px;
       height: 7px;
       background: #0b0f17;
-      border-top: 1px solid rgba(245, 158, 11, 0.7);
-      border-left: 1px solid rgba(245, 158, 11, 0.7);
+      border-top: 1px solid rgba(220, 208, 185, 0.6);
+      border-left: 1px solid rgba(220, 208, 185, 0.6);
+    }
+
+    .status-floating-tooltip.tooltip-missing-info {
+      border: 1px solid rgba(245, 158, 11, 0.85);
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.95), 0 0 16px rgba(245, 158, 11, 0.5);
+    }
+
+    .status-floating-tooltip.tooltip-missing-info::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 7px;
+      height: 7px;
+      background: #0b0f17;
+      border-top: 1px solid rgba(245, 158, 11, 0.85);
+      border-left: 1px solid rgba(245, 158, 11, 0.85);
     }
 
     .status-floating-tooltip.tooltip-review {
@@ -1217,12 +1240,12 @@
     <div class="kanban-column kanban-column-paused">
       <div class="kanban-column-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-orange-500/20 border border-orange-400/40 text-orange-400 text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(249,115,22,0.3)]">
+          <div class="w-6 h-6 rounded-full bg-[#d6c7a1]/20 border border-[#d6c7a1]/40 text-[#e5d7ba] text-xs font-bold flex items-center justify-center shadow-[0_0_10px_rgba(214,199,161,0.25)]">
             2
           </div>
           <span class="text-sm font-bold tracking-tight text-white">En Pausa</span>
         </div>
-        <span class="bg-orange-500/15 text-orange-300 border border-orange-400/30 px-2.5 py-0.5 rounded-full text-xs font-semibold" id="count-paused">0</span>
+        <span class="bg-[#d6c7a1]/15 text-[#e5d7ba] border border-[#d6c7a1]/30 px-2.5 py-0.5 rounded-full text-xs font-semibold" id="count-paused">0</span>
       </div>
       <div class="kanban-cards dropzone" id="paused"></div>
     </div>
@@ -1371,11 +1394,24 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <input type="checkbox" id="newTaskMissingInfo" class="w-4 h-4 rounded text-amber-500 bg-[#080a0f] border-white/20 focus:ring-amber-500 cursor-pointer">
+            <input type="checkbox" id="newTaskMissingInfo" onchange="document.getElementById('pauseReasonGroup').style.display = this.checked ? 'block' : 'none'" class="w-4 h-4 rounded text-amber-500 bg-[#080a0f] border-white/20 focus:ring-amber-500 cursor-pointer">
             <label for="newTaskMissingInfo" class="text-xs font-bold text-amber-400 flex items-center gap-1 cursor-pointer select-none">
               ⚠️ Falta Información (Pausa)
             </label>
           </div>
+        </div>
+
+        <!-- Campo para Motivo de Falta de Información -->
+        <div id="pauseReasonGroup" class="p-3 bg-amber-950/20 border border-amber-500/30 rounded-xl" style="display: none;">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Motivo de Falta de Información / Pausa
+            </label>
+            <span class="text-[11px] text-amber-400/70 font-semibold">Opcional</span>
+          </div>
+          <input type="text" id="newTaskPauseReason" placeholder="Ej: Esperando aprobación de diseño o recursos del cliente..." class="w-full bg-[#080a0f] border border-amber-500/40 rounded-lg p-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400">
+          <p class="text-[11px] text-slate-400 mt-1">Este motivo se mostrará en líneas amarillas en la tarjeta para los visitantes.</p>
         </div>
       </div>
 
@@ -1472,6 +1508,43 @@
           </button>
           <button onclick="saveCustomDeliveryUrl()" class="px-5 py-2 text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl shadow-lg shadow-cyan-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
             Guardar Enlace
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Motivo de Pausa / Falta de Información -->
+  <div id="editPauseReasonModal" class="modal-overlay" onclick="if(event.target===this) closeEditPauseReasonModal()">
+    <div class="modal-content !max-w-md" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>Motivo de Falta de Información</span>
+        </h2>
+        <button onclick="closeEditPauseReasonModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <input type="hidden" id="editPauseReasonTaskId">
+      <div class="mb-4">
+        <label class="block text-xs font-bold uppercase tracking-wider text-amber-300 mb-1.5">¿Por qué se pausa este proyecto?</label>
+        <textarea id="customPauseReasonInput" rows="3" placeholder="Ej: Esperando planos actualizados del cliente..." class="w-full bg-[#080a0f] border border-amber-500/40 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl p-2.5 text-sm text-white placeholder-slate-500 outline-none resize-none"></textarea>
+        <p class="text-[11px] text-slate-400 mt-1.5">
+          Este motivo se mostrará con líneas amarillas en la tarjeta del tablero para visitantes y administradores.
+        </p>
+      </div>
+
+      <div class="flex items-center justify-between gap-2.5 mt-5 pt-3 border-t border-white/10">
+        <button type="button" onclick="clearPauseReason()" class="px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-red-400 transition-colors">
+          Quitar motivo
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="closeEditPauseReasonModal()" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-colors">
+            Cancelar
+          </button>
+          <button onclick="saveCustomPauseReason()" class="px-5 py-2 text-sm font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl shadow-lg shadow-amber-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            Guardar Motivo
           </button>
         </div>
       </div>
@@ -2117,12 +2190,13 @@
     }
 
     function parseTaskDescription(rawDesc) {
-      if (!rawDesc) return { text: '', subtasks: [], order: null, workingText: '', deliveryUrl: '' };
+      if (!rawDesc) return { text: '', subtasks: [], order: null, workingText: '', deliveryUrl: '', pauseReason: '' };
       let cleanText = rawDesc;
       let order = null;
       let subtasks = [];
       let workingText = '';
       let deliveryUrl = '';
+      let pauseReason = '';
 
       const orderMatch = cleanText.match(/<!--order:(-?\d+)-->/);
       if (orderMatch) {
@@ -2142,6 +2216,12 @@
         cleanText = cleanText.replace(/<!--delivery_url:[\s\S]*?-->/, '').trim();
       }
 
+      const prMatch = cleanText.match(/<!--pause_reason:([\s\S]*?)-->/);
+      if (prMatch) {
+        pauseReason = prMatch[1].trim();
+        cleanText = cleanText.replace(/<!--pause_reason:[\s\S]*?-->/, '').trim();
+      }
+
       const match = cleanText.match(/<!--subtasks:([\s\S]*?)-->/);
       if (match) {
         try {
@@ -2158,10 +2238,10 @@
         }
       }
 
-      return { text: cleanText.trim(), subtasks, order, workingText, deliveryUrl };
+      return { text: cleanText.trim(), subtasks, order, workingText, deliveryUrl, pauseReason };
     }
 
-    function formatTaskDescription(text, subtasks, order, workingText, deliveryUrl) {
+    function formatTaskDescription(text, subtasks, order, workingText, deliveryUrl, pauseReason) {
       const clean = (text || '').trim();
       const parts = [];
       if (clean) parts.push(clean);
@@ -2173,6 +2253,9 @@
       }
       if (deliveryUrl && typeof deliveryUrl === 'string' && deliveryUrl.trim()) {
         parts.push(`<!--delivery_url:${deliveryUrl.trim()}-->`);
+      }
+      if (pauseReason && typeof pauseReason === 'string' && pauseReason.trim()) {
+        parts.push(`<!--pause_reason:${pauseReason.trim()}-->`);
       }
       if (subtasks && subtasks.length > 0) {
         parts.push(`<!--subtasks:${JSON.stringify(subtasks)}-->`);
@@ -2239,7 +2322,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
       const existingTexts = new Set(subtasks.map(s => s.text.toLowerCase().trim()));
       const newSubtasks = [...subtasks];
       DEFAULT_SUBTASK_TEMPLATES.forEach(title => {
@@ -2248,7 +2331,7 @@
         }
       });
 
-      task.description = formatTaskDescription(text, newSubtasks, order, workingText, deliveryUrl);
+      task.description = formatTaskDescription(text, newSubtasks, order, workingText, deliveryUrl, pauseReason);
       expandedSubtasksCards.add(taskId);
       renderBoard();
 
@@ -2271,9 +2354,9 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
       subtasks.push({ text: clean, done: false, status: 'pending' });
-      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl, pauseReason);
       expandedSubtasksCards.add(taskId);
       renderBoard();
 
@@ -2294,11 +2377,11 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       subtasks.splice(index, 1);
-      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl, pauseReason);
       renderBoard();
 
       try {
@@ -2328,7 +2411,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       const currentStatus = getSubtaskStatus(subtasks[index]);
@@ -2343,7 +2426,7 @@
 
       subtasks[index].status = nextStatus;
       subtasks[index].done = (nextStatus === 'done');
-      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl, pauseReason);
 
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -2368,7 +2451,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       const currentStatus = getSubtaskStatus(subtasks[index]);
@@ -2383,7 +2466,7 @@
 
       subtasks[index].status = nextStatus;
       subtasks[index].done = (nextStatus === 'done');
-      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl, pauseReason);
 
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -2408,12 +2491,12 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       subtasks[index].status = nextStatus;
       subtasks[index].done = (nextStatus === 'done');
-      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl, pauseReason);
 
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -2499,7 +2582,7 @@
           const cb = parseInt(hexClean.substring(4, 6), 16) || 246;
           const rgb = `${cr}, ${cg}, ${cb}`;
 
-          card.className = `kanban-card text-sm ${isWorking ? 'is-active-working' : ''} ${colId === 'in-progress' ? 'has-working-btn' : ''} ${colId === 'paused' ? 'has-paused-btn' : ''}`;
+          card.className = `kanban-card text-sm ${isWorking ? 'is-active-working' : ''} ${isMissingInfo ? 'is-missing-info-card' : ''} ${colId === 'in-progress' ? 'has-working-btn' : ''} ${colId === 'paused' ? 'has-paused-btn' : ''}`;
           
           card.style.setProperty('--card-color', cardColor);
           card.style.setProperty('--card-color-soft', `rgba(${rgb}, 0.5)`);
@@ -2571,11 +2654,11 @@
                 <div class="status-tooltip-wrapper">
                   <button onclick="toggleMissingInfo('${task.id}', event)" 
                     class="status-icon-badge ${isMissingInfo ? 'missing-info-btn is-active' : 'badge-paused'}" 
-                    title="">
+                    title="${isMissingInfo ? 'Falta Información (Clic para alternar o editar motivo)' : 'En Pausa (Clic para activar Falta Información)'}">
                     ${pausedIconSvg}
                   </button>
-                  <div class="status-floating-tooltip tooltip-paused">
-                    <span class="font-extrabold text-amber-300 text-[10.5px] tracking-wider uppercase">${pausedTooltipText}</span>
+                  <div class="status-floating-tooltip ${isMissingInfo ? 'tooltip-missing-info' : 'tooltip-paused'}">
+                    <span class="font-extrabold ${isMissingInfo ? 'text-amber-300' : 'text-[#dfd3be]'} text-[10.5px] tracking-wider uppercase">${pausedTooltipText}</span>
                   </div>
                 </div>
               `;
@@ -2585,8 +2668,8 @@
                   <span class="status-icon-badge ${isMissingInfo ? 'missing-info-btn is-active' : 'badge-paused'} cursor-help">
                     ${pausedIconSvg}
                   </span>
-                  <div class="status-floating-tooltip tooltip-paused">
-                    <span class="font-extrabold text-amber-300 text-[10.5px] tracking-wider uppercase">${pausedTooltipText}</span>
+                  <div class="status-floating-tooltip ${isMissingInfo ? 'tooltip-missing-info' : 'tooltip-paused'}">
+                    <span class="font-extrabold ${isMissingInfo ? 'text-amber-300' : 'text-[#dfd3be]'} text-[10.5px] tracking-wider uppercase">${pausedTooltipText}</span>
                   </div>
                 </div>
               `;
@@ -2647,8 +2730,46 @@
             </div>
           `;
 
-          // Parsear descripción, subtareas, texto de trabajo y enlace de entrega
-          const { text: cleanDescription, subtasks, workingText, deliveryUrl } = parseTaskDescription(task.description);
+          // Parsear descripción, subtareas, texto de trabajo, enlace de entrega y motivo de pausa
+          const { text: cleanDescription, subtasks, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
+
+          let pauseReasonHtml = '';
+          if (isMissingInfo) {
+            if (pauseReason && pauseReason.trim()) {
+              pauseReasonHtml = `
+                <div class="pause-reason-box my-1.5 p-2 rounded-lg bg-amber-950/40 border-l-[3.5px] border-amber-400 border border-amber-500/30 text-xs shadow-sm" onclick="event.stopPropagation()">
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                      <span>Falta Información:</span>
+                    </span>
+                    ${isAdmin ? `
+                      <button onclick="promptEditPauseReason('${task.id}', event)" class="text-[10px] text-amber-300 hover:text-white hover:underline font-semibold" title="Editar motivo de pausa">
+                        Editar
+                      </button>
+                    ` : ''}
+                  </div>
+                  <div class="text-amber-200 text-xs leading-snug font-medium">
+                    ${escapeHtml(pauseReason.trim())}
+                  </div>
+                </div>
+              `;
+            } else if (isAdmin) {
+              pauseReasonHtml = `
+                <div class="pause-reason-box my-1.5 py-1 px-2.5 rounded-lg bg-amber-950/30 border border-dashed border-amber-400/50 text-amber-300 text-[11px] font-semibold flex items-center justify-between gap-1 cursor-pointer hover:bg-amber-900/30 transition-all" onclick="promptEditPauseReason('${task.id}', event)" title="Añadir motivo de pausa">
+                  <span class="flex items-center gap-1.5 truncate">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span>+ Añadir motivo de pausa</span>
+                  </span>
+                  <span class="text-[10px] text-amber-400 underline shrink-0 font-bold">Editar</span>
+                </div>
+              `;
+            }
+          }
 
           let workingStatusHtml = '';
           if (isWorking) {
@@ -2918,6 +3039,12 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                       <span>Editar estado</span>
                     </button>
+                    ${(colId === 'paused' || isMissingInfo) ? `
+                      <button class="dropdown-item text-amber-400 hover:text-amber-300 hover:bg-amber-500/10" onclick="promptEditPauseReason('${task.id}', event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <span>${pauseReason ? 'Editar motivo de pausa' : 'Añadir motivo de pausa'}</span>
+                      </button>
+                    ` : ''}
                     ${(colId === 'review' || colId === 'done-col' || colId === 'done' || deliveryUrl) ? `
                       <button class="dropdown-item text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10" onclick="promptEditDeliveryUrl('${task.id}', event)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
@@ -2996,6 +3123,7 @@
             ${workingStatusHtml}
             ${cardControlsHtml}
             <div class="mb-2 flex items-center gap-1.5 min-w-0 max-w-full">${tagsHtml}</div>
+            ${pauseReasonHtml}
             <div class="font-semibold text-sm mb-1 text-slate-100 leading-snug">${task.title}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
             ${deliverySectionHtml}
@@ -3004,7 +3132,7 @@
           
           card.setAttribute('title', 'Doble clic para ver detalles');
           card.addEventListener('dblclick', (e) => {
-            if (e.target.closest('button, input, textarea, select, .card-dropdown-menu, .card-bottom-controls, .card-top-controls, .subtasks-toggle-bottom-btn')) return;
+            if (e.target.closest('button, input, textarea, select, .card-dropdown-menu, .card-bottom-controls, .card-top-controls, .subtasks-toggle-bottom-btn, .pause-reason-box')) return;
             openCardDetailModal(task.id);
           });
 
@@ -3065,6 +3193,11 @@
       task.tag_class = newTag;
       renderBoard();
 
+      // Si se activa falta de información, abrir modal para registrar el motivo
+      if (!isMissing) {
+        promptEditPauseReason(taskId);
+      }
+
       try {
         const res = await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
           method: 'PATCH',
@@ -3087,6 +3220,7 @@
         if (deliveryUrl && !deliveryUrl.startsWith('http://') && !deliveryUrl.startsWith('https://') && !deliveryUrl.startsWith('mailto:')) {
           deliveryUrl = 'https://' + deliveryUrl;
         }
+        const pauseReason = document.getElementById('newTaskPauseReason') ? document.getElementById('newTaskPauseReason').value.trim() : '';
         const priority = document.getElementById('newTaskPriority').checked;
         const missingInfo = document.getElementById('newTaskMissingInfo').checked;
         const select = document.getElementById('taskProjectSelect');
@@ -3134,7 +3268,7 @@
           
           // Preservar subtareas y orden existentes
           const { subtasks, order } = parseTaskDescription(oldTask ? oldTask.description : '');
-          taskObj.description = formatTaskDescription(desc, subtasks, order, workingText, deliveryUrl);
+          taskObj.description = formatTaskDescription(desc, subtasks, order, workingText, deliveryUrl, pauseReason);
 
           const res = await fetch(`${SUPABASE_URL}?id=eq.${editingId}`, {
             method: 'PATCH',
@@ -3146,7 +3280,7 @@
           if (idx !== -1) tasksData[idx] = taskObj;
         } else {
           taskObj.id = 't' + Date.now();
-          taskObj.description = formatTaskDescription(desc, [], 0, workingText, deliveryUrl);
+          taskObj.description = formatTaskDescription(desc, [], 0, workingText, deliveryUrl, pauseReason);
           const res = await fetch(SUPABASE_URL, {
             method: 'POST',
             headers: HEADERS,
@@ -3175,15 +3309,20 @@
       document.getElementById('editingTaskId').value = task.id;
       document.getElementById('newTaskTitle').value = task.title;
       
-      const { text, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      const { text, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
       document.getElementById('newTaskDesc').value = text;
       const wtInput = document.getElementById('newTaskWorkingText');
       if (wtInput) wtInput.value = workingText || '';
       const duInput = document.getElementById('newTaskDeliveryUrl');
       if (duInput) duInput.value = deliveryUrl || '';
+      const prInput = document.getElementById('newTaskPauseReason');
+      if (prInput) prInput.value = pauseReason || '';
       document.getElementById('newTaskPriority').checked = task.priority;
       const rawTag = task.tag_class || '';
-      document.getElementById('newTaskMissingInfo').checked = rawTag.includes(':missing_info');
+      const isMissing = rawTag.includes(':missing_info');
+      document.getElementById('newTaskMissingInfo').checked = isMissing;
+      const prGroup = document.getElementById('pauseReasonGroup');
+      if (prGroup) prGroup.style.display = isMissing ? 'block' : 'none';
       
       populateProjectDropdown(task.project);
       
@@ -3208,10 +3347,10 @@
         const newId = 't' + Date.now();
         
         // Copiar subtareas con estado desmarcado para empezar fresco y calcular orden siguiente
-        const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(original.description);
+        const { text, subtasks, order, workingText, deliveryUrl, pauseReason } = parseTaskDescription(original.description);
         const freshSubtasks = subtasks.map(s => ({ text: s.text, done: false, status: 'pending' }));
         const newOrder = (order !== null && !isNaN(order)) ? order + 1 : null;
-        const newDesc = formatTaskDescription(text, freshSubtasks, newOrder, workingText, deliveryUrl);
+        const newDesc = formatTaskDescription(text, freshSubtasks, newOrder, workingText, deliveryUrl, pauseReason);
 
         const newTask = {
           id: newId,
@@ -3270,6 +3409,10 @@
       if (wtInput) wtInput.value = '';
       const duInput = document.getElementById('newTaskDeliveryUrl');
       if (duInput) duInput.value = '';
+      const prInput = document.getElementById('newTaskPauseReason');
+      if (prInput) prInput.value = '';
+      const prGroup = document.getElementById('pauseReasonGroup');
+      if (prGroup) prGroup.style.display = 'none';
       document.getElementById('newTaskPriority').checked = false;
       document.getElementById('newTaskMissingInfo').checked = false;
       populateProjectDropdown();
@@ -3284,6 +3427,10 @@
       if (wtInput) wtInput.value = '';
       const duInput = document.getElementById('newTaskDeliveryUrl');
       if (duInput) duInput.value = '';
+      const prInput = document.getElementById('newTaskPauseReason');
+      if (prInput) prInput.value = '';
+      const prGroup = document.getElementById('pauseReasonGroup');
+      if (prGroup) prGroup.style.display = 'none';
     }
 
     // Modal para detalle ampliado de tarjeta (Doble Clic)
@@ -3323,7 +3470,7 @@
       const cb = parseInt(hexClean.substring(4, 6), 16) || 246;
       const rgb = `${cr}, ${cg}, ${cb}`;
 
-      const { text: cleanDescription, subtasks, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      const { text: cleanDescription, subtasks, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
       const currentWorkingText = (workingText && workingText.trim()) ? workingText.trim() : 'Trabajando...';
       const charCount = currentWorkingText.length;
       const animDuration = Math.max(2.6, Math.min(7.0, (charCount * 0.12) + 1.6)).toFixed(1) + 's';
@@ -3415,6 +3562,27 @@
                 <span>Editar texto</span>
               </button>
             ` : ''}
+          </div>
+        ` : ''}
+
+        <!-- Banner de Motivo de Pausa / Falta de Información -->
+        ${(isMissingInfo || (colId === 'paused' && pauseReason)) ? `
+          <div class="mb-4 p-3.5 rounded-xl bg-amber-950/40 border-l-[4px] border-amber-400 border border-amber-500/30">
+            <div class="flex items-center justify-between gap-2 mb-1.5 pb-1.5 border-b border-amber-500/20">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <span>Motivo de Falta de Información / Pausa</span>
+              </span>
+              ${isAdmin ? `
+                <button onclick="promptEditPauseReason('${task.id}', event)" class="text-xs text-amber-300 hover:text-white flex items-center gap-1 font-semibold hover:underline transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  <span>${pauseReason ? 'Editar motivo' : '+ Añadir motivo'}</span>
+                </button>
+              ` : ''}
+            </div>
+            <div class="text-amber-200 text-xs sm:text-sm leading-relaxed font-medium">
+              ${pauseReason ? escapeHtml(pauseReason) : '<span class="italic text-amber-400/70">No se ha especificado el motivo todavía.</span>'}
+            </div>
           </div>
         ` : ''}
 
@@ -3607,8 +3775,8 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, deliveryUrl } = parseTaskDescription(task.description);
-      task.description = formatTaskDescription(text, subtasks, order, textVal, deliveryUrl);
+      const { text, subtasks, order, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
+      task.description = formatTaskDescription(text, subtasks, order, textVal, deliveryUrl, pauseReason);
 
       // Si se escribe un texto personalizado y la tarjeta no tenía activo el estado :working, activarlo
       const rawTag = task.tag_class || '#3b82f6';
@@ -3683,8 +3851,8 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
-      task.description = formatTaskDescription(text, subtasks, order, workingText, urlVal);
+      const { text, subtasks, order, workingText, pauseReason } = parseTaskDescription(task.description);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, urlVal, pauseReason);
 
       renderBoard();
       closeEditDeliveryUrlModal();
@@ -3704,6 +3872,98 @@
         if (!res.ok) console.warn("Aviso al guardar enlace de entrega:", await res.text());
       } catch(e) {
         console.error("Error al guardar enlace de entrega:", e);
+      }
+    }
+
+    function promptEditPauseReason(taskId, event) {
+      if (!isAdmin) return;
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      closeAllCardMenus();
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { pauseReason } = parseTaskDescription(task.description);
+      document.getElementById('editPauseReasonTaskId').value = taskId;
+      const input = document.getElementById('customPauseReasonInput');
+      input.value = pauseReason || '';
+
+      document.getElementById('editPauseReasonModal').classList.add('active');
+      input.focus();
+    }
+
+    function closeEditPauseReasonModal() {
+      const modal = document.getElementById('editPauseReasonModal');
+      if (modal) modal.classList.remove('active');
+      document.getElementById('editPauseReasonTaskId').value = '';
+    }
+
+    async function clearPauseReason() {
+      if (!isAdmin) return;
+      const taskId = document.getElementById('editPauseReasonTaskId').value;
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl, '');
+
+      renderBoard();
+      closeEditPauseReasonModal();
+
+      const detailModal = document.getElementById('cardDetailModal');
+      if (detailModal && detailModal.classList.contains('active')) {
+        openCardDetailModal(taskId);
+      }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: task.description })
+        });
+        if (!res.ok) console.warn("Aviso al limpiar motivo de pausa:", await res.text());
+      } catch(e) {
+        console.error("Error al limpiar motivo de pausa:", e);
+      }
+    }
+
+    async function saveCustomPauseReason() {
+      if (!isAdmin) return;
+      const taskId = document.getElementById('editPauseReasonTaskId').value;
+      const reasonVal = document.getElementById('customPauseReasonInput').value.trim();
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl, reasonVal);
+
+      // Si se ingresó un motivo y la tarjeta aún no tenía el estado ':missing_info', activarlo automáticamente
+      const rawTag = task.tag_class || '#3b82f6';
+      if (reasonVal && !rawTag.includes(':missing_info')) {
+        task.tag_class = `${rawTag}:missing_info`;
+      }
+
+      renderBoard();
+      closeEditPauseReasonModal();
+
+      // Si el modal de detalle ampliado está abierto, refrescarlo
+      const detailModal = document.getElementById('cardDetailModal');
+      if (detailModal && detailModal.classList.contains('active')) {
+        openCardDetailModal(taskId);
+      }
+
+      try {
+        const patchData = { description: task.description, tag_class: task.tag_class };
+        const res = await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify(patchData)
+        });
+        if (!res.ok) console.warn("Aviso al guardar motivo de pausa:", await res.text());
+      } catch(e) {
+        console.error("Error al guardar motivo de pausa:", e);
       }
     }
 
@@ -3759,8 +4019,8 @@
       const updates = [];
       if (sameProjectCards.length > 0) {
         sameProjectCards.forEach((t, idx) => {
-          const { text, subtasks, workingText, deliveryUrl } = parseTaskDescription(t.description);
-          t.description = formatTaskDescription(text, subtasks, idx, workingText, deliveryUrl);
+          const { text, subtasks, workingText, deliveryUrl, pauseReason } = parseTaskDescription(t.description);
+          t.description = formatTaskDescription(text, subtasks, idx, workingText, deliveryUrl, pauseReason);
           const payload = { description: t.description };
           if (t.id === id && colChanged) {
             payload.col_id = newColId;
@@ -3775,8 +4035,8 @@
           );
         });
       } else if (colChanged) {
-        const { text, subtasks, workingText, deliveryUrl } = parseTaskDescription(task.description);
-        task.description = formatTaskDescription(text, subtasks, 0, workingText, deliveryUrl);
+        const { text, subtasks, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
+        task.description = formatTaskDescription(text, subtasks, 0, workingText, deliveryUrl, pauseReason);
         updates.push(
           fetch(`${SUPABASE_URL}?id=eq.${id}`, {
             method: 'PATCH',
