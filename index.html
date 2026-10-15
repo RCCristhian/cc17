@@ -1331,6 +1331,19 @@
           <p class="text-[11px] text-slate-400 mt-1">Este texto se deletreará con animación letra por letra cuando la tarjeta esté activa.</p>
         </div>
 
+        <!-- Enlace de Entrega (Revisión) -->
+        <div class="p-3 bg-cyan-950/20 border border-cyan-500/30 rounded-xl">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold text-cyan-300 uppercase tracking-wide flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+              Enlace de Entrega (Para columna "En Revisión")
+            </label>
+            <span class="text-[11px] text-cyan-400/70 font-semibold">Opcional</span>
+          </div>
+          <input type="url" id="newTaskDeliveryUrl" placeholder="https://ejemplo.com/entrega o Figma, Drive, web..." class="w-full bg-[#080a0f] border border-cyan-500/40 rounded-lg p-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+          <p class="text-[11px] text-slate-400 mt-1">Link directo donde estará alojada la entrega cuando la tarjeta esté en revisión.</p>
+        </div>
+
         <!-- Opciones de Estado: Prioritario & Falta Información -->
         <div class="flex flex-wrap items-center gap-5 pt-1">
           <div class="flex items-center gap-2">
@@ -1409,6 +1422,44 @@
         <button onclick="saveCustomWorkingText()" class="px-5 py-2 text-sm font-bold bg-[#00E599] hover:bg-[#00B377] text-slate-950 rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
           Guardar Texto
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Enlace de Entrega (Revisión) -->
+  <div id="editDeliveryUrlModal" class="modal-overlay" onclick="if(event.target===this) closeEditDeliveryUrlModal()">
+    <div class="modal-content !max-w-md" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400" style="box-shadow: 0 0 10px #22d3ee;"></span>
+          <span>Enlace de Entrega (En Revisión)</span>
+        </h2>
+        <button onclick="closeEditDeliveryUrlModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <input type="hidden" id="editDeliveryTaskId">
+      <div class="mb-4">
+        <label class="block text-xs font-bold uppercase tracking-wider text-cyan-300 mb-1.5">URL o Link de la Entrega</label>
+        <input type="url" id="customDeliveryUrlInput" placeholder="https://ejemplo.com/entrega o Figma, Drive, web..." class="w-full bg-[#080a0f] border border-cyan-500/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl p-2.5 text-sm text-white placeholder-slate-500 outline-none">
+        <p class="text-[11px] text-slate-400 mt-1.5">
+          Este link será accesible con un botón directo para los visitantes cuando la tarjeta esté en la columna <strong>En Revisión</strong>.
+        </p>
+      </div>
+
+      <div class="flex items-center justify-between gap-2.5 mt-5 pt-3 border-t border-white/10">
+        <button type="button" onclick="testDeliveryUrl()" class="px-3 py-1.5 text-xs font-semibold text-cyan-400 hover:text-white bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 rounded-xl transition-all flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          <span>Probar link</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="closeEditDeliveryUrlModal()" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-colors">
+            Cancelar
+          </button>
+          <button onclick="saveCustomDeliveryUrl()" class="px-5 py-2 text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-xl shadow-lg shadow-cyan-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            Guardar Enlace
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2052,11 +2103,12 @@
     }
 
     function parseTaskDescription(rawDesc) {
-      if (!rawDesc) return { text: '', subtasks: [], order: null, workingText: '' };
+      if (!rawDesc) return { text: '', subtasks: [], order: null, workingText: '', deliveryUrl: '' };
       let cleanText = rawDesc;
       let order = null;
       let subtasks = [];
       let workingText = '';
+      let deliveryUrl = '';
 
       const orderMatch = cleanText.match(/<!--order:(-?\d+)-->/);
       if (orderMatch) {
@@ -2068,6 +2120,12 @@
       if (wtMatch) {
         workingText = wtMatch[1].trim();
         cleanText = cleanText.replace(/<!--working_text:[\s\S]*?-->/, '').trim();
+      }
+
+      const duMatch = cleanText.match(/<!--delivery_url:([\s\S]*?)-->/);
+      if (duMatch) {
+        deliveryUrl = duMatch[1].trim();
+        cleanText = cleanText.replace(/<!--delivery_url:[\s\S]*?-->/, '').trim();
       }
 
       const match = cleanText.match(/<!--subtasks:([\s\S]*?)-->/);
@@ -2086,10 +2144,10 @@
         }
       }
 
-      return { text: cleanText.trim(), subtasks, order, workingText };
+      return { text: cleanText.trim(), subtasks, order, workingText, deliveryUrl };
     }
 
-    function formatTaskDescription(text, subtasks, order, workingText) {
+    function formatTaskDescription(text, subtasks, order, workingText, deliveryUrl) {
       const clean = (text || '').trim();
       const parts = [];
       if (clean) parts.push(clean);
@@ -2098,6 +2156,9 @@
       }
       if (workingText && typeof workingText === 'string' && workingText.trim()) {
         parts.push(`<!--working_text:${workingText.trim()}-->`);
+      }
+      if (deliveryUrl && typeof deliveryUrl === 'string' && deliveryUrl.trim()) {
+        parts.push(`<!--delivery_url:${deliveryUrl.trim()}-->`);
       }
       if (subtasks && subtasks.length > 0) {
         parts.push(`<!--subtasks:${JSON.stringify(subtasks)}-->`);
@@ -2164,7 +2225,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
       const existingTexts = new Set(subtasks.map(s => s.text.toLowerCase().trim()));
       const newSubtasks = [...subtasks];
       DEFAULT_SUBTASK_TEMPLATES.forEach(title => {
@@ -2173,7 +2234,7 @@
         }
       });
 
-      task.description = formatTaskDescription(text, newSubtasks, order, workingText);
+      task.description = formatTaskDescription(text, newSubtasks, order, workingText, deliveryUrl);
       expandedSubtasksCards.add(taskId);
       renderBoard();
 
@@ -2196,9 +2257,9 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
       subtasks.push({ text: clean, done: false, status: 'pending' });
-      task.description = formatTaskDescription(text, subtasks, order, workingText);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
       expandedSubtasksCards.add(taskId);
       renderBoard();
 
@@ -2219,11 +2280,11 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       subtasks.splice(index, 1);
-      task.description = formatTaskDescription(text, subtasks, order, workingText);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
       renderBoard();
 
       try {
@@ -2253,7 +2314,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       const currentStatus = getSubtaskStatus(subtasks[index]);
@@ -2268,7 +2329,7 @@
 
       subtasks[index].status = nextStatus;
       subtasks[index].done = (nextStatus === 'done');
-      task.description = formatTaskDescription(text, subtasks, order, workingText);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
 
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -2293,7 +2354,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       const currentStatus = getSubtaskStatus(subtasks[index]);
@@ -2308,7 +2369,7 @@
 
       subtasks[index].status = nextStatus;
       subtasks[index].done = (nextStatus === 'done');
-      task.description = formatTaskDescription(text, subtasks, order, workingText);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
 
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -2333,12 +2394,12 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       subtasks[index].status = nextStatus;
       subtasks[index].done = (nextStatus === 'done');
-      task.description = formatTaskDescription(text, subtasks, order, workingText);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, deliveryUrl);
 
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -2572,8 +2633,8 @@
             </div>
           `;
 
-          // Parsear descripción, subtareas y texto de trabajo personalizado
-          const { text: cleanDescription, subtasks, workingText } = parseTaskDescription(task.description);
+          // Parsear descripción, subtareas, texto de trabajo y enlace de entrega
+          const { text: cleanDescription, subtasks, workingText, deliveryUrl } = parseTaskDescription(task.description);
 
           let workingStatusHtml = '';
           if (isWorking) {
@@ -2849,6 +2910,12 @@
                         <span>Editar texto "Trabajando..."</span>
                       </button>
                     ` : ''}
+                    ${colId === 'review' || deliveryUrl ? `
+                      <button class="dropdown-item text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10" onclick="promptEditDeliveryUrl('${task.id}', event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        <span>${deliveryUrl ? 'Editar enlace de entrega' : 'Asignar enlace de entrega'}</span>
+                      </button>
+                    ` : ''}
                     <button class="dropdown-item" onclick="duplicateTask('${task.id}', event)">
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -2871,12 +2938,56 @@
             `;
           }
 
+          let deliverySectionHtml = '';
+          if (colId === 'review' || deliveryUrl) {
+            if (deliveryUrl) {
+              deliverySectionHtml = `
+                <div class="my-2 p-2 rounded-xl bg-cyan-950/40 border border-cyan-400/40 shadow-sm" onclick="event.stopPropagation()">
+                  <div class="flex items-center justify-between gap-1.5 mb-1.5">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                      <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
+                      </span>
+                      <span>Entrega para Revisión</span>
+                    </span>
+                    ${isAdmin ? `
+                      <button onclick="promptEditDeliveryUrl('${task.id}', event)" class="text-[10.5px] text-cyan-400 hover:text-white hover:underline flex items-center gap-1 font-semibold" title="Editar enlace">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <span>Editar</span>
+                      </button>
+                    ` : ''}
+                  </div>
+                  <a href="${escapeHtml(deliveryUrl)}" target="_blank" rel="noopener noreferrer" 
+                     class="w-full flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs shadow-md shadow-cyan-950/50 transition-all hover:scale-[1.01] active:scale-[0.99] group">
+                    <span class="truncate">🚀 Ver Entrega</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                  </a>
+                </div>
+              `;
+            } else if (isAdmin && colId === 'review') {
+              deliverySectionHtml = `
+                <div class="my-2 p-1.5 rounded-xl bg-cyan-950/25 border border-dashed border-cyan-500/40" onclick="event.stopPropagation()">
+                  <button onclick="promptEditDeliveryUrl('${task.id}', event)" class="w-full flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-cyan-300 hover:text-white hover:bg-cyan-900/40 text-[11px] font-semibold transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    <span>+ Asignar enlace de entrega</span>
+                  </button>
+                </div>
+              `;
+            }
+          }
+
           card.innerHTML = `
             ${workingStatusHtml}
             ${cardControlsHtml}
             <div class="mb-2 flex items-center gap-1.5 min-w-0 max-w-full">${tagsHtml}</div>
             <div class="font-semibold text-sm mb-1 text-slate-100 ${isAdmin ? 'pr-7' : ''} leading-snug">${task.title}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
+            ${deliverySectionHtml}
             ${progressBarHtml}
           `;
           
@@ -2961,6 +3072,10 @@
         const title = document.getElementById('newTaskTitle').value.trim();
         const desc = document.getElementById('newTaskDesc').value.trim();
         const workingText = document.getElementById('newTaskWorkingText') ? document.getElementById('newTaskWorkingText').value.trim() : '';
+        let deliveryUrl = document.getElementById('newTaskDeliveryUrl') ? document.getElementById('newTaskDeliveryUrl').value.trim() : '';
+        if (deliveryUrl && !deliveryUrl.startsWith('http://') && !deliveryUrl.startsWith('https://') && !deliveryUrl.startsWith('mailto:')) {
+          deliveryUrl = 'https://' + deliveryUrl;
+        }
         const priority = document.getElementById('newTaskPriority').checked;
         const missingInfo = document.getElementById('newTaskMissingInfo').checked;
         const select = document.getElementById('taskProjectSelect');
@@ -3008,7 +3123,7 @@
           
           // Preservar subtareas y orden existentes
           const { subtasks, order } = parseTaskDescription(oldTask ? oldTask.description : '');
-          taskObj.description = formatTaskDescription(desc, subtasks, order, workingText);
+          taskObj.description = formatTaskDescription(desc, subtasks, order, workingText, deliveryUrl);
 
           const res = await fetch(`${SUPABASE_URL}?id=eq.${editingId}`, {
             method: 'PATCH',
@@ -3020,7 +3135,7 @@
           if (idx !== -1) tasksData[idx] = taskObj;
         } else {
           taskObj.id = 't' + Date.now();
-          taskObj.description = formatTaskDescription(desc, [], 0, workingText);
+          taskObj.description = formatTaskDescription(desc, [], 0, workingText, deliveryUrl);
           const res = await fetch(SUPABASE_URL, {
             method: 'POST',
             headers: HEADERS,
@@ -3049,10 +3164,12 @@
       document.getElementById('editingTaskId').value = task.id;
       document.getElementById('newTaskTitle').value = task.title;
       
-      const { text, workingText } = parseTaskDescription(task.description);
+      const { text, workingText, deliveryUrl } = parseTaskDescription(task.description);
       document.getElementById('newTaskDesc').value = text;
       const wtInput = document.getElementById('newTaskWorkingText');
       if (wtInput) wtInput.value = workingText || '';
+      const duInput = document.getElementById('newTaskDeliveryUrl');
+      if (duInput) duInput.value = deliveryUrl || '';
       document.getElementById('newTaskPriority').checked = task.priority;
       const rawTag = task.tag_class || '';
       document.getElementById('newTaskMissingInfo').checked = rawTag.includes(':missing_info');
@@ -3080,10 +3197,10 @@
         const newId = 't' + Date.now();
         
         // Copiar subtareas con estado desmarcado para empezar fresco y calcular orden siguiente
-        const { text, subtasks, order, workingText } = parseTaskDescription(original.description);
+        const { text, subtasks, order, workingText, deliveryUrl } = parseTaskDescription(original.description);
         const freshSubtasks = subtasks.map(s => ({ text: s.text, done: false, status: 'pending' }));
         const newOrder = (order !== null && !isNaN(order)) ? order + 1 : null;
-        const newDesc = formatTaskDescription(text, freshSubtasks, newOrder, workingText);
+        const newDesc = formatTaskDescription(text, freshSubtasks, newOrder, workingText, deliveryUrl);
 
         const newTask = {
           id: newId,
@@ -3140,6 +3257,8 @@
       document.getElementById('newTaskDesc').value = '';
       const wtInput = document.getElementById('newTaskWorkingText');
       if (wtInput) wtInput.value = '';
+      const duInput = document.getElementById('newTaskDeliveryUrl');
+      if (duInput) duInput.value = '';
       document.getElementById('newTaskPriority').checked = false;
       document.getElementById('newTaskMissingInfo').checked = false;
       populateProjectDropdown();
@@ -3152,6 +3271,8 @@
       document.getElementById('editingTaskId').value = '';
       const wtInput = document.getElementById('newTaskWorkingText');
       if (wtInput) wtInput.value = '';
+      const duInput = document.getElementById('newTaskDeliveryUrl');
+      if (duInput) duInput.value = '';
     }
 
     // Modal para detalle ampliado de tarjeta (Doble Clic)
@@ -3191,7 +3312,7 @@
       const cb = parseInt(hexClean.substring(4, 6), 16) || 246;
       const rgb = `${cr}, ${cg}, ${cb}`;
 
-      const { text: cleanDescription, subtasks, workingText } = parseTaskDescription(task.description);
+      const { text: cleanDescription, subtasks, workingText, deliveryUrl } = parseTaskDescription(task.description);
       const currentWorkingText = (workingText && workingText.trim()) ? workingText.trim() : 'Trabajando...';
       const charCount = currentWorkingText.length;
       const animDuration = Math.max(2.6, Math.min(7.0, (charCount * 0.12) + 1.6)).toFixed(1) + 's';
@@ -3300,6 +3421,52 @@
             <div class="text-slate-500 text-xs italic">Sin descripción detallada</div>
           `}
         </div>
+
+        <!-- Sección de Entrega (En Revisión o con enlace asignado) -->
+        ${(colId === 'review' || deliveryUrl) ? `
+          <div class="mb-4 p-4 rounded-xl bg-gradient-to-br from-cyan-950/60 via-[#0a121e] to-slate-900 border border-cyan-500/40 shadow-xl shadow-cyan-950/40 relative overflow-hidden">
+            <div class="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-cyan-500/20">
+              <div class="flex items-center gap-2">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
+                </span>
+                <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-300">Entrega para Revisión</span>
+              </div>
+              ${isAdmin ? `
+                <button onclick="promptEditDeliveryUrl('${task.id}', event)" class="text-xs text-cyan-400 hover:text-white flex items-center gap-1 font-semibold hover:underline transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  <span>${deliveryUrl ? 'Editar enlace' : '+ Asignar enlace'}</span>
+                </button>
+              ` : ''}
+            </div>
+
+            ${deliveryUrl ? `
+              <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+                El trabajo de este entregable se encuentra disponible para su revisión. Haz clic en el siguiente botón para abrir el enlace directo:
+              </p>
+              <div class="flex items-center gap-3 flex-wrap">
+                <a href="${escapeHtml(deliveryUrl)}" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  <span>🚀 Abrir Entrega en nueva pestaña</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
+                <span class="text-[11px] font-mono text-cyan-400/80 truncate max-w-sm select-all bg-black/40 px-2.5 py-1.5 rounded-lg border border-cyan-500/20">
+                  ${escapeHtml(deliveryUrl)}
+                </span>
+              </div>
+            ` : `
+              <p class="text-xs text-slate-400 italic">
+                ${isAdmin ? 'Aún no has configurado el enlace de la entrega para esta tarea en revisión.' : 'La entrega está en revisión y el enlace se habilitará aquí en cuanto sea publicado por el equipo.'}
+              </p>
+              ${isAdmin ? `
+                <button onclick="promptEditDeliveryUrl('${task.id}', event)" class="mt-2.5 inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-semibold hover:bg-cyan-500/30 transition-all">
+                  + Asignar enlace de entrega ahora
+                </button>
+              ` : ''}
+            `}
+          </div>
+        ` : ''}
 
         <!-- Sección de Progreso y Procesos -->
         <div class="p-3.5 bg-slate-900/50 border border-white/10 rounded-xl mb-4">
@@ -3429,8 +3596,8 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order } = parseTaskDescription(task.description);
-      task.description = formatTaskDescription(text, subtasks, order, textVal);
+      const { text, subtasks, order, deliveryUrl } = parseTaskDescription(task.description);
+      task.description = formatTaskDescription(text, subtasks, order, textVal, deliveryUrl);
 
       renderBoard();
       closeEditWorkingTextModal();
@@ -3450,6 +3617,75 @@
         if (!res.ok) console.warn("Aviso al guardar texto personalizado de trabajo:", await res.text());
       } catch(e) {
         console.error("Error al guardar texto de trabajo:", e);
+      }
+    }
+
+    function promptEditDeliveryUrl(taskId, event) {
+      if (!isAdmin) return;
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      closeAllCardMenus();
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { deliveryUrl } = parseTaskDescription(task.description);
+      document.getElementById('editDeliveryTaskId').value = taskId;
+      const input = document.getElementById('customDeliveryUrlInput');
+      input.value = deliveryUrl || '';
+
+      document.getElementById('editDeliveryUrlModal').classList.add('active');
+      input.focus();
+    }
+
+    function closeEditDeliveryUrlModal() {
+      const modal = document.getElementById('editDeliveryUrlModal');
+      if (modal) modal.classList.remove('active');
+      document.getElementById('editDeliveryTaskId').value = '';
+    }
+
+    function testDeliveryUrl() {
+      const url = document.getElementById('customDeliveryUrlInput').value.trim();
+      if (!url) {
+        alert("Ingresa un enlace primero.");
+        return;
+      }
+      const validUrl = (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:')) ? url : 'https://' + url;
+      window.open(validUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    async function saveCustomDeliveryUrl() {
+      if (!isAdmin) return;
+      const taskId = document.getElementById('editDeliveryTaskId').value;
+      let urlVal = document.getElementById('customDeliveryUrlInput').value.trim();
+      if (urlVal && !urlVal.startsWith('http://') && !urlVal.startsWith('https://') && !urlVal.startsWith('mailto:')) {
+        urlVal = 'https://' + urlVal;
+      }
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
+      task.description = formatTaskDescription(text, subtasks, order, workingText, urlVal);
+
+      renderBoard();
+      closeEditDeliveryUrlModal();
+
+      // Si el modal de detalle ampliado está abierto, refrescarlo
+      const detailModal = document.getElementById('cardDetailModal');
+      if (detailModal && detailModal.classList.contains('active')) {
+        openCardDetailModal(taskId);
+      }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: task.description })
+        });
+        if (!res.ok) console.warn("Aviso al guardar enlace de entrega:", await res.text());
+      } catch(e) {
+        console.error("Error al guardar enlace de entrega:", e);
       }
     }
 
@@ -3505,8 +3741,8 @@
       const updates = [];
       if (sameProjectCards.length > 0) {
         sameProjectCards.forEach((t, idx) => {
-          const { text, subtasks, workingText } = parseTaskDescription(t.description);
-          t.description = formatTaskDescription(text, subtasks, idx, workingText);
+          const { text, subtasks, workingText, deliveryUrl } = parseTaskDescription(t.description);
+          t.description = formatTaskDescription(text, subtasks, idx, workingText, deliveryUrl);
           const payload = { description: t.description };
           if (t.id === id && colChanged) {
             payload.col_id = newColId;
@@ -3521,8 +3757,8 @@
           );
         });
       } else if (colChanged) {
-        const { text, subtasks, workingText } = parseTaskDescription(task.description);
-        task.description = formatTaskDescription(text, subtasks, 0, workingText);
+        const { text, subtasks, workingText, deliveryUrl } = parseTaskDescription(task.description);
+        task.description = formatTaskDescription(text, subtasks, 0, workingText, deliveryUrl);
         updates.push(
           fetch(`${SUPABASE_URL}?id=eq.${id}`, {
             method: 'PATCH',
@@ -3619,6 +3855,7 @@
       if (e.key === 'Escape') {
         closeCardDetailModal();
         closeEditWorkingTextModal();
+        closeEditDeliveryUrlModal();
         closeModal();
         closeAllCardMenus();
       }
