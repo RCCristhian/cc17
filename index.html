@@ -1446,7 +1446,7 @@
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-cyan-400" style="box-shadow: 0 0 10px #22d3ee;"></span>
-          <span>Enlace de Entrega (En Revisión)</span>
+          <span>Enlace de Entrega (Revisión / Terminado)</span>
         </h2>
         <button onclick="closeEditDeliveryUrlModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -1457,7 +1457,7 @@
         <label class="block text-xs font-bold uppercase tracking-wider text-cyan-300 mb-1.5">URL o Link de la Entrega</label>
         <input type="url" id="customDeliveryUrlInput" placeholder="https://ejemplo.com/entrega o Figma, Drive, web..." class="w-full bg-[#080a0f] border border-cyan-500/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl p-2.5 text-sm text-white placeholder-slate-500 outline-none">
         <p class="text-[11px] text-slate-400 mt-1.5">
-          Este link será accesible con un botón directo para los visitantes cuando la tarjeta esté en la columna <strong>En Revisión</strong>.
+          Este link será accesible con un botón directo para los visitantes en las columnas <strong>En Revisión</strong> y <strong>Terminado</strong>.
         </p>
       </div>
 
@@ -2918,7 +2918,7 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                       <span>Editar estado</span>
                     </button>
-                    ${colId === 'review' || deliveryUrl ? `
+                    ${(colId === 'review' || colId === 'done-col' || colId === 'done' || deliveryUrl) ? `
                       <button class="dropdown-item text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10" onclick="promptEditDeliveryUrl('${task.id}', event)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                         <span>${deliveryUrl ? 'Editar enlace de entrega' : 'Asignar enlace de entrega'}</span>
@@ -2946,8 +2946,11 @@
             `;
           }
 
+          const isReviewOrDone = (colId === 'review' || colId === 'done-col' || colId === 'done');
           let deliverySectionHtml = '';
-          if (colId === 'review' || deliveryUrl) {
+          if (isReviewOrDone || deliveryUrl) {
+            const isDoneCol = (colId === 'done-col' || colId === 'done');
+            const deliveryLabel = isDoneCol ? 'Entrega Final' : 'Entrega para Revisión';
             if (deliveryUrl) {
               deliverySectionHtml = `
                 <div class="my-2 p-2 rounded-xl bg-cyan-950/40 border border-cyan-400/40 shadow-sm" onclick="event.stopPropagation()">
@@ -2957,7 +2960,7 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
                       </span>
-                      <span>Entrega para Revisión</span>
+                      <span>${deliveryLabel}</span>
                     </span>
                     ${isAdmin ? `
                       <button onclick="promptEditDeliveryUrl('${task.id}', event)" class="text-[10.5px] text-cyan-400 hover:text-white hover:underline flex items-center gap-1 font-semibold" title="Editar enlace">
@@ -2977,7 +2980,7 @@
                   </a>
                 </div>
               `;
-            } else if (isAdmin && colId === 'review') {
+            } else if (isAdmin && isReviewOrDone) {
               deliverySectionHtml = `
                 <div class="my-2 p-1.5 rounded-xl bg-cyan-950/25 border border-dashed border-cyan-500/40" onclick="event.stopPropagation()">
                   <button onclick="promptEditDeliveryUrl('${task.id}', event)" class="w-full flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-cyan-300 hover:text-white hover:bg-cyan-900/40 text-[11px] font-semibold transition-all">
@@ -3430,8 +3433,8 @@
           `}
         </div>
 
-        <!-- Sección de Entrega (En Revisión o con enlace asignado) -->
-        ${(colId === 'review' || deliveryUrl) ? `
+        <!-- Sección de Entrega (En Revisión, Terminado o con enlace asignado) -->
+        ${(colId === 'review' || colId === 'done-col' || colId === 'done' || deliveryUrl) ? `
           <div class="mb-4 p-4 rounded-xl bg-gradient-to-br from-cyan-950/60 via-[#0a121e] to-slate-900 border border-cyan-500/40 shadow-xl shadow-cyan-950/40 relative overflow-hidden">
             <div class="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-cyan-500/20">
               <div class="flex items-center gap-2">
@@ -3439,7 +3442,7 @@
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
                 </span>
-                <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-300">Entrega para Revisión</span>
+                <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-300">${(colId === 'done-col' || colId === 'done') ? 'Entrega Final' : 'Entrega para Revisión'}</span>
               </div>
               ${isAdmin ? `
                 <button onclick="promptEditDeliveryUrl('${task.id}', event)" class="text-xs text-cyan-400 hover:text-white flex items-center gap-1 font-semibold hover:underline transition-colors">
@@ -3451,10 +3454,10 @@
 
             ${deliveryUrl ? `
               <p class="text-xs text-slate-300 mb-3 leading-relaxed">
-                El trabajo de este entregable se encuentra disponible para su revisión. Haz clic en el siguiente botón para abrir el enlace directo:
+                El trabajo de este entregable se encuentra disponible. Haz clic en el siguiente botón para abrir el enlace directo:
               </p>
               <div class="flex items-center gap-3 flex-wrap">
-                <a href="${escapeHtml(deliveryUrl)}" target="_blank" rel="noopener noreferrer"
+                <a href="${escapeHtml(deliveryUrl)}" target="_blank" rel="noopener noreferrer" 
                    class="inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]">
                   <span>🚀 Abrir Entrega en nueva pestaña</span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
@@ -3465,7 +3468,7 @@
               </div>
             ` : `
               <p class="text-xs text-slate-400 italic">
-                ${isAdmin ? 'Aún no has configurado el enlace de la entrega para esta tarea en revisión.' : 'La entrega está en revisión y el enlace se habilitará aquí en cuanto sea publicado por el equipo.'}
+                ${isAdmin ? 'Aún no has configurado el enlace de la entrega para esta tarea.' : 'El enlace de la entrega se habilitará aquí en cuanto sea publicado por el equipo.'}
               </p>
               ${isAdmin ? `
                 <button onclick="promptEditDeliveryUrl('${task.id}', event)" class="mt-2.5 inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-semibold hover:bg-cyan-500/30 transition-all">
