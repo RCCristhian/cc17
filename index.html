@@ -198,12 +198,13 @@
       text-transform: none;
       z-index: 20;
       pointer-events: none;
+      max-width: calc(100% - 28px);
     }
 
-    /* Animación Typewriter: deletreo constante de "Trabajando..." */
+    /* Animación Typewriter: deletreo constante y dinámico para cualquier longitud de texto */
     @keyframes typeWorkingAnim {
       0%, 5% { width: 0ch; }
-      58%, 80% { width: 13.2ch; }
+      55%, 82% { width: calc(var(--char-count, 13) * 1ch + 0.35ch); }
       94%, 100% { width: 0ch; }
     }
 
@@ -225,6 +226,7 @@
       font-style: italic;
       text-shadow: 0 0 12px rgba(0, 229, 153, 0.85);
       font-family: inherit;
+      max-width: 100%;
     }
 
     /* Resplandor suave y continuo para la etiqueta del proyecto en tarjeta activa */
@@ -1316,6 +1318,19 @@
           <textarea id="newTaskDesc" rows="3" placeholder="Detalles o requerimientos de la tarea..." class="w-full bg-[#080a0f] border border-white/10 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"></textarea>
         </div>
 
+        <!-- Texto de Estado "Trabajando..." personalizado -->
+        <div class="p-3 bg-emerald-950/20 border border-emerald-500/30 rounded-xl">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold text-emerald-300 uppercase tracking-wide flex items-center gap-1.5">
+              <span class="pulse-dot !w-2 !h-2 !mr-0 !bg-[#00E599]"></span>
+              Texto "Trabajando..." personalizado
+            </label>
+            <span class="text-[11px] text-emerald-400/70 font-semibold">Opcional</span>
+          </div>
+          <input type="text" id="newTaskWorkingText" placeholder="Ej: Trabajando en cambios de marketing... (por defecto: Trabajando...)" class="w-full bg-[#080a0f] border border-emerald-500/40 rounded-lg p-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          <p class="text-[11px] text-slate-400 mt-1">Este texto se deletreará con animación letra por letra cuando la tarjeta esté activa.</p>
+        </div>
+
         <!-- Opciones de Estado: Prioritario & Falta Información -->
         <div class="flex flex-wrap items-center gap-5 pt-1">
           <div class="flex items-center gap-2">
@@ -1343,6 +1358,56 @@
         </button>
         <button onclick="saveTask()" class="px-5 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
           Guardar Tarjeta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Detalle Ampliado de Tarjeta (Doble Clic) -->
+  <div id="cardDetailModal" class="modal-overlay" onclick="if(event.target===this) closeCardDetailModal()">
+    <div class="modal-content !max-w-xl sm:!max-w-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+      <div id="cardDetailContent">
+        <!-- Contenido generado dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Texto de Animación "Trabajando..." -->
+  <div id="editWorkingTextModal" class="modal-overlay" onclick="if(event.target===this) closeEditWorkingTextModal()">
+    <div class="modal-content !max-w-md" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+          <span class="pulse-dot !w-2 !h-2 !mr-0 !bg-[#00E599]"></span>
+          <span>Editar Texto "Trabajando..."</span>
+        </h2>
+        <button onclick="closeEditWorkingTextModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <input type="hidden" id="editWorkingTaskId">
+      <div class="mb-4">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Texto personalizado</label>
+        <input type="text" id="customWorkingTextInput" placeholder="Ej: Trabajando en cambios de marketing..." oninput="updateWorkingTextPreview(this.value)" class="w-full bg-[#080a0f] border border-emerald-500/40 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 rounded-xl p-2.5 text-sm text-white placeholder-slate-500 outline-none">
+        <p class="text-[11px] text-slate-400 mt-1.5">
+          Si lo dejas vacío, se usará el texto estándar <strong>"Trabajando..."</strong>.
+        </p>
+      </div>
+
+      <!-- Vista previa en vivo -->
+      <div class="p-3 bg-[#080a0f] border border-white/10 rounded-xl mb-4">
+        <span class="text-[10.5px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Vista previa en vivo:</span>
+        <div class="flex items-center gap-1.5 py-1 text-xs min-h-[26px]">
+          <span class="pulse-dot !w-2 !h-2 !mr-0 !bg-[#00E599]"></span>
+          <span id="previewWorkingText" class="typewriter-working">Trabajando...</span>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2.5">
+        <button onclick="closeEditWorkingTextModal()" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-colors">
+          Cancelar
+        </button>
+        <button onclick="saveCustomWorkingText()" class="px-5 py-2 text-sm font-bold bg-[#00E599] hover:bg-[#00B377] text-slate-950 rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+          Guardar Texto
         </button>
       </div>
     </div>
@@ -1976,16 +2041,33 @@
     const expandedSubtasksCards = new Set();
     let openCardMenuId = null;
 
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     function parseTaskDescription(rawDesc) {
-      if (!rawDesc) return { text: '', subtasks: [], order: null };
+      if (!rawDesc) return { text: '', subtasks: [], order: null, workingText: '' };
       let cleanText = rawDesc;
       let order = null;
       let subtasks = [];
+      let workingText = '';
 
       const orderMatch = cleanText.match(/<!--order:(-?\d+)-->/);
       if (orderMatch) {
         order = parseInt(orderMatch[1], 10);
         cleanText = cleanText.replace(/<!--order:-?\d+-->/, '').trim();
+      }
+
+      const wtMatch = cleanText.match(/<!--working_text:([\s\S]*?)-->/);
+      if (wtMatch) {
+        workingText = wtMatch[1].trim();
+        cleanText = cleanText.replace(/<!--working_text:[\s\S]*?-->/, '').trim();
       }
 
       const match = cleanText.match(/<!--subtasks:([\s\S]*?)-->/);
@@ -2004,15 +2086,18 @@
         }
       }
 
-      return { text: cleanText.trim(), subtasks, order };
+      return { text: cleanText.trim(), subtasks, order, workingText };
     }
 
-    function formatTaskDescription(text, subtasks, order) {
+    function formatTaskDescription(text, subtasks, order, workingText) {
       const clean = (text || '').trim();
       const parts = [];
       if (clean) parts.push(clean);
       if (order !== undefined && order !== null && !isNaN(order)) {
         parts.push(`<!--order:${order}-->`);
+      }
+      if (workingText && typeof workingText === 'string' && workingText.trim()) {
+        parts.push(`<!--working_text:${workingText.trim()}-->`);
       }
       if (subtasks && subtasks.length > 0) {
         parts.push(`<!--subtasks:${JSON.stringify(subtasks)}-->`);
@@ -2079,7 +2164,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
       const existingTexts = new Set(subtasks.map(s => s.text.toLowerCase().trim()));
       const newSubtasks = [...subtasks];
       DEFAULT_SUBTASK_TEMPLATES.forEach(title => {
@@ -2088,7 +2173,7 @@
         }
       });
 
-      task.description = formatTaskDescription(text, newSubtasks, order);
+      task.description = formatTaskDescription(text, newSubtasks, order, workingText);
       expandedSubtasksCards.add(taskId);
       renderBoard();
 
@@ -2111,9 +2196,9 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
       subtasks.push({ text: clean, done: false, status: 'pending' });
-      task.description = formatTaskDescription(text, subtasks, order);
+      task.description = formatTaskDescription(text, subtasks, order, workingText);
       expandedSubtasksCards.add(taskId);
       renderBoard();
 
@@ -2134,11 +2219,11 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       subtasks.splice(index, 1);
-      task.description = formatTaskDescription(text, subtasks, order);
+      task.description = formatTaskDescription(text, subtasks, order, workingText);
       renderBoard();
 
       try {
@@ -2168,7 +2253,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       const currentStatus = getSubtaskStatus(subtasks[index]);
@@ -2183,7 +2268,7 @@
 
       subtasks[index].status = nextStatus;
       subtasks[index].done = (nextStatus === 'done');
-      task.description = formatTaskDescription(text, subtasks, order);
+      task.description = formatTaskDescription(text, subtasks, order, workingText);
 
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -2208,7 +2293,7 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       const currentStatus = getSubtaskStatus(subtasks[index]);
@@ -2223,7 +2308,7 @@
 
       subtasks[index].status = nextStatus;
       subtasks[index].done = (nextStatus === 'done');
-      task.description = formatTaskDescription(text, subtasks, order);
+      task.description = formatTaskDescription(text, subtasks, order, workingText);
 
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -2248,12 +2333,12 @@
       const task = tasksData.find(t => t.id === taskId);
       if (!task) return;
 
-      const { text, subtasks, order } = parseTaskDescription(task.description);
+      const { text, subtasks, order, workingText } = parseTaskDescription(task.description);
       if (!subtasks[index]) return;
 
       subtasks[index].status = nextStatus;
       subtasks[index].done = (nextStatus === 'done');
-      task.description = formatTaskDescription(text, subtasks, order);
+      task.description = formatTaskDescription(text, subtasks, order, workingText);
 
       expandedSubtasksCards.add(taskId);
       renderBoard();
@@ -2487,18 +2572,22 @@
             </div>
           `;
 
+          // Parsear descripción, subtareas y texto de trabajo personalizado
+          const { text: cleanDescription, subtasks, workingText } = parseTaskDescription(task.description);
+
           let workingStatusHtml = '';
           if (isWorking) {
+            const currentWorkingText = (workingText && workingText.trim()) ? workingText.trim() : 'Trabajando...';
+            const charCount = currentWorkingText.length;
+            const animDuration = Math.max(2.6, Math.min(7.0, (charCount * 0.12) + 1.6)).toFixed(1) + 's';
             workingStatusHtml = `
               <div class="working-outer-badge">
                 <span class="pulse-dot !w-2 !h-2 !mr-1" style="background-color: #00E599; box-shadow: 0 0 12px #00E599;"></span>
-                <span class="typewriter-working">Trabajando...</span>
+                <span class="typewriter-working" style="--char-count: ${charCount}; animation: typeWorkingAnim ${animDuration} steps(${charCount}, end) infinite, cursorBlinkAnim 0.6s infinite;" title="${escapeHtml(currentWorkingText)}">${escapeHtml(currentWorkingText)}</span>
               </div>
             `;
           }
 
-          // Parsear descripción y subtareas
-          const { text: cleanDescription, subtasks } = parseTaskDescription(task.description);
           const showProgress = (colId === 'in-progress' || colId === 'paused' || colId === 'review');
           const totalSubtasks = subtasks.length;
           const completedSubtasks = subtasks.filter(s => getSubtaskStatus(s) === 'done').length;
@@ -2750,6 +2839,16 @@
                     </svg>
                   </button>
                   <div id="card-menu-${task.id}" class="card-dropdown-menu" onclick="event.stopPropagation()">
+                    <button class="dropdown-item" onclick="openCardDetailModal('${task.id}', event)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      <span>Ver detalles (Doble clic)</span>
+                    </button>
+                    ${isWorking ? `
+                      <button class="dropdown-item text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10" onclick="promptEditWorkingText('${task.id}', event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <span>Editar texto "Trabajando..."</span>
+                      </button>
+                    ` : ''}
                     <button class="dropdown-item" onclick="duplicateTask('${task.id}', event)">
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -2781,6 +2880,12 @@
             ${progressBarHtml}
           `;
           
+          card.setAttribute('title', 'Doble clic para ver detalles');
+          card.addEventListener('dblclick', (e) => {
+            if (e.target.closest('button, input, textarea, select, .card-dropdown-menu, .card-top-controls, .subtasks-toggle-bottom-btn')) return;
+            openCardDetailModal(task.id);
+          });
+
           if (isAdmin) {
             card.setAttribute('draggable', 'true');
             card.classList.add('cursor-grab');
@@ -2789,7 +2894,7 @@
           } else {
             card.setAttribute('draggable', 'false');
             card.classList.remove('cursor-grab');
-            card.classList.add('cursor-default');
+            card.classList.add('cursor-pointer');
           }
           col.appendChild(card);
         });
@@ -2855,6 +2960,7 @@
       try {
         const title = document.getElementById('newTaskTitle').value.trim();
         const desc = document.getElementById('newTaskDesc').value.trim();
+        const workingText = document.getElementById('newTaskWorkingText') ? document.getElementById('newTaskWorkingText').value.trim() : '';
         const priority = document.getElementById('newTaskPriority').checked;
         const missingInfo = document.getElementById('newTaskMissingInfo').checked;
         const select = document.getElementById('taskProjectSelect');
@@ -2902,7 +3008,7 @@
           
           // Preservar subtareas y orden existentes
           const { subtasks, order } = parseTaskDescription(oldTask ? oldTask.description : '');
-          taskObj.description = formatTaskDescription(desc, subtasks, order);
+          taskObj.description = formatTaskDescription(desc, subtasks, order, workingText);
 
           const res = await fetch(`${SUPABASE_URL}?id=eq.${editingId}`, {
             method: 'PATCH',
@@ -2914,6 +3020,7 @@
           if (idx !== -1) tasksData[idx] = taskObj;
         } else {
           taskObj.id = 't' + Date.now();
+          taskObj.description = formatTaskDescription(desc, [], 0, workingText);
           const res = await fetch(SUPABASE_URL, {
             method: 'POST',
             headers: HEADERS,
@@ -2942,8 +3049,10 @@
       document.getElementById('editingTaskId').value = task.id;
       document.getElementById('newTaskTitle').value = task.title;
       
-      const { text } = parseTaskDescription(task.description);
+      const { text, workingText } = parseTaskDescription(task.description);
       document.getElementById('newTaskDesc').value = text;
+      const wtInput = document.getElementById('newTaskWorkingText');
+      if (wtInput) wtInput.value = workingText || '';
       document.getElementById('newTaskPriority').checked = task.priority;
       const rawTag = task.tag_class || '';
       document.getElementById('newTaskMissingInfo').checked = rawTag.includes(':missing_info');
@@ -2971,10 +3080,10 @@
         const newId = 't' + Date.now();
         
         // Copiar subtareas con estado desmarcado para empezar fresco y calcular orden siguiente
-        const { text, subtasks, order } = parseTaskDescription(original.description);
+        const { text, subtasks, order, workingText } = parseTaskDescription(original.description);
         const freshSubtasks = subtasks.map(s => ({ text: s.text, done: false, status: 'pending' }));
         const newOrder = (order !== null && !isNaN(order)) ? order + 1 : null;
-        const newDesc = formatTaskDescription(text, freshSubtasks, newOrder);
+        const newDesc = formatTaskDescription(text, freshSubtasks, newOrder, workingText);
 
         const newTask = {
           id: newId,
@@ -3029,6 +3138,8 @@
       document.getElementById('editingTaskId').value = '';
       document.getElementById('newTaskTitle').value = '';
       document.getElementById('newTaskDesc').value = '';
+      const wtInput = document.getElementById('newTaskWorkingText');
+      if (wtInput) wtInput.value = '';
       document.getElementById('newTaskPriority').checked = false;
       document.getElementById('newTaskMissingInfo').checked = false;
       populateProjectDropdown();
@@ -3039,6 +3150,292 @@
     function closeModal() {
       document.getElementById('addModal').classList.remove('active');
       document.getElementById('editingTaskId').value = '';
+      const wtInput = document.getElementById('newTaskWorkingText');
+      if (wtInput) wtInput.value = '';
+    }
+
+    // Modal para detalle ampliado de tarjeta (Doble Clic)
+    let modalDetailSubtasksExpanded = false;
+
+    function openCardDetailModal(taskId) {
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const rawTag = task.tag_class || '#3b82f6';
+      const isWorking = rawTag.includes(':working');
+      const isMissingInfo = rawTag.includes(':missing_info');
+      let cleanTag = rawTag.replace(':working', '').replace(':missing_info', '');
+      if (!cleanTag.startsWith('#')) cleanTag = '#3b82f6';
+
+      const knownProject = projectsList.find(p => p.name === task.project);
+      const cardColor = knownProject ? knownProject.color : cleanTag;
+      let hexClean = cardColor.replace('#', '');
+      if (hexClean.length === 3) hexClean = hexClean.split('').map(c => c + c).join('');
+      const cr = parseInt(hexClean.substring(0, 2), 16) || 59;
+      const cg = parseInt(hexClean.substring(2, 4), 16) || 130;
+      const cb = parseInt(hexClean.substring(4, 6), 16) || 246;
+      const rgb = `${cr}, ${cg}, ${cb}`;
+
+      const { text: cleanDescription, subtasks, workingText } = parseTaskDescription(task.description);
+      const currentWorkingText = (workingText && workingText.trim()) ? workingText.trim() : 'Trabajando...';
+      const charCount = currentWorkingText.length;
+      const animDuration = Math.max(2.6, Math.min(7.0, (charCount * 0.12) + 1.6)).toFixed(1) + 's';
+
+      const colId = task.col_id || 'todo';
+      const colLabels = {
+        'todo': { label: 'Por Hacer', cls: 'bg-slate-800 text-slate-300 border-slate-700' },
+        'in-progress': { label: isWorking ? 'En Progreso (Trabajando)' : 'En Progreso', cls: 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40' },
+        'paused': { label: isMissingInfo ? 'Falta Información (Pausa)' : 'Pausado', cls: 'bg-amber-950/80 text-amber-300 border-amber-500/40' },
+        'review': { label: 'En Revisión', cls: 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40' },
+        'done': { label: 'Completado', cls: 'bg-green-950/80 text-green-300 border-green-500/40' }
+      };
+      const colInfo = colLabels[colId] || colLabels['todo'];
+
+      const totalSubtasks = subtasks.length;
+      const completedSubtasks = subtasks.filter(s => getSubtaskStatus(s) === 'done').length;
+      const workingSubtasks = subtasks.filter(s => getSubtaskStatus(s) === 'working');
+      const percent = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : (colId === 'done' ? 100 : 0);
+
+      let subtasksHtml = '';
+      if (totalSubtasks === 0) {
+        subtasksHtml = `
+          <div class="py-2.5 px-3 rounded-lg bg-slate-900/60 border border-white/5 text-center text-xs text-slate-400 italic">
+            Sin fases ni subtareas asignadas a esta tarea.
+          </div>
+        `;
+      } else {
+        subtasksHtml = subtasks.map((st) => {
+          const status = getSubtaskStatus(st);
+          const isDone = (status === 'done');
+          const isSubWorking = (status === 'working');
+          return `
+            <div class="flex items-center justify-between py-1.5 px-2.5 rounded-lg ${isSubWorking ? 'bg-[#00E599]/10 border border-[#00E599]/30 text-white' : 'bg-white/[0.02] border border-white/5 text-slate-200'} text-xs">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-4 text-center shrink-0 font-bold ${isDone ? 'text-emerald-400' : isSubWorking ? 'text-[#00E599]' : 'text-slate-500'}">
+                  ${isDone ? '✓' : isSubWorking ? '⚡' : '○'}
+                </span>
+                <span class="${isDone ? 'line-through text-slate-500' : isSubWorking ? 'font-bold text-emerald-300' : 'text-slate-200'} truncate">
+                  ${escapeHtml(st.text)}
+                </span>
+              </div>
+              <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded shrink-0 ${isDone ? 'bg-emerald-500/20 text-emerald-400' : isSubWorking ? 'bg-[#00E599]/25 text-[#00E599]' : 'bg-slate-800 text-slate-400'}">
+                ${isDone ? 'Completado' : isSubWorking ? 'En curso' : 'Pendiente'}
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      modalDetailSubtasksExpanded = false;
+
+      const content = document.getElementById('cardDetailContent');
+      content.innerHTML = `
+        <!-- Cabecera de la tarjeta ampliada -->
+        <div class="flex justify-between items-start gap-3 mb-4 pb-3 border-b border-white/10">
+          <div class="flex items-center gap-2 flex-wrap min-w-0">
+            <span class="tag font-bold text-xs" style="background: rgba(${rgb}, 0.25); color: #ffffff; border: 1px solid rgba(${rgb}, 0.65); box-shadow: 0 0 12px rgba(${rgb}, 0.35);">
+              ${escapeHtml(task.project)}
+            </span>
+            ${task.priority ? `
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
+                </svg>
+                Alta Prioridad
+              </span>
+            ` : ''}
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${colInfo.cls}">
+              ${colInfo.label}
+            </span>
+          </div>
+          <button onclick="closeCardDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition-colors shrink-0" title="Cerrar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <!-- Banner animado si está en estado Trabajando -->
+        ${isWorking ? `
+          <div class="flex items-center justify-between gap-2 p-2.5 mb-4 rounded-xl bg-emerald-950/40 border border-[#00E599]/30">
+            <div class="flex items-center gap-2 min-w-0 overflow-hidden">
+              <span class="pulse-dot !w-2.5 !h-2.5 !mr-0 !bg-[#00E599] shrink-0" style="box-shadow: 0 0 10px #00E599;"></span>
+              <span class="typewriter-working text-xs sm:text-sm" style="--char-count: ${charCount}; animation: typeWorkingAnim ${animDuration} steps(${charCount}, end) infinite, cursorBlinkAnim 0.6s infinite;" title="${escapeHtml(currentWorkingText)}">
+                ${escapeHtml(currentWorkingText)}
+              </span>
+            </div>
+            ${isAdmin ? `
+              <button onclick="promptEditWorkingText('${task.id}', event)" class="shrink-0 text-xs text-[#00E599] hover:text-white hover:underline flex items-center gap-1 font-semibold transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>Editar texto</span>
+              </button>
+            ` : ''}
+          </div>
+        ` : ''}
+
+        <!-- Título -->
+        <h2 class="text-lg sm:text-xl font-extrabold text-white mb-3 leading-snug">
+          ${escapeHtml(task.title)}
+        </h2>
+
+        <!-- Descripción completa -->
+        <div class="mb-4 p-3.5 bg-slate-900/60 border border-white/10 rounded-xl">
+          <span class="text-[10.5px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Descripción</span>
+          ${cleanDescription ? `
+            <div class="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">${escapeHtml(cleanDescription)}</div>
+          ` : `
+            <div class="text-slate-500 text-xs italic">Sin descripción detallada</div>
+          `}
+        </div>
+
+        <!-- Sección de Progreso y Procesos -->
+        <div class="p-3.5 bg-slate-900/50 border border-white/10 rounded-xl mb-4">
+          <div class="flex items-center justify-between mb-2 text-xs">
+            <div class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E599" stroke-width="2.5"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+              <span class="font-bold uppercase tracking-wider text-slate-300">Progreso general</span>
+              <span class="text-slate-400 font-mono">(${completedSubtasks}/${totalSubtasks})</span>
+            </div>
+            <span class="font-extrabold text-sm font-mono text-[#00E599]">${percent}%</span>
+          </div>
+
+          <!-- Barra de progreso -->
+          <div class="w-full bg-[#080a0f] rounded-full h-2.5 border border-white/5 relative p-[0.5px] overflow-hidden mb-3">
+            <div class="h-full rounded-full transition-all duration-300" style="width: ${percent}%; background: linear-gradient(90deg, #00B377, #00E599, #5CFFC6); box-shadow: 0 0 10px rgba(0, 229, 153, 0.5);"></div>
+          </div>
+
+          ${workingSubtasks.length > 0 ? `
+            <div class="flex items-center gap-2 py-1.5 px-3 mb-3 rounded-lg bg-[#00E599]/10 border border-[#00E599]/30 text-[#00E599] text-xs font-semibold">
+              <span class="pulse-dot !w-1.5 !h-1.5 !mr-0 !bg-[#00E599]"></span>
+              <span>Fase activa: <strong>${workingSubtasks.map(s => escapeHtml(s.text)).join(', ')}</strong></span>
+            </div>
+          ` : ''}
+
+          <!-- Lista de procesos MINIMIZADA por defecto -->
+          <div class="rounded-xl bg-[#080a0f]/90 border border-white/10 overflow-hidden">
+            <button type="button" onclick="toggleModalSubtasksList()" class="w-full py-2.5 px-3 flex items-center justify-between text-xs font-bold text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all">
+              <div class="flex items-center gap-2">
+                <span>📋 Lista de fases (${totalSubtasks})</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-slate-400">
+                <span id="modalSubtasksToggleText" class="text-[11px] font-medium">Ver fases</span>
+                <svg id="modalSubtasksChevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform duration-200">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </button>
+            <div id="modalSubtasksContent" style="display: none;" class="p-3 pt-1 border-t border-white/5 space-y-1.5 max-h-56 overflow-y-auto">
+              ${subtasksHtml}
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer del modal -->
+        <div class="flex items-center justify-between pt-3 border-t border-white/10">
+          <span class="text-[11px] text-slate-500 hidden sm:inline">Doble clic en cualquier tarjeta del tablero para expandirla</span>
+          <div class="flex items-center gap-2 ml-auto">
+            ${isAdmin ? `
+              <button onclick="closeCardDetailModal(); editTask('${task.id}')" class="px-3.5 py-1.5 text-xs font-semibold text-blue-300 hover:text-white bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-xl transition-all flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>Editar Tarjeta</span>
+              </button>
+            ` : ''}
+            <button onclick="closeCardDetailModal()" class="px-4 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/10 hover:bg-white/15 rounded-xl transition-colors">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('cardDetailModal').classList.add('active');
+    }
+
+    function closeCardDetailModal() {
+      const modal = document.getElementById('cardDetailModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function toggleModalSubtasksList() {
+      const content = document.getElementById('modalSubtasksContent');
+      const text = document.getElementById('modalSubtasksToggleText');
+      const chevron = document.getElementById('modalSubtasksChevron');
+      if (!content) return;
+      const isHidden = (content.style.display === 'none');
+      content.style.display = isHidden ? 'block' : 'none';
+      if (text) text.textContent = isHidden ? 'Ocultar fases' : 'Ver fases';
+      if (chevron) {
+        if (isHidden) {
+          chevron.classList.add('rotate-180');
+        } else {
+          chevron.classList.remove('rotate-180');
+        }
+      }
+    }
+
+    function promptEditWorkingText(taskId, event) {
+      if (!isAdmin) return;
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      closeAllCardMenus();
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { workingText } = parseTaskDescription(task.description);
+      document.getElementById('editWorkingTaskId').value = taskId;
+      const input = document.getElementById('customWorkingTextInput');
+      input.value = workingText || '';
+      updateWorkingTextPreview(input.value);
+
+      document.getElementById('editWorkingTextModal').classList.add('active');
+      input.focus();
+    }
+
+    function closeEditWorkingTextModal() {
+      const modal = document.getElementById('editWorkingTextModal');
+      if (modal) modal.classList.remove('active');
+      document.getElementById('editWorkingTaskId').value = '';
+    }
+
+    function updateWorkingTextPreview(text) {
+      const preview = document.getElementById('previewWorkingText');
+      if (!preview) return;
+      const val = (text && text.trim()) ? text.trim() : 'Trabajando...';
+      const charCount = val.length;
+      const animDuration = Math.max(2.6, Math.min(7.0, (charCount * 0.12) + 1.6)).toFixed(1) + 's';
+      preview.textContent = val;
+      preview.style.setProperty('--char-count', charCount);
+      preview.style.animation = `typeWorkingAnim ${animDuration} steps(${charCount}, end) infinite, cursorBlinkAnim 0.6s infinite`;
+    }
+
+    async function saveCustomWorkingText() {
+      if (!isAdmin) return;
+      const taskId = document.getElementById('editWorkingTaskId').value;
+      const textVal = document.getElementById('customWorkingTextInput').value.trim();
+      const task = tasksData.find(t => t.id === taskId);
+      if (!task) return;
+
+      const { text, subtasks, order } = parseTaskDescription(task.description);
+      task.description = formatTaskDescription(text, subtasks, order, textVal);
+
+      renderBoard();
+      closeEditWorkingTextModal();
+
+      // Si el modal de detalle está abierto, refrescarlo
+      const detailModal = document.getElementById('cardDetailModal');
+      if (detailModal && detailModal.classList.contains('active')) {
+        openCardDetailModal(taskId);
+      }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}?id=eq.${taskId}`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: task.description })
+        });
+        if (!res.ok) console.warn("Aviso al guardar texto personalizado de trabajo:", await res.text());
+      } catch(e) {
+        console.error("Error al guardar texto de trabajo:", e);
+      }
     }
 
     // Drag and Drop Logic
@@ -3093,8 +3490,8 @@
       const updates = [];
       if (sameProjectCards.length > 0) {
         sameProjectCards.forEach((t, idx) => {
-          const { text, subtasks } = parseTaskDescription(t.description);
-          t.description = formatTaskDescription(text, subtasks, idx);
+          const { text, subtasks, workingText } = parseTaskDescription(t.description);
+          t.description = formatTaskDescription(text, subtasks, idx, workingText);
           const payload = { description: t.description };
           if (t.id === id && colChanged) {
             payload.col_id = newColId;
@@ -3109,8 +3506,8 @@
           );
         });
       } else if (colChanged) {
-        const { text, subtasks } = parseTaskDescription(task.description);
-        task.description = formatTaskDescription(text, subtasks, 0);
+        const { text, subtasks, workingText } = parseTaskDescription(task.description);
+        task.description = formatTaskDescription(text, subtasks, 0, workingText);
         updates.push(
           fetch(`${SUPABASE_URL}?id=eq.${id}`, {
             method: 'PATCH',
@@ -3201,6 +3598,16 @@
 
       requestAnimationFrame(updateProgress);
     }
+
+    // Atajos de teclado globales (Cerrar modales con Escape)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCardDetailModal();
+        closeEditWorkingTextModal();
+        closeModal();
+        closeAllCardMenus();
+      }
+    });
 
     // Inicializar autenticación de admin, preloader y cargar datos
     initAdminAuth();
