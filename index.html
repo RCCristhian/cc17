@@ -2924,7 +2924,7 @@
             let computedDefaultText = 'Trabajando...';
             if (activeWorkingSubtasks.length > 0) {
               const phaseNames = activeWorkingSubtasks.map(s => s.text).join(' - ');
-              computedDefaultText = `Trabajando en ${phaseNames}`;
+              computedDefaultText = `Trabajando en ${phaseNames}...`;
             }
 
             const hasCustomText = Boolean(workingText && workingText.trim());
@@ -3720,7 +3720,13 @@
       const rgb = `${cr}, ${cg}, ${cb}`;
 
       const { text: cleanDescription, subtasks, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
-      const currentWorkingText = (workingText && workingText.trim()) ? workingText.trim() : 'Trabajando...';
+      const activeWorkingModalSubtasks = subtasks.filter(s => getSubtaskStatus(s) === 'working');
+      let computedDefaultModalText = 'Trabajando...';
+      if (activeWorkingModalSubtasks.length > 0) {
+        const phaseNames = activeWorkingModalSubtasks.map(s => s.text).join(' - ');
+        computedDefaultModalText = `Trabajando en ${phaseNames}...`;
+      }
+      const currentWorkingText = (workingText && workingText.trim()) ? workingText.trim() : computedDefaultModalText;
       const charCount = currentWorkingText.length;
       const animDuration = Math.max(2.6, Math.min(7.0, (charCount * 0.12) + 1.6)).toFixed(1) + 's';
 
