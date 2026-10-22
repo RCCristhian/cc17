@@ -1762,7 +1762,7 @@
               Registro de Accesos y Visitas
               <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30">Privado</span>
             </h2>
-            <p class="text-xs text-slate-400">Historial confidencial de accesos al tablero (dispositivo, ubicación, fecha)</p>
+            <p class="text-xs text-slate-400">Historial confidencial de personas externas que entran a ver el tablero (tú estás excluido)</p>
           </div>
         </div>
         <button type="button" onclick="closeVisitsModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all shrink-0">
@@ -1777,12 +1777,12 @@
           <div id="statTotalVisits" class="text-lg font-extrabold text-white mt-0.5">0</div>
         </div>
         <div class="bg-white/[0.03] border border-white/5 rounded-xl p-2">
-          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Visitantes</div>
-          <div id="statVisitors" class="text-lg font-extrabold text-sky-400 mt-0.5">0</div>
+          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">📱 Móvil / Tablet</div>
+          <div id="statMobileVisits" class="text-lg font-extrabold text-sky-400 mt-0.5">0</div>
         </div>
         <div class="bg-white/[0.03] border border-white/5 rounded-xl p-2">
-          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Admin (Tú)</div>
-          <div id="statAdminVisits" class="text-lg font-extrabold text-emerald-400 mt-0.5">0</div>
+          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">💻 Escritorio</div>
+          <div id="statDesktopVisits" class="text-lg font-extrabold text-indigo-400 mt-0.5">0</div>
         </div>
       </div>
 
@@ -1797,9 +1797,9 @@
         </div>
         <div class="flex items-center gap-1.5">
           <select id="visitsFilterType" onchange="applyVisitsFilter()" class="bg-[#131722] border border-white/10 text-xs text-slate-300 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer">
-            <option value="all">Todos</option>
-            <option value="visitors">Solo Visitantes</option>
-            <option value="admin">Solo Admin</option>
+            <option value="all">Todos los dispositivos</option>
+            <option value="mobile">Solo Móviles</option>
+            <option value="desktop">Solo Escritorio</option>
           </select>
           <button type="button" onclick="loadVisitsLogs(true)" class="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 transition-all flex items-center justify-center" title="Recargar registro">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -1852,6 +1852,9 @@
         console.warn("Error leyendo URL params:", e);
       }
       isAdmin = (localStorage.getItem('cc17_is_admin') === 'true');
+      if (isAdmin) {
+        localStorage.setItem('cc17_is_admin_device', 'true');
+      }
       updateAdminUI();
     }
 
@@ -1933,6 +1936,8 @@
       if (val === ADMIN_PIN) {
         isAdmin = true;
         localStorage.setItem('cc17_is_admin', 'true');
+        localStorage.setItem('cc17_is_admin_device', 'true');
+        purgeAdminVisitsFromSupabase();
         closeAdminAuthModal();
         updateAdminUI();
         renderBoard();
@@ -4568,7 +4573,7 @@
       }
     });
 
-    // --- SISTEMA SILENCIOSO DE REGISTRO Y MONITOREO DE VISITAS ---
+    // --- SISTEMA SILENCIOSO DE REGISTRO Y MONITOREO DE VISITAS (SOLO EXTERNOS) ---
     function getDeviceInfo() {
       const ua = navigator.userAgent || '';
       let os = 'Desconocido';
@@ -4613,11 +4618,53 @@
       return new Date(timeMs).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
+    // Purgar accesos del admin si se coló alguno provisional
+    async function purgeAdminVisitsFromSupabase() {
+      try {
+        const currentVisitId = sessionStorage.getItem('cc17_current_visit_id');
+        const res = await fetch(`${SUPABASE_URL}?id=eq.system_access_logs`, { headers: HEADERS });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.length > 0 && data[0].description) {
+          let logs = JSON.parse(data[0].description);
+          if (Array.isArray(logs) && logs.length > 0) {
+            const filtered = logs.filter(v => !v.isAdmin && v.id !== currentVisitId);
+            if (filtered.length !== logs.length) {
+              await fetch(`${SUPABASE_URL}?id=eq.system_access_logs`, {
+                method: 'PATCH',
+                headers: HEADERS,
+                body: JSON.stringify({ description: JSON.stringify(filtered) })
+              });
+              cachedVisits = filtered;
+              updateVisitsStats(filtered);
+              updateVisitsBadge(filtered.length);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Error al purgar visitas de admin:", e);
+      }
+    }
+
     async function recordVisitLog() {
       try {
+        // EXCLUSIÓN TOTAL DEL ADMINISTRADOR:
+        // Si el usuario es el administrador o está en el dispositivo reconocido del administrador, NUNCA registrar
+        if (isAdmin || localStorage.getItem('cc17_is_admin') === 'true' || localStorage.getItem('cc17_is_admin_device') === 'true') {
+          return;
+        }
+
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('admin') === ADMIN_PIN) {
+            localStorage.setItem('cc17_is_admin_device', 'true');
+            return;
+          }
+        } catch (e) {}
+
         const lastLogTime = parseInt(sessionStorage.getItem('cc17_last_visit_log') || '0', 10);
         const now = Date.now();
-        // Evitar registrar visitas repetidas por recargar la página dentro de un intervalo de 10 minutos
+        // Evitar registrar visitas repetidas por recargar la página dentro de 10 minutos
         if (now - lastLogTime < 10 * 60 * 1000) {
           return;
         }
@@ -4640,10 +4687,11 @@
           }
         } catch (e) {}
 
-        const isCurrentlyAdmin = (localStorage.getItem('cc17_is_admin') === 'true');
+        const visitId = 'v_' + now + '_' + Math.random().toString(36).substring(2, 7);
+        sessionStorage.setItem('cc17_current_visit_id', visitId);
 
         const newVisit = {
-          id: 'v_' + now + '_' + Math.random().toString(36).substring(2, 7),
+          id: visitId,
           time: now,
           timestamp: new Date().toISOString(),
           dateStr: new Date().toLocaleString('es-PE', { 
@@ -4651,7 +4699,7 @@
             hour: '2-digit', minute: '2-digit', second: '2-digit', 
             hour12: true 
           }),
-          isAdmin: isCurrentlyAdmin,
+          isAdmin: false,
           tag: visitorTag,
           ip: geo?.ip || 'No disponible',
           city: geo?.city || '',
@@ -4684,7 +4732,10 @@
           }
         }
 
-        // Agregar nueva visita al inicio y conservar las últimas 150
+        // Filtrar por si había algún registro antiguo de admin
+        logs = logs.filter(v => !v.isAdmin);
+
+        // Agregar la nueva visita al inicio y conservar las últimas 150
         logs.unshift(newVisit);
         if (logs.length > 150) {
           logs = logs.slice(0, 150);
@@ -4713,10 +4764,6 @@
             })
           });
         }
-
-        if (isCurrentlyAdmin) {
-          updateVisitsBadge(logs.length);
-        }
       } catch (err) {
         console.warn("Log de visita silencioso omitido:", err);
       }
@@ -4730,7 +4777,8 @@
         if (data && data.length > 0 && data[0].description) {
           const logs = JSON.parse(data[0].description);
           if (Array.isArray(logs)) {
-            updateVisitsBadge(logs.length);
+            const externalLogs = logs.filter(v => !v.isAdmin);
+            updateVisitsBadge(externalLogs.length);
           }
         }
       } catch (e) {
@@ -4788,7 +4836,7 @@
         if (data && data.length > 0 && data[0].description) {
           try {
             const parsed = JSON.parse(data[0].description);
-            cachedVisits = Array.isArray(parsed) ? parsed : [];
+            cachedVisits = Array.isArray(parsed) ? parsed.filter(v => !v.isAdmin) : [];
           } catch (e) {
             cachedVisits = [];
           }
@@ -4807,17 +4855,17 @@
 
     function updateVisitsStats(visits) {
       const statTotal = document.getElementById('statTotalVisits');
-      const statVisitors = document.getElementById('statVisitors');
-      const statAdmin = document.getElementById('statAdminVisits');
+      const statMobile = document.getElementById('statMobileVisits');
+      const statDesktop = document.getElementById('statDesktopVisits');
       if (!statTotal) return;
 
       const total = visits.length;
-      const adminCount = visits.filter(v => v.isAdmin).length;
-      const visitorCount = total - adminCount;
+      const mobileCount = visits.filter(v => v.device === 'Móvil' || v.device === 'Tablet').length;
+      const desktopCount = total - mobileCount;
 
       statTotal.textContent = total;
-      statVisitors.textContent = visitorCount;
-      statAdmin.textContent = adminCount;
+      if (statMobile) statMobile.textContent = mobileCount;
+      if (statDesktop) statDesktop.textContent = desktopCount;
     }
 
     function applyVisitsFilter() {
@@ -4826,10 +4874,10 @@
 
       let filtered = cachedVisits.slice();
 
-      if (filterType === 'visitors') {
-        filtered = filtered.filter(v => !v.isAdmin);
-      } else if (filterType === 'admin') {
-        filtered = filtered.filter(v => !v.isAdmin ? false : true);
+      if (filterType === 'mobile') {
+        filtered = filtered.filter(v => v.device === 'Móvil' || v.device === 'Tablet');
+      } else if (filterType === 'desktop') {
+        filtered = filtered.filter(v => v.device === 'Escritorio');
       }
 
       if (search) {
@@ -4857,8 +4905,8 @@
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center py-12 text-center text-slate-500">
             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-40 mb-2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            <p class="text-sm font-semibold text-slate-400">Sin registros de visitas</p>
-            <p class="text-xs text-slate-600 mt-0.5">Los accesos aparecerán aquí automáticamente cuando alguien entre al tablero.</p>
+            <p class="text-sm font-semibold text-slate-400">Sin registros de visitantes aún</p>
+            <p class="text-xs text-slate-600 mt-0.5">Los accesos de personas externas aparecerán aquí automáticamente cuando entren.</p>
           </div>
         `;
         return;
@@ -4866,10 +4914,10 @@
 
       let html = '';
       items.forEach(v => {
-        const isAdm = !!v.isAdmin;
-        const badgeType = isAdm 
-          ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Admin (Tú)</span>'
-          : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30">Visitante</span>';
+        const isMobileOrTablet = (v.device === 'Móvil' || v.device === 'Tablet');
+        const deviceBadge = isMobileOrTablet
+          ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">📱 Móvil</span>'
+          : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">💻 Escritorio</span>';
 
         const tagBadge = v.tag 
           ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">🏷️ ${escapeHtml(v.tag)}</span>` 
@@ -4884,7 +4932,6 @@
 
         const relTime = getRelativeTimeString(v.timestamp || v.time);
 
-        const isMobileOrTablet = (v.device === 'Móvil' || v.device === 'Tablet');
         const deviceIcon = isMobileOrTablet
           ? `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 inline-block mr-1"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`
           : `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 inline-block mr-1"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
@@ -4895,7 +4942,7 @@
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="text-base leading-none">${flag}</span>
                 <span class="text-xs font-bold text-white tracking-tight">${escapeHtml(locationStr)}</span>
-                ${badgeType}
+                ${deviceBadge}
                 ${tagBadge}
               </div>
               <div class="text-[11px] text-slate-400 font-medium whitespace-nowrap" title="${escapeHtml(v.dateStr || v.timestamp)}">
@@ -4906,7 +4953,7 @@
             <div class="flex items-center justify-between text-[11px] text-slate-400 gap-2 flex-wrap pt-1.5 border-t border-white/[0.04]">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="inline-flex items-center text-slate-300 font-medium">
-                  ${deviceIcon} ${escapeHtml(v.device || 'Dispositivo')} · ${escapeHtml(v.os || '')} · ${escapeHtml(v.browser || '')}
+                  ${deviceIcon} ${escapeHtml(v.os || '')} · ${escapeHtml(v.browser || '')}
                 </span>
                 ${v.screen ? `<span class="text-slate-500">(${escapeHtml(v.screen)})</span>` : ''}
                 ${v.isp ? `<span class="text-slate-500 hidden sm:inline">· ISP: ${escapeHtml(v.isp)}</span>` : ''}
