@@ -4993,8 +4993,19 @@
                 ${deviceBadge}
                 ${tagBadge}
               </div>
-              <div class="text-[11px] text-slate-400 font-medium whitespace-nowrap" title="${escapeHtml(v.dateStr || v.timestamp)}">
-                🕒 ${escapeHtml(relTime)} · <span class="text-slate-500 font-normal">${escapeHtml(v.dateStr || '')}</span>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <div class="text-[11px] text-slate-400 font-medium whitespace-nowrap" title="${escapeHtml(v.dateStr || v.timestamp)}">
+                  🕒 ${escapeHtml(relTime)} · <span class="text-slate-500 font-normal">${escapeHtml(v.dateStr || '')}</span>
+                </div>
+                <button type="button" 
+                        onclick="deleteVisitRecord('${escapeHtml(v.id || ('v_' + v.time))}', event)" 
+                        class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/15 border border-white/5 hover:border-red-500/30 transition-all shrink-0 active:scale-90" 
+                        title="Eliminar este registro de visita">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -5017,6 +5028,36 @@
       });
 
       container.innerHTML = html;
+    }
+
+    async function deleteVisitRecord(visitId, event) {
+      if (!isAdmin) return;
+      if (event) event.stopPropagation();
+
+      const itemToDelete = cachedVisits.find(v => (v.id || ('v_' + v.time)) === visitId);
+      if (!itemToDelete) return;
+
+      const previousVisits = cachedVisits.slice();
+      cachedVisits = cachedVisits.filter(v => (v.id || ('v_' + v.time)) !== visitId);
+      updateVisitsStats(cachedVisits);
+      applyVisitsFilter();
+      updateVisitsBadge(cachedVisits.length);
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}?id=eq.system_access_logs`, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ description: JSON.stringify(cachedVisits) })
+        });
+        if (!res.ok) throw new Error("Error HTTP " + res.status);
+      } catch (err) {
+        console.error("Error al borrar visita:", err);
+        alert("No se pudo eliminar el registro: " + err.message);
+        cachedVisits = previousVisits;
+        updateVisitsStats(cachedVisits);
+        applyVisitsFilter();
+        updateVisitsBadge(cachedVisits.length);
+      }
     }
 
     async function clearVisitsHistory() {
