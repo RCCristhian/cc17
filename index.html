@@ -2994,16 +2994,16 @@
               </div>
             `;
 
-            // Si está pausado por un motivo o falta de información, también mostrar esas etiquetas en En Revisión
-            const extraPausedInReview = isMissingInfo ? `${pausedBadgeMarkup}${missingInfoBadgeMarkup}` : '';
-            colStatusBadgeHtml = `${reviewBadge}${extraPausedInReview}`;
+            // Si está marcado con falta de información o motivo de pausa, en Revisión se muestra únicamente Falta Información (sin el ícono de pausado)
+            const extraMissingInReview = isMissingInfo ? missingInfoBadgeMarkup : '';
+            colStatusBadgeHtml = `${reviewBadge}${extraMissingInReview}`;
           }
 
           let tagsHtml = `
             <div class="inline-flex items-center gap-1.5 flex-nowrap shrink-0">
               <span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>
-              ${priorityHtml}
               ${colStatusBadgeHtml}
+              ${priorityHtml}
             </div>
           `;
 
@@ -3860,7 +3860,7 @@
         'todo': { label: 'Por Hacer', cls: 'bg-slate-800 text-slate-300 border-slate-700' },
         'in-progress': { label: isWorking ? (isOffHours() ? 'En Progreso (Descansando)' : 'En Progreso (Trabajando)') : 'En Progreso', cls: isOffHours() ? 'bg-indigo-950/80 text-indigo-300 border-indigo-500/40' : 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40' },
         'paused': { label: isMissingInfo ? 'Pausado (Falta Información)' : 'Pausado', cls: 'bg-amber-950/80 text-amber-300 border-amber-500/40' },
-        'review': { label: isMissingInfo ? 'En Revisión (Pausa / Falta Información)' : 'En Revisión', cls: isMissingInfo ? 'bg-cyan-950/80 text-cyan-300 border-amber-500/40' : 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40' },
+        'review': { label: isMissingInfo ? 'En Revisión (Falta Información)' : 'En Revisión', cls: isMissingInfo ? 'bg-cyan-950/80 text-cyan-300 border-amber-500/40' : 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40' },
         'done': { label: 'Completado', cls: 'bg-green-950/80 text-green-300 border-green-500/40' }
       };
       const colInfo = colLabels[colId] || colLabels['todo'];
@@ -3910,22 +3910,10 @@
             <span class="tag font-bold text-xs" style="background: rgba(${rgb}, 0.25); color: #ffffff; border: 1px solid rgba(${rgb}, 0.65); box-shadow: 0 0 12px rgba(${rgb}, 0.35);">
               ${escapeHtml(task.project)}
             </span>
-            ${task.priority ? `
-              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
-                </svg>
-                Alta Prioridad
-              </span>
-            ` : ''}
             <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${colInfo.cls}">
               ${colInfo.label}
             </span>
             ${(colId === 'review' && isMissingInfo) ? `
-              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
-                Pausado
-              </span>
               <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm">
                 ⚠️ Falta Información
               </span>
@@ -3940,6 +3928,14 @@
                   ⚠️ Falta Información
                 </span>
               ` : ''}
+            ` : ''}
+            ${task.priority ? `
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
+                </svg>
+                Alta Prioridad
+              </span>
             ` : ''}
           </div>
           <button onclick="closeCardDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition-colors shrink-0" title="Cerrar">
