@@ -1473,9 +1473,6 @@
           <div class="flex items-center gap-2">
             <input type="checkbox" id="newTaskPriority" class="w-4 h-4 rounded text-rose-500 bg-[#080a0f] border-white/20 focus:ring-rose-500 cursor-pointer">
             <label for="newTaskPriority" class="text-xs font-bold text-rose-400 flex items-center gap-1.5 cursor-pointer select-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
-              </svg>
               Marcar como Prioritario
             </label>
           </div>
@@ -2879,19 +2876,12 @@
             card.style.borderLeft = `3.5px solid ${cardColor}`;
           }
           
-          let priorityHtml = '';
+          let priorityBadgeHtml = '';
           if (task.priority) {
-            priorityHtml = `
-              <div class="status-tooltip-wrapper">
-                <span class="status-icon-badge badge-priority" title="Alta Prioridad">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
-                  </svg>
-                </span>
-                <div class="status-floating-tooltip tooltip-priority">
-                  <span class="font-extrabold text-red-300 text-[10.5px] tracking-wider uppercase">Alta Prioridad</span>
-                </div>
-              </div>
+            priorityBadgeHtml = `
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm shrink-0" title="Prioridad">
+                Prioridad
+              </span>
             `;
           }
 
@@ -3003,7 +2993,6 @@
             <div class="inline-flex items-center gap-1.5 flex-nowrap shrink-0">
               <span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>
               ${colStatusBadgeHtml}
-              ${priorityHtml}
             </div>
           `;
 
@@ -3490,7 +3479,7 @@
             ${cardControlsHtml}
             <div class="mb-2 flex items-center gap-1.5 min-w-0 max-w-full">${tagsHtml}</div>
             ${pauseReasonHtml}
-            <div class="font-semibold text-sm mb-1 text-slate-100 leading-snug">${task.title}</div>
+            <div class="font-semibold text-sm mb-1 text-slate-100 leading-snug flex items-center gap-1.5 flex-wrap"><span>${task.title}</span>${priorityBadgeHtml}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
             ${deliverySectionHtml}
             ${progressBarHtml}
@@ -3935,11 +3924,8 @@
               </span>
             `}
             ${task.priority ? `
-              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
-                </svg>
-                Alta Prioridad
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm">
+                Prioridad
               </span>
             ` : ''}
           </div>
@@ -3981,8 +3967,8 @@
         ` : ''}
 
         <!-- Título -->
-        <h2 class="text-lg sm:text-xl font-extrabold text-white mb-3 leading-snug">
-          ${escapeHtml(task.title)}
+        <h2 class="text-lg sm:text-xl font-extrabold text-white mb-3 leading-snug flex items-center gap-2 flex-wrap">
+          <span>${escapeHtml(task.title)}</span>${task.priority ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-extrabold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm">Prioridad</span>` : ''}
         </h2>
 
         <!-- Descripción completa -->
