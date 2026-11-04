@@ -41,9 +41,7 @@
       overflow: hidden;
       box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.75);
       height: 100%;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* iOS Glass Aesthetic: Bordes finos de 1px con sutil resplandor ambiental y bisel interior */
@@ -145,10 +143,6 @@
         gap: 0.85rem !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
-        transform: translateZ(0);
-        will-change: scroll-position;
       }
 
       .kanban-card {
@@ -172,10 +166,6 @@
       justify-content: space-between;
       align-items: center;
       background: rgba(255, 255, 255, 0.015);
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      flex-shrink: 0;
     }
 
     .kanban-cards {
@@ -187,12 +177,6 @@
       flex-direction: column;
       gap: 1.25rem;
       min-height: 220px;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      will-change: scroll-position;
     }
 
     .working-outer-badge {
@@ -333,21 +317,15 @@
       border-radius: 1.15rem;
       padding: 1.1rem 1.15rem;
       cursor: grab;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       user-select: none;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      contain: layout style;
-      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
     }
 
-    @media (hover: hover) and (pointer: fine) {
-      .kanban-card:hover {
-        transform: translateY(-3px) scale(1.008) translateZ(0);
-        box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), 0 0 20px -2px var(--card-glow, rgba(59, 130, 246, 0.35)) !important;
-        border-color: var(--card-color, #3b82f6) !important;
-      }
+    .kanban-card:hover {
+      transform: translateY(-3px) scale(1.008);
+      box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), 0 0 20px -2px var(--card-glow, rgba(59, 130, 246, 0.35)) !important;
+      border-color: var(--card-color, #3b82f6) !important;
     }
 
     .kanban-card:active {
@@ -988,13 +966,12 @@
     }
 
     @keyframes warningPulse {
-      0%, 100% { transform: scale(1) translateZ(0); opacity: 0.9; }
-      50% { transform: scale(1.15) translateZ(0); opacity: 1; }
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.6)); }
+      50% { transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.95)); }
     }
 
     .missing-info-btn.is-active svg {
       animation: warningPulse 2.4s infinite ease-in-out;
-      will-change: transform;
     }
 
     @keyframes pauseReasonGlow {
