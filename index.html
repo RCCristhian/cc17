@@ -1473,6 +1473,9 @@
           <div class="flex items-center gap-2">
             <input type="checkbox" id="newTaskPriority" class="w-4 h-4 rounded text-rose-500 bg-[#080a0f] border-white/20 focus:ring-rose-500 cursor-pointer">
             <label for="newTaskPriority" class="text-xs font-bold text-rose-400 flex items-center gap-1.5 cursor-pointer select-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
+              </svg>
               Marcar como Prioritario
             </label>
           </div>
@@ -2808,13 +2811,9 @@
           card.draggable = true;
           card.id = task.id;
           
-          // Parsear descripción, subtareas, texto de trabajo, enlace de entrega y motivo de pausa anticipadamente
-          const { text: cleanDescription, subtasks, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
-          const hasPauseReason = Boolean(pauseReason && pauseReason.trim());
-
           const rawTag = task.tag_class || '#3b82f6';
           const isWorking = (colId === 'in-progress') && rawTag.includes(':working');
-          const isMissingInfo = rawTag.includes(':missing_info') || hasPauseReason;
+          const isMissingInfo = rawTag.includes(':missing_info');
           const cleanTag = rawTag.replace(':working', '').replace(':missing_info', '');
 
           // Resolver el color del proyecto asociado a la tarjeta
@@ -2840,7 +2839,7 @@
           const cb = parseInt(hexClean.substring(4, 6), 16) || 246;
           const rgb = `${cr}, ${cg}, ${cb}`;
 
-          card.className = `kanban-card text-sm ${isWorking ? 'is-active-working' : ''} ${isMissingInfo ? 'is-missing-info-card' : ''} ${colId === 'in-progress' ? 'has-working-btn' : ''} ${(colId === 'paused' || colId === 'review') && isMissingInfo ? 'has-paused-btn' : ''}`;
+          card.className = `kanban-card text-sm ${isWorking ? 'is-active-working' : ''} ${isMissingInfo ? 'is-missing-info-card' : ''} ${colId === 'in-progress' ? 'has-working-btn' : ''} ${colId === 'paused' ? 'has-paused-btn' : ''}`;
           
           card.style.setProperty('--card-color', cardColor);
           card.style.setProperty('--card-color-soft', `rgba(${rgb}, 0.5)`);
@@ -2870,73 +2869,68 @@
           // Lomo izquierdo refinado estilo iOS (3.5px de grosor)
           if (task.priority) {
             card.style.borderLeft = `3.5px solid #ff334b`;
-          } else if ((colId === 'paused' || colId === 'review') && isMissingInfo) {
+          } else if (colId === 'paused' && isMissingInfo) {
             card.style.borderLeft = `3.5px solid #f59e0b`;
           } else {
             card.style.borderLeft = `3.5px solid ${cardColor}`;
           }
           
-          let priorityBadgeHtml = '';
+          let priorityHtml = '';
           if (task.priority) {
-            priorityBadgeHtml = `
-              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-extrabold uppercase tracking-wider text-white shadow-sm shrink-0 border border-rose-300/30" style="background: linear-gradient(135deg, #ff2a4b 0%, #dc2626 100%); box-shadow: 0 2px 8px rgba(255, 42, 75, 0.45);" title="Prioridad">
-                Prioridad
-              </span>
+            priorityHtml = `
+              <div class="status-tooltip-wrapper">
+                <span class="status-icon-badge badge-priority" title="Alta Prioridad">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
+                  </svg>
+                </span>
+                <div class="status-floating-tooltip tooltip-priority">
+                  <span class="font-extrabold text-red-300 text-[10.5px] tracking-wider uppercase">Alta Prioridad</span>
+                </div>
+              </div>
             `;
           }
 
           let colStatusBadgeHtml = '';
-
-          // Íconos SVG para Pausado y Falta Información
-          const pausedIconSvg = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
-            </svg>
-          `;
-          const missingInfoIconSvg = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-              <line x1="12" y1="9" x2="12" y2="13"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-          `;
-
-          const pausedBadgeMarkup = `
-            <div class="status-tooltip-wrapper">
-              <span class="status-icon-badge badge-paused" title="Pausado">
-                ${pausedIconSvg}
-              </span>
-              <div class="status-floating-tooltip tooltip-paused">
-                <span class="font-extrabold text-[#dfd3be] text-[10.5px] tracking-wider uppercase">Pausado</span>
-              </div>
-            </div>
-          `;
-
-          const missingInfoBadgeMarkup = isAdmin ? `
-            <div class="status-tooltip-wrapper">
-              <button onclick="toggleMissingInfo('${task.id}', event)" 
-                class="status-icon-badge ${isMissingInfo ? 'missing-info-btn is-active' : 'badge-paused opacity-40 hover:opacity-100'}" 
-                title="${isMissingInfo ? 'Falta Información (Clic para alternar o editar motivo)' : 'Marcar Falta Información'}">
-                ${missingInfoIconSvg}
-              </button>
-              <div class="status-floating-tooltip tooltip-missing-info">
-                <span class="font-extrabold text-amber-300 text-[10.5px] tracking-wider uppercase">${isMissingInfo ? 'Falta Información' : 'Marcar Falta Información'}</span>
-              </div>
-            </div>
-          ` : (isMissingInfo ? `
-            <div class="status-tooltip-wrapper pointer-events-auto">
-              <span class="status-icon-badge missing-info-btn is-active cursor-help" title="Falta Información">
-                ${missingInfoIconSvg}
-              </span>
-              <div class="status-floating-tooltip tooltip-missing-info">
-                <span class="font-extrabold text-amber-300 text-[10.5px] tracking-wider uppercase">Falta Información</span>
-              </div>
-            </div>
-          ` : '');
-
           if (colId === 'paused') {
-            // Mantener el ícono de Pausado y al costado agregar el ícono de Falta Información
-            colStatusBadgeHtml = `${pausedBadgeMarkup}${missingInfoBadgeMarkup}`;
+            const pausedIconSvg = isMissingInfo ? `
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            ` : `
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+              </svg>
+            `;
+            const pausedTooltipText = isMissingInfo ? 'Falta Información' : 'Pausado';
+            
+            if (isAdmin) {
+              colStatusBadgeHtml = `
+                <div class="status-tooltip-wrapper">
+                  <button onclick="toggleMissingInfo('${task.id}', event)" 
+                    class="status-icon-badge ${isMissingInfo ? 'missing-info-btn is-active' : 'badge-paused'}" 
+                    title="${isMissingInfo ? 'Falta Información (Clic para alternar o editar motivo)' : 'En Pausa (Clic para activar Falta Información)'}">
+                    ${pausedIconSvg}
+                  </button>
+                  <div class="status-floating-tooltip ${isMissingInfo ? 'tooltip-missing-info' : 'tooltip-paused'}">
+                    <span class="font-extrabold ${isMissingInfo ? 'text-amber-300' : 'text-[#dfd3be]'} text-[10.5px] tracking-wider uppercase">${pausedTooltipText}</span>
+                  </div>
+                </div>
+              `;
+            } else {
+              colStatusBadgeHtml = `
+                <div class="status-tooltip-wrapper pointer-events-auto">
+                  <span class="status-icon-badge ${isMissingInfo ? 'missing-info-btn is-active' : 'badge-paused'} cursor-help">
+                    ${pausedIconSvg}
+                  </span>
+                  <div class="status-floating-tooltip ${isMissingInfo ? 'tooltip-missing-info' : 'tooltip-paused'}">
+                    <span class="font-extrabold ${isMissingInfo ? 'text-amber-300' : 'text-[#dfd3be]'} text-[10.5px] tracking-wider uppercase">${pausedTooltipText}</span>
+                  </div>
+                </div>
+              `;
+            }
           } else if (colId === 'in-progress') {
             if (isAdmin) {
               colStatusBadgeHtml = `
@@ -2967,7 +2961,7 @@
               `;
             }
           } else if (colId === 'review') {
-            const reviewBadge = `
+            colStatusBadgeHtml = `
               <div class="status-tooltip-wrapper">
                 <span class="status-icon-badge badge-review" title="En Revisión">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -2983,23 +2977,22 @@
                 </div>
               </div>
             `;
-
-            // Si está marcado con falta de información o motivo de pausa, en Revisión se muestra únicamente Falta Información (sin el ícono de pausado)
-            const extraMissingInReview = isMissingInfo ? missingInfoBadgeMarkup : '';
-            colStatusBadgeHtml = `${reviewBadge}${extraMissingInReview}`;
           }
 
           let tagsHtml = `
             <div class="inline-flex items-center gap-1.5 flex-nowrap shrink-0">
               <span class="tag ${isWorking ? 'tag-working-active' : ''}" style="background: rgba(${rgb}, 0.22); color: #ffffff; border: 1px solid rgba(${rgb}, 0.60); font-weight: 700; box-shadow: 0 0 12px rgba(${rgb}, 0.30); text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${task.project}</span>
+              ${priorityHtml}
               ${colStatusBadgeHtml}
             </div>
           `;
 
-          // Motivo de Pausa / Falta de Información: visible en Pausado y también en En Revisión
+          // Parsear descripción, subtareas, texto de trabajo, enlace de entrega y motivo de pausa
+          const { text: cleanDescription, subtasks, workingText, deliveryUrl, pauseReason } = parseTaskDescription(task.description);
+
           let pauseReasonHtml = '';
-          if ((colId === 'paused' || colId === 'review') && (isMissingInfo || hasPauseReason)) {
-            if (hasPauseReason) {
+          if (isMissingInfo) {
+            if (pauseReason && pauseReason.trim()) {
               pauseReasonHtml = `
                 <div class="pause-reason-line my-1 flex items-baseline justify-between gap-1.5" onclick="event.stopPropagation()">
                   <div class="pause-reason-text flex-1">
@@ -3394,10 +3387,10 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                       <span>Editar estado</span>
                     </button>
-                    ${(colId === 'paused' || colId === 'review' || isMissingInfo || hasPauseReason) ? `
+                    ${(colId === 'paused' || isMissingInfo) ? `
                       <button class="dropdown-item text-amber-400 hover:text-amber-300 hover:bg-amber-500/10" onclick="promptEditPauseReason('${task.id}', event)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                        <span>${hasPauseReason ? 'Editar motivo de pausa' : 'Añadir motivo de pausa'}</span>
+                        <span>${pauseReason ? 'Editar motivo de pausa' : 'Añadir motivo de pausa'}</span>
                       </button>
                     ` : ''}
                     ${(colId === 'review' || colId === 'done-col' || colId === 'done' || deliveryUrl) ? `
@@ -3479,7 +3472,7 @@
             ${cardControlsHtml}
             <div class="mb-2 flex items-center gap-1.5 min-w-0 max-w-full">${tagsHtml}</div>
             ${pauseReasonHtml}
-            <div class="font-semibold text-sm mb-1 text-slate-100 leading-snug flex items-center gap-1.5 flex-wrap"><span>${task.title}</span>${priorityBadgeHtml}</div>
+            <div class="font-semibold text-sm mb-1 text-slate-100 leading-snug">${task.title}</div>
             ${cleanDescription ? `<div class="text-slate-400 text-xs leading-relaxed font-normal mb-1.5">${cleanDescription}</div>` : ''}
             ${deliverySectionHtml}
             ${progressBarHtml}
@@ -3848,7 +3841,7 @@
       const colLabels = {
         'todo': { label: 'Por Hacer', cls: 'bg-slate-800 text-slate-300 border-slate-700' },
         'in-progress': { label: isWorking ? (isOffHours() ? 'En Progreso (Descansando)' : 'En Progreso (Trabajando)') : 'En Progreso', cls: isOffHours() ? 'bg-indigo-950/80 text-indigo-300 border-indigo-500/40' : 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40' },
-        'paused': { label: 'Pausado', cls: 'bg-amber-950/80 text-amber-300 border-amber-500/40' },
+        'paused': { label: isMissingInfo ? 'Falta Información (Pausa)' : 'Pausado', cls: 'bg-amber-950/80 text-amber-300 border-amber-500/40' },
         'review': { label: 'En Revisión', cls: 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40' },
         'done': { label: 'Completado', cls: 'bg-green-950/80 text-green-300 border-green-500/40' }
       };
@@ -3899,35 +3892,17 @@
             <span class="tag font-bold text-xs" style="background: rgba(${rgb}, 0.25); color: #ffffff; border: 1px solid rgba(${rgb}, 0.65); box-shadow: 0 0 12px rgba(${rgb}, 0.35);">
               ${escapeHtml(task.project)}
             </span>
-            ${colId === 'paused' ? `
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
-                Pausado
-              </span>
-              ${isMissingInfo ? `
-                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm">
-                  ⚠️ Falta Información
-                </span>
-              ` : ''}
-            ` : colId === 'review' ? `
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${colInfo.cls}">
-                ${colInfo.label}
-              </span>
-              ${isMissingInfo ? `
-                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm">
-                  ⚠️ Falta Información
-                </span>
-              ` : ''}
-            ` : `
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${colInfo.cls}">
-                ${colInfo.label}
-              </span>
-            `}
             ${task.priority ? `
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider text-white border border-rose-300/30 shadow-sm" style="background: linear-gradient(135deg, #ff2a4b 0%, #dc2626 100%); box-shadow: 0 2px 8px rgba(255, 42, 75, 0.45);">
-                Prioridad
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.7 9.3L22 12L14.7 14.7L12 22L9.3 14.7L2 12L9.3 9.3L12 2Z"></path>
+                </svg>
+                Alta Prioridad
               </span>
             ` : ''}
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${colInfo.cls}">
+              ${colInfo.label}
+            </span>
           </div>
           <button onclick="closeCardDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition-colors shrink-0" title="Cerrar">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -3953,7 +3928,7 @@
         ` : ''}
 
         <!-- Motivo de Pausa / Falta de Información -->
-        ${(isMissingInfo || ((colId === 'paused' || colId === 'review') && pauseReason)) ? `
+        ${(isMissingInfo || (colId === 'paused' && pauseReason)) ? `
           <div class="mb-3.5 flex items-baseline justify-between gap-2 pb-2 border-b border-amber-500/20">
             <div class="pause-reason-text text-sm sm:text-base font-semibold leading-relaxed">
               ${pauseReason ? escapeHtml(pauseReason) : '<span class="italic text-amber-400/60 font-normal text-xs">Sin motivo especificado aún.</span>'}
@@ -3967,8 +3942,8 @@
         ` : ''}
 
         <!-- Título -->
-        <h2 class="text-lg sm:text-xl font-extrabold text-white mb-3 leading-snug flex items-center gap-2 flex-wrap">
-          <span>${escapeHtml(task.title)}</span>${task.priority ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-extrabold uppercase tracking-wider text-white border border-rose-300/30 shadow-sm" style="background: linear-gradient(135deg, #ff2a4b 0%, #dc2626 100%); box-shadow: 0 2px 8px rgba(255, 42, 75, 0.45);">Prioridad</span>` : ''}
+        <h2 class="text-lg sm:text-xl font-extrabold text-white mb-3 leading-snug">
+          ${escapeHtml(task.title)}
         </h2>
 
         <!-- Descripción completa -->
@@ -4469,8 +4444,8 @@
         if (newColId !== 'in-progress' && task.tag_class && task.tag_class.includes(':working')) {
           task.tag_class = task.tag_class.replace(':working', '');
         }
-        // Si sale de paused y no va a review, limpiar el estado ':missing_info'
-        if (newColId !== 'paused' && newColId !== 'review' && task.tag_class && task.tag_class.includes(':missing_info')) {
+        // Si sale de paused, limpiar el estado ':missing_info'
+        if (newColId !== 'paused' && task.tag_class && task.tag_class.includes(':missing_info')) {
           task.tag_class = task.tag_class.replace(':missing_info', '');
         }
       }
